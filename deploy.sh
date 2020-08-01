@@ -3,13 +3,24 @@
 set -ex
 
 docker build \
-  --build-arg APP_ENV=dev \
-	--build-arg APP_DEBUG=1 \
-	--file ./docker/php-cli/Dockerfile \
-	--tag sandbox/php-cli .
+	--file ./docker/nginx/Dockerfile \
+	--tag sandbox/nginx \
+	.
 
 docker build \
-  --build-arg APP_ENV=dev \
-	--build-arg APP_DEBUG=1 \
+	--build-arg app_env=dev \
+	--build-arg app_debug=true \
+	--file ./docker/php-cli/Dockerfile \
+	--tag sandbox/php-cli \
+	.
+
+docker build \
+	--build-arg app_env=dev \
+	--build-arg app_debug=true \
 	--file ./docker/php-fpm/Dockerfile \
-	--tag sandbox/php-fpm .
+	--tag sandbox/php-fpm \
+	.
+
+docker-compose up --build --detach --force-recreate --remove-orphans
+
+docker run -it --rm --volume $(pwd):/app sandbox/php-fpm composer install

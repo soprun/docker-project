@@ -7,23 +7,24 @@ success:
 
 build-php-cli:
 	@docker build \
-	--build-arg APP_ENV=dev \
-	--build-arg APP_DEBUG=1 \
+	--build-arg app_env=dev \
+	--build-arg app_debug=true \
 	--file ./docker/php-cli/Dockerfile \
 	--tag sandbox/php-cli .
 
 build-php-fpm:
 	@docker build \
-	--build-arg APP_ENV=dev \
-	--build-arg APP_DEBUG=1 \
+	--build-arg app_env=dev \
+	--build-arg app_debug=true \
 	--file ./docker/php-fpm/Dockerfile \
-	--tag sandbox/php-fpm .
+	--tag sandbox/php-fpm \
+	.
 
 run-php-cli: build-php-cli
-	docker run --interactive --tty --rm -v $(pwd):/app sandbox/php-cli bash
+	@docker run --interactive --tty --rm --volume $(pwd):/app sandbox/php-cli bash
 
 run-php-fpm: build-php-fpm
-	docker run --interactive --tty --rm -v $(pwd):/app sandbox/php-fpm bash
+	@docker run --interactive --tty --rm --volume $(pwd):/app sandbox/php-fpm bash
 
 #build-php-fpm:
 #	docker build --progress tty --file ./docker/php-fpm/Dockerfile --tag sandbox/php-fpm:7.4 .

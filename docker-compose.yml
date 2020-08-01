@@ -2,13 +2,11 @@ version: "3.8"
 
 services:
   nginx:
-    image: nginx:latest
+    image: sandbox/nginx:latest
     depends_on:
       - php-fpm
 
   php-fpm:
-    build:
-      dockerfile: ./docker/php-fpm/Dockerfile
-      context: .
+    image: sandbox/php-fpm:latest
     volumes:
       - .:/var/www:cached

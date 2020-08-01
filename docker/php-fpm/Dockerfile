@@ -1,12 +1,10 @@
 FROM php:7.4-fpm-alpine
 
-ARG APP_ENV
-ARG PHP_DEBUG
-
-# RUN usermod -u 1000 www-data
+ENV APP_ENV="${app_env:-dev}"
+ENV APP_DEBUG="${app_debug:-false}"
 
 RUN \
-    apk update && apk add --no-cache $PHPIZE_DEPS \
+    apk add --update --no-cache $PHPIZE_DEPS \
         bash \
         git \
         zip \
@@ -62,8 +60,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-COPY composer.* /app
-RUN composer install --no-dev --no-scripts --no-suggest --no-interaction --prefer-dist --optimize-autoloader
+# COPY composer.* /app
+# RUN composer install --no-dev --no-scripts --no-suggest --no-interaction --prefer-dist --optimize-autoloader
 
 COPY . /app
 RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
@@ -71,4 +69,4 @@ RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
 COPY ./docker/php-fpm/init.sh /usr/local/bin/init.sh
 RUN chmod +x /usr/local/bin/init.sh
 
-CMD ["/usr/local/bin/init.sh"]
+CMD ["/usr/local/bin/init.sh", "php-fpm"]
