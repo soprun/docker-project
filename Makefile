@@ -68,13 +68,22 @@ down:
 	@docker-compose down --volumes
 	@make -s clean
 
-clean:
-	@docker system prune --volumes --force
+#clean:
+	@#docker system prune --volumes --force
 
-all:
-	@make -s build
-	@make -s composer
-	@make -s database
-	@make -s test
-	@make -s down
-	@make -s clean
+#all:
+#	@make -s build
+#	@make -s composer
+#	@make -s database
+#	@make -s test
+#	@make -s down
+#	@make -s clean
+
+.PHONY: docker-list
+container_list_format := 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
+
+docker-list:
+	@docker container list --format $(container_list_format)
+
+docker-port:
+	@docker container list --filter publish=80-443 --format $(container_list_format)
