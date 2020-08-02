@@ -1,14 +1,24 @@
 FROM php:7.4-fpm-alpine
 
+RUN bash -l -c 'echo export APP_SECRET="$(openssl rand -hex 64)" >> /etc/bash.bashrc'
+RUN bash -l -c 'echo export APP_RELEASE="$(git rev-parse HEAD)" >> /etc/bash.bashrc'
+
+LABEL maintainer="Vladislav Soprun <develop@soprun.com>"
+
 ENV APP_ENV="${app_env:-dev}"
 ENV APP_DEBUG="${app_debug:-false}"
+
+ENV \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US.UTF-8 \
+    COMPOSER_MEMORY_LIMIT="-1" \
+    COMPOSER_ALLOW_SUPERUSER="1"
 
 RUN \
     apk add --update --no-cache $PHPIZE_DEPS \
         bash \
         git \
-        zip \
-        unzip \
+        gnupg \
     ; \
     docker-php-ext-install \
         opcache \
@@ -40,21 +50,11 @@ RUN \
     /var/cache/apk/* \
     /var/lib/apt/lists/*
 
-# Use the default production configuration
-# RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 COPY ./docker/php-fpm/php.ini "${PHP_INI_DIR}/conf.d/php.override.ini"
 COPY ./docker/php-fpm/xdebug.ini "${PHP_INI_DIR}/conf.d/xdebug.ini"
 
 # Only for php-fpm:
 # COPY docker/php-fpm/docker/php/www.conf "/usr/local/etc/php-fpm.d/www.conf"
-
-
-# https://getcomposer.org/doc/03-cli.md
-ENV COMPOSER_MEMORY_LIMIT="-1"
-ENV COMPOSER_ALLOW_SUPERUSER="1"
-# ENV COMPOSER_NO_INTERACTION=1
-# ENV COMPOSER_HOME="${HOME}/.composer"
-# ENV COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
