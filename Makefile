@@ -29,3 +29,52 @@ run-php-fpm: build-php-fpm
 #build-php-fpm:
 #	docker build --progress tty --file ./docker/php-fpm/Dockerfile --tag sandbox/php-fpm:7.4 .
 #	docker build --progress tty --file ./docker/php-fpm/Dockerfile --tag sandbox/php-fpm .
+
+#SYS_PREFIX := $(shell $(SENTRY_EXE) -c "import sys; print(sys.prefix)")
+#
+#sentry-cli:
+	 @docker pull getsentry/sentry-cli
+#	@docker run --rm -v $(pwd):/work getsentry/sentry-cli $(call args,--help)
+
+#.PHONY: container-name
+#container-name:
+#	echo container-name
+#	# docker-compose -p $PROJECT_NAME up -d container-name
+
+build:
+	@echo 'RUN build.sh'
+	@sh ./docker/build.sh
+
+clean:
+	@echo 'RUN clean...'
+	@echo 'RUN build.sh'
+
+release:
+	@echo 'RUN release...'
+	@sh ./docker/build.sh
+
+deploy:
+	@echo 'RUN build.sh'
+	@sh ./docker/deploy.sh
+
+
+composer:
+	@docker-compose exec -T app composer install
+
+check:
+	@docker-compose exec -T app php bin/console security:check
+
+down:
+	@docker-compose down --volumes
+	@make -s clean
+
+clean:
+	@docker system prune --volumes --force
+
+all:
+	@make -s build
+	@make -s composer
+	@make -s database
+	@make -s test
+	@make -s down
+	@make -s clean

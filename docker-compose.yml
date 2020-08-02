@@ -1,12 +1,65 @@
 version: "3.8"
 
+x-logging:
+  &default-logging
+  logging:
+    driver: json-file
+
+x-php:
+  &default-php
+  labels:
+    - "com.example.description=Database volume"
+    - "com.example.department=IT/Ops"
+    - "com.example.label-with-empty-value"
+  restart: "no"
+  volumes:
+    - .:/app:delegated
+  environment:
+    - APP_SECRET
+    - APP_RELEASE
+  # depends_on:
+  #  - postgres
+
+volumes:
+  postgres:
+    driver: local
+#  app:
+#    driver: local
+#    driver_opts:
+#      type: nfs
+#      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+#      device: ":$PWD"
+
 services:
   nginx:
     image: sandbox/nginx:latest
-    depends_on:
-      - php-fpm
-
-  php-fpm:
-    image: sandbox/php-fpm:latest
     volumes:
-      - .:/var/www:cached
+      - .:/app:delegated
+    depends_on:
+      - app
+    ports:
+      - 80:80
+      - 443:443
+
+  app:
+    image: sandbox/php:latest
+    <<: *default-php
+    <<: *default-logging
+    ports:
+      - 9000
+
+  app-cli:
+    image: sandbox/php-cli:latest
+    tty: true
+    <<: *default-php
+    <<: *default-logging
+
+#  postgres:
+#    image: postgres:latest
+#    <<: *default-logging
+#    volumes:
+#      - postgres:/var/lib/postgresql/data
+#    ports:
+#      - 5432
+#    environment:
+#      - POSTGRES_HOST_AUTH_METHOD=trust

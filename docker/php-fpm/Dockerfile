@@ -1,8 +1,5 @@
 FROM php:7.4-fpm-alpine
 
-RUN bash -l -c 'echo export APP_SECRET="$(openssl rand -hex 64)" >> /etc/bash.bashrc'
-RUN bash -l -c 'echo export APP_RELEASE="$(git rev-parse HEAD)" >> /etc/bash.bashrc'
-
 LABEL maintainer="Vladislav Soprun <develop@soprun.com>"
 
 ENV APP_ENV="${app_env:-dev}"
@@ -45,12 +42,19 @@ RUN \
         memcached \
         redis \
         yaml \
+        http \
+        imap \
+        intl \
+        memcached \
     ; \
     rm -rf \
     /var/cache/apk/* \
     /var/lib/apt/lists/*
 
-COPY ./docker/php-fpm/php.ini "${PHP_INI_DIR}/conf.d/php.override.ini"
+# Use the default production configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+# COPY ./docker/php-fpm/php.ini "${PHP_INI_DIR}/conf.d/php.override.ini"
+COPY ./docker/php-fpm/php.conf /usr/local/etc/php-fpm.conf
 COPY ./docker/php-fpm/xdebug.ini "${PHP_INI_DIR}/conf.d/xdebug.ini"
 
 # Only for php-fpm:
@@ -63,10 +67,12 @@ WORKDIR /app
 # COPY composer.* /app
 # RUN composer install --no-dev --no-scripts --no-suggest --no-interaction --prefer-dist --optimize-autoloader
 
-COPY . /app
-RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
+COPY . .
+# RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
 
 COPY ./docker/php-fpm/init.sh /usr/local/bin/init.sh
 RUN chmod +x /usr/local/bin/init.sh
 
-CMD ["/usr/local/bin/init.sh", "php-fpm"]
+CMD ["/usr/local/bin/init.sh"]
+
+EXPOSE 9000
