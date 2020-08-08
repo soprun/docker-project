@@ -48,6 +48,10 @@ services:
       - ./bin:/app/bin:delegated
       - ./config:/app/config:delegated
       - ./src:/app/src:delegated
+    environment:
+      - APP_SECRET
+      - APP_RELEASE
+      - APP_COMMIT_SHA
 
   php_cli:
     image: soprun/sandbox-php-cli:latest

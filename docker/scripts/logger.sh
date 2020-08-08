@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 tput sgr0
 
@@ -19,7 +19,7 @@ function error() {
   exit 1
 }
 
-function dump-env() {
+function dump_env() {
   log_info $(printenv | sort | less)
   exit 1
 }

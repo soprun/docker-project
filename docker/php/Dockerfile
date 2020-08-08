@@ -1,8 +1,5 @@
 ARG APP_ENV
 ARG APP_DEBUG
-ARG APP_RELEASE
-ARG APP_COMMIT_SHA
-ARG APP_SECRET
 
 ###
 ### Installation container
@@ -14,10 +11,6 @@ FROM php:7.2-fpm-alpine AS builder
 ###
 ENV APP_ENV="${APP_ENV:-dev}" \
     APP_DEBUG="${APP_DEBUG:-1}" \
-    APP_SECRET="${APP_SECRET}" \
-    APP_RELEASE="${APP_RELEASE}" \
-    APP_COMMIT_SHA="${APP_COMMIT_SHA}" \
-    PATH="$PATH:${APP_PROJECT_PATH}/bin" \
     COMPOSER_MEMORY_LIMIT="-1" \
     COMPOSER_ALLOW_SUPERUSER="1"
 
@@ -41,7 +34,14 @@ LABEL "dev.sandbox.image.commit_sha"="${APP_COMMIT_SHA}"
 # install php-extension-installer
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/bin/
 
-# install php-extension-installer
+
+###
+### Install composer
+###
+
+ENV COMPOSER_MEMORY_LIMIT="-1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 ###

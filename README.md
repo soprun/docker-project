@@ -42,3 +42,27 @@ https://phpinsights.com/ide.html#supported-ide
 - **rabbitmq-management**: ...
 - **redis**: ...
 - **elastic**: ...
+
+
+## Debug & message logging.
+
+[Severity_levels](https://en.wikipedia.org/wiki/Syslog#Severity_levels)
+
+| Debug level | Description |
+| --- | --- |
+| `emergency` | Emergency events. |
+| `alert` | Events for which action must be taken immediately. |
+| `critical` | Critical conditions. |
+| `error` | Runtime errors that do not require immediate action. |
+| `warning` | Exceptional occurrences that are not errors. |
+| `notice` | Normal but significant events. |
+| `info` | Interesting events |
+| `debug` | Detailed debug information. |
+
+## What are `/dev/stdout` and `/dev/stdin`?
+
+| Standard streams | Description |
+| --- | --- |
+| `/dev/stdin` | Стандартный поток ввода. |
+| `/dev/stdout` | Стандартный поток вывода. |
+| `/dev/stderr` | Стандартный поток ошибок. |
