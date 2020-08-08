@@ -1,9 +1,6 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-set -e
-set -o pipefail
-
-clear -x
+set -eo pipefail
 
 source "./docker/scripts/logger.sh"
 
@@ -23,51 +20,23 @@ fi
 ### Globals
 ###
 
-# ${DOCKER_SRC}
-
 readonly SHELL_SCRIPT_PATH="$(pwd)"
 
 if [ -e "${SHELL_SCRIPT_PATH}/.env" ]; then
+  set -o allexport
   source "${SHELL_SCRIPT_PATH}/.env"
+  set +o allexport
 fi
 
 if [ -e "${SHELL_SCRIPT_PATH}/.env.local" ]; then
+  set -o allexport
   source "${SHELL_SCRIPT_PATH}/.env.local"
+  set +o allexport
 fi
 
 ###
-### Docker environment variables
+### Application environment variables
 ###
-
-#if [ -z "${DOCKER_DEBUG}" ]; then
-#  export DOCKER_DEBUG=0
-#fi
-#
-#if [ -z "${DOCKER_DETACHED_MODE}" ]; then
-#  export DOCKER_DETACHED_MODE=1
-#fi
-#
-#if [ -z "${DOCKER_PROJECT_PATH}"]; then
-#  export DOCKER_PROJECT_PATH="$(pwd)"
-#fi
-#
-# if [ -z "${DOCKER_PROJECT_NAME}" ]; then
-#   export DOCKER_PROJECT_NAME="$(basename ${DOCKER_PROJECT_PATH})"
-# fi
-#
-# export COMPOSE_PROJECT_NAME="${DOCKER_PROJECT_NAME}"
-
-#if [ -z "${APP_PATH}" ]; then
-#  export APP_PATH="$(pwd)"
-#fi
-#
-#if [ -z "${APP_NAME}" ]; then
-#  export APP_NAME="$(basename $(pwd))"
-#fi
-
-if [ -z "${APP_SECRET}" ]; then
-  export APP_SECRET="$(openssl rand -hex 16)"
-fi
 
 if [ -z "${GIT_BRANCH}" ]; then
   export GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
@@ -77,11 +46,13 @@ if [ -z "${GIT_COMMIT_SHA}" ]; then
   export GIT_COMMIT_SHA="$(git rev-parse HEAD)"
 fi
 
-###
-### Application environment variables
-###
+if [ -z "${APP_SECRET}" ]; then
+  export APP_SECRET="$(openssl rand -hex 16)"
+fi
 
-dump_env
+if [ -z "${APP_RELEASE}" ]; then
+  export APP_RELEASE="${GIT_COMMIT_SHA}"
+fi
 
 set -u
 
@@ -109,20 +80,14 @@ docker build \
   --tag soprun/sandbox-php:latest \
   .
 
-# env -i TERM="$TERM" PATH="$PATH" USER="$USER" HOME="$HOME" sh
-
-log_info "Docker push images: 🐳 "
-
-docker push soprun/sandbox-nginx
-docker push soprun/sandbox-php
-docker push soprun/sandbox-php-cli
-
 log_info "Starting detached containers: 🐳 "
 
 docker-compose --log-level info up \
   --detach \
   --force-recreate \
   --remove-orphans
+
+# env -i TERM="$TERM" PATH="$PATH" USER="$USER" HOME="$HOME" sh
 
 # command > /dev/null 2>&1 &
 # Здесь >/dev/null 2>&1 обозначает, что stdout будет перенаправлен на /dev/null,

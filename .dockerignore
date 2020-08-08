@@ -4,4 +4,12 @@
 /docker/scripts-old
 /docker-temp
 /var/
-/vendor/
+
+# Files
+/.dockerignore
+/.gitignore
+/.hadolint.yaml
+/LICENSE
+/Makefile
+/README.md
+/docker-compose.yml

@@ -9,9 +9,9 @@ docker-up:
 	@printf '\e[1;32m%-6s\e[m\n' "up.."
 	@docker-compose up --detach
 
-docker-build:
-	@printf '\e[1;32m%-6s\e[m\n' "Building and start containers.."
-	@docker-compose up --build --detach --quiet-pull
+#docker-build:
+#	@printf '\e[1;32m%-6s\e[m\n' "Building and start containers.."
+#	@docker-compose up --build --detach --quiet-pull
 
 docker-build-force:
 	@printf '\e[1;32m%-6s\e[m\n' "Force recreate and start containers.."
@@ -82,3 +82,13 @@ docker-port:
 # docker volume create --driver local --opt type=tmpfs --opt device=tmpfs php
 
 # https://github.com/wodby/drupal-php/blob/master/7/Makefile
+
+docker-build:
+	@echo '=> building containers: 🐳 '
+	@bash build.sh
+
+docker-push:
+	@echo '=> Docker push images: 🐳 '
+	@docker push soprun/sandbox-nginx
+	@docker push soprun/sandbox-php
+	@docker push soprun/sandbox-php-cli

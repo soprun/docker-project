@@ -8,11 +8,18 @@ x-logging:
 x-php:
   &default-php
   restart: "no"
+  volumes:
+    - ./bin:/app/bin:cached
+    - ./config:/app/config:cached
+    - ./src:/app/src:cached
+    - ./docker:/app/docker:cached
   env_file:
     - .env
   environment:
-    - ${APP_SECRET:?You need to set the APP_SECRET environment variable}
-    - ${APP_RELEASE:?You need to set the APP_RELEASE environment variable}
+    # - APP_SECRET=${APP_SECRET:?You need to set the APP_SECRET environment variable}
+    # - APP_RELEASE=${APP_RELEASE:?You need to set the APP_RELEASE environment variable}
+    - APP_SECRET
+    - APP_RELEASE
   depends_on:
     - postgres
     - memcached
@@ -44,14 +51,6 @@ services:
     <<: *default-logging
     ports:
       - 9000
-    volumes:
-      - ./bin:/app/bin:delegated
-      - ./config:/app/config:delegated
-      - ./src:/app/src:delegated
-    environment:
-      - APP_SECRET
-      - APP_RELEASE
-      - APP_COMMIT_SHA
 
   php_cli:
     image: soprun/sandbox-php-cli:latest
@@ -59,10 +58,6 @@ services:
     container_name: php_cli
     tty: true
     <<: *default-php
-    volumes:
-      - ./bin:/app/bin:cached
-      - ./config:/app/config:cached
-      - ./src:/app/src:cached
 
   postgres:
     image: postgres:latest
