@@ -16,10 +16,10 @@ x-php:
   env_file:
     - .env
   environment:
-    # - APP_SECRET=${APP_SECRET:?You need to set the APP_SECRET environment variable}
-    # - APP_RELEASE=${APP_RELEASE:?You need to set the APP_RELEASE environment variable}
-    - APP_SECRET
-    - APP_RELEASE
+    - APP_ENV=${APP_ENV:?You need to set the APP_ENV environment variable}
+    - APP_DEBUG=${APP_DEBUG:-0}
+    - APP_SECRET=${APP_SECRET:?You need to set the APP_SECRET environment variable}
+    - APP_RELEASE=${APP_RELEASE:?You need to set the APP_RELEASE environment variable}
   depends_on:
     - postgres
     - memcached
@@ -61,17 +61,16 @@ services:
 
   postgres:
     image: postgres:latest
-    hostname: postgres
+    hostname: "${POSTGRES_HOST}"
     container_name: postgres
     restart: on-failure
     <<: *default-logging
     ports:
-      - 5432
+      - "${POSTGRES_PORT_EXTERNAL}:${POSTGRES_PORT}"
     volumes:
       - ./docker/postgres/dump.sql:/docker-entrypoint-initdb.d/dump.sql
       - postgres:/var/lib/postgresql/data
     environment:
-      # - PGDATA: /var/lib/postgresql/data/pgdata
       - POSTGRES_DB
       - POSTGRES_USERNAME
       - POSTGRES_PASSWORD
@@ -79,12 +78,12 @@ services:
 
   rabbitmq:
     image: rabbitmq:3.8.5-alpine
-    hostname: rabbitmq
+    hostname: "${RABBITMQ_HOST}"
     container_name: rabbitmq
     restart: on-failure
     <<: *default-logging
     ports:
-      - 5672:5672
+      - "${RABBITMQ_PORT_EXTERNAL}:${RABBITMQ_PORT}"
     volumes:
       - rabbitmq:/var/lib/rabbitmq
     environment:
@@ -102,15 +101,15 @@ services:
   memcached:
     image: memcached:latest
     container_name: memcached
-    hostname: memcached
+    hostname: ${MEMCACHED_HOST}
     restart: always
     ports:
-      - 11211:11211
+      - "${MEMCACHED_PORT_EXTERNAL}:${MEMCACHED_PORT}"
 
   redis:
     image: redis:latest
     container_name: redis
-    hostname: redis
+    hostname: ${REDIS_HOST}
     command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - 6379:6379
+      - "${REDIS_PORT_EXTERNAL}:${REDIS_PORT}"
