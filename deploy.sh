@@ -1,5 +1,4 @@
 #!/bin/sh
-
 clear -x
 set -e
 
