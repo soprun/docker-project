@@ -6,7 +6,7 @@ ARG APP_DEBUG
 ### Installation container
 ###
 
-FROM php:${PHP_VERSION:-7.2}-fpm-alpine AS build
+FROM php:7.2-fpm-alpine AS build
 
 ###
 ### Environment variables
@@ -19,6 +19,9 @@ ENV APP_DEBUG="${APP_DEBUG:-1}"
 ###
 ### Context environment
 ###
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
 
 # ENV PATH="${PATH}:${HOME}/.composer/vendor/bin"
 ENV PATH="${PATH}:${APP_DIR}/bin"
@@ -49,7 +52,17 @@ LABEL "dev.sandbox.image.commit_sha"="${APP_COMMIT_SHA}"
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/bin/
 
 RUN set -eux; \
-    install-php-extensions xdebug memcached opcache pdo_pgsql redis intl apcu;
+    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+        git \
+        make \
+        gnupg \
+        openssl \
+        curl \
+        ca-certificates \
+        vim \
+    ; \
+    install-php-extensions xdebug memcached opcache pdo_pgsql redis intl apcu; \
+    apk del .build-deps;
 
 ###
 ### Install and enable PHP modules
