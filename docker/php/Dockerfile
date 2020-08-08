@@ -99,7 +99,13 @@ RUN set -eux; \
     # chmod +x /usr/local/bin/init.sh; \
     chmod +x /usr/local/bin/docker-entrypoint.sh; \
     # composer dump-autoload --optimize --classmap-authoritative; \
-    composer install --no-suggest --no-interaction --prefer-dist --optimize-autoloader --classmap-authoritative;
+    composer install \
+        --ignore-platform-reqs \
+        --no-suggest \
+        --no-interaction \
+        --prefer-dist \
+        --optimize-autoloader \
+        --classmap-authoritative;
 
 ###
 ### Ports
