@@ -1,4 +1,4 @@
-# .PHONY: all docker-up docker-build docker-build-force docker-down
+.PHONY: all docker-up docker-build docker-build-force docker-down
 
 all: success
 

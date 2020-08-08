@@ -7,59 +7,121 @@ x-logging:
 
 x-php:
   &default-php
-  labels:
-    - "com.example.description=Database volume"
-    - "com.example.department=IT/Ops"
-    - "com.example.label-with-empty-value"
   restart: "no"
-  volumes:
-    - .:/app:delegated
+  env_file:
+    - .env
   environment:
-    - APP_SECRET
-    - APP_RELEASE
-  # depends_on:
-  #  - postgres
+    - ${APP_SECRET:?You need to set the APP_SECRET environment variable}
+    - ${APP_RELEASE:?You need to set the APP_RELEASE environment variable}
+  depends_on:
+    - postgres
+    - memcached
+    - redis
+    - rabbitmq
 
 volumes:
-  postgres:
+  rabbitmq: {}
+  postgres: {}
+  # $PWD is only available on linux based systems (Linux, MacOs), Windows might need absolute paths
+  appSource:
     driver: local
-#  app:
-#    driver: local
-#    driver_opts:
-#      type: nfs
-#      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
-#      device: ":$PWD"
+    driver_opts:
+      type: bind
+      device: ${PWD}/
+      o: bind
+  dynamicData:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/var # abs. path ONLY
+      o: bind
 
+# https://github.com/docker/compose/issues/4675
 services:
   nginx:
     image: sandbox/nginx:latest
+    hostname: nginx
+    container_name: nginx
     volumes:
-      - .:/app:delegated
+      - ./web:/app/public:delegated
     depends_on:
-      - app
+      - php
     ports:
       - 80:80
       - 443:443
 
-  app:
+  php:
     image: sandbox/php:latest
+    hostname: php
+    container_name: php
+    privileged: true
     <<: *default-php
     <<: *default-logging
     ports:
       - 9000
+    volumes:
+      - .:/app:cached
+      # - dynamicData:/app/var
 
-  app-cli:
-    image: sandbox/php-cli:latest
+  php_cli:
+    image: sandbox/php_cli:latest
+    hostname: php_cli
+    container_name: php_cli
     tty: true
     <<: *default-php
-    <<: *default-logging
 
-#  postgres:
-#    image: postgres:latest
-#    <<: *default-logging
-#    volumes:
-#      - postgres:/var/lib/postgresql/data
-#    ports:
-#      - 5432
-#    environment:
-#      - POSTGRES_HOST_AUTH_METHOD=trust
+  postgres:
+    image: postgres:latest
+    hostname: postgres
+    container_name: postgres
+    restart: on-failure
+    <<: *default-logging
+    ports:
+      - 5432
+    volumes:
+      - ./docker/postgres/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+      - postgres:/var/lib/postgresql/data
+    environment:
+      # - PGDATA: /var/lib/postgresql/data/pgdata
+      - POSTGRES_DB
+      - POSTGRES_USERNAME
+      - POSTGRES_PASSWORD
+      - POSTGRES_HOST_AUTH_METHOD
+
+  rabbitmq:
+    image: rabbitmq:3.8.5-alpine
+    hostname: rabbitmq
+    container_name: rabbitmq
+    restart: on-failure
+    <<: *default-logging
+    ports:
+      - 5672:5672
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST}
+
+  rabbitmq-management:
+    image: rabbitmq:3.8.5-management-alpine
+    container_name: rabbitmq-management
+    restart: always
+    ports:
+      - 15672:15672
+
+  memcached:
+    image: memcached:latest
+    container_name: memcached
+    hostname: memcached
+    restart: always
+    ports:
+      - 11211:11211
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    hostname: redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - 6379:6379
