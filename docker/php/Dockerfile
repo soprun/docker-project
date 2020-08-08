@@ -72,17 +72,17 @@ COPY ./docker/php/php.ini "${PHP_INI_DIR}/conf.d/php.ini"
 COPY ./docker/php/php-fpm.conf "/usr/local/etc/php-fpm.conf"
 COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint.sh"
 
-#RUN set -eux; \
-#    chmod +x /usr/local/bin/init.sh; \
-#    chmod +x /usr/local/bin/docker-entrypoint.sh;
-
 WORKDIR "${APP_PROJECT_PATH}"
 
 # COPY composer.* /app
 # RUN composer install --no-dev --no-scripts --no-suggest --no-interaction --prefer-dist --optimize-autoloader
 
 COPY . .
-RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
+
+RUN set -eux; \
+    # chmod +x /usr/local/bin/init.sh; \
+    chmod +x /usr/local/bin/docker-entrypoint.sh; \
+    composer dump-autoload --no-dev --optimize --classmap-authoritative;
 
 ###
 ### Ports

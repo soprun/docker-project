@@ -1,7 +1,7 @@
 /.idea
 /.git
 
-/docker
+/docker/scripts-old
 /docker-temp
 /var/
 /vendor/
