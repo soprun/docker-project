@@ -12,7 +12,7 @@ FROM php:${PHP_CLI_VERSION:-7.2}-cli-alpine AS build
 ### Environment variables
 ###
 
-ENV APP_DIR="${APP_DIR:-/var/app}"
+ENV APP_DIR="${APP_DIR:-/app}"
 ENV APP_ENV="${APP_ENV:-dev}"
 ENV APP_DEBUG="${APP_DEBUG:-1}"
 
@@ -37,14 +37,7 @@ ENV PATH="${PATH}:${APP_DIR}/vendor/bin"
 
 RUN set -eux; \
     apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-        git \
         bash \
-        make \
-        gnupg \
-        openssl \
-        curl \
-        ca-certificates \
-        vim \
     ; \
     apk del .build-deps
 
@@ -57,7 +50,6 @@ RUN set -eux; \
 ###
 
 COPY ./docker/php/php.ini "/usr/local/etc/php/conf.d/php.ini,"
-COPY ./docker/php/php-fpm.conf "/usr/local/etc/php-fpm.conf"
 COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint.sh"
 
 ###
@@ -76,9 +68,6 @@ COPY . "${APP_DIR}"
 ### Install composer
 ###
 
-ENV COMPOSER_MEMORY_LIMIT="-1"
-ENV COMPOSER_ALLOW_SUPERUSER="1"
-
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN set -eux; \
@@ -94,16 +83,13 @@ RUN set -eux; \
         --classmap-authoritative;
 
 ###
-### Entrypoint
-###
-
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-
-###
 ### Installation building a development image from build.
 ###
 
 FROM build AS dev
+
+ENV COMPOSER_MEMORY_LIMIT="-1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ###
 ### Install
@@ -112,7 +98,6 @@ FROM build AS dev
 RUN set -eux; \
     apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
         git \
-        bash \
         make \
         gnupg \
         openssl \
@@ -123,8 +108,16 @@ RUN set -eux; \
     apk del .build-deps;
 
 ###
+### Entrypoint
+###
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
+###
 ### Installation building a production image from build.
 ###
 
 FROM build AS prod
 
+ENV APP_ENV="${APP_ENV:-prod}"
+ENV APP_DEBUG="${APP_DEBUG:-0}"

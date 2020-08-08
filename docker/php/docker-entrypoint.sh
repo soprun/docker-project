@@ -55,7 +55,7 @@ if ! composer global show hirak/prestissimo >/dev/null 2>/dev/null; then
 fi
 
 if ! test -f ./vendor/autoload.php; then
-  printf '\e[0;31m%-6s\e[m\n' 'Composer dependencies are not installed.'
+  log_info 'Composer dependencies are not installed.'
 fi
 
 ###

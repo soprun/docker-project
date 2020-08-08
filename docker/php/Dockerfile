@@ -12,7 +12,7 @@ FROM php:${PHP_VERSION:-7.2}-fpm-alpine AS build
 ### Environment variables
 ###
 
-ENV APP_DIR="${APP_DIR:-/var/app}"
+ENV APP_DIR="${APP_DIR:-/app}"
 ENV APP_ENV="${APP_ENV:-dev}"
 ENV APP_DEBUG="${APP_DEBUG:-1}"
 
@@ -67,8 +67,8 @@ COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint.sh"
 ### Install composer
 ###
 
-ENV COMPOSER_MEMORY_LIMIT="-1"
-ENV COMPOSER_ALLOW_SUPERUSER="1"
+# ENV COMPOSER_MEMORY_LIMIT="-1"
+# ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -95,6 +95,7 @@ RUN set -eux; \
     # chmod +x /usr/local/bin/init.sh; \
     chmod +x /usr/local/bin/docker-entrypoint.sh; \
     # composer dump-autoload --optimize --classmap-authoritative; \
+    composer global require hirak/prestissimo --ignore-platform-reqs; \
     composer install \
         --ignore-platform-reqs \
         --no-suggest \

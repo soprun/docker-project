@@ -71,6 +71,7 @@ docker build \
   --build-arg APP_DEBUG="${APP_DEBUG}" \
   --file ./docker/php-cli/Dockerfile \
   --tag soprun/sandbox-php-cli:dev \
+  --tag soprun/sandbox-php-cli:latest \
   --target dev \
   .
 
