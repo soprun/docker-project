@@ -105,4 +105,4 @@ docker-compose --log-level info up \
 # Здесь >/dev/null 2>&1 обозначает, что stdout будет перенаправлен на /dev/null,
 # а stderr — к stdout.
 
-git commit -a -S -m "Building image successfully: ${APP_RELEASE}"
+# git commit -a -S -m "build image: ${APP_RELEASE}"
