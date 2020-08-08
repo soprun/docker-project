@@ -66,28 +66,29 @@ docker build \
   --tag soprun/sandbox-nginx \
   .
 
-docker build \
-  --build-arg APP_ENV="${APP_ENV}" \
-  --build-arg APP_DEBUG="${APP_DEBUG}" \
-  --file ./docker/php-cli/Dockerfile \
-  --tag soprun/sandbox-php-cli:dev \
-  --tag soprun/sandbox-php-cli:latest \
-  --target dev \
-  .
-
-docker build \
-  --build-arg APP_ENV="${APP_ENV}" \
-  --build-arg APP_DEBUG="${APP_DEBUG}" \
-  --file ./docker/php-cli/Dockerfile \
-  --tag soprun/sandbox-php-cli:prod \
-  --target prod \
-  .
+#docker build \
+#  --build-arg APP_ENV="${APP_ENV}" \
+#  --build-arg APP_DEBUG="${APP_DEBUG}" \
+#  --file ./docker/php-cli/Dockerfile \
+#  --tag soprun/sandbox-php-cli:dev \
+#  --tag soprun/sandbox-php-cli:latest \
+#  --target dev \
+#  .
+#
+#docker build \
+#  --build-arg APP_ENV="${APP_ENV}" \
+#  --build-arg APP_DEBUG="${APP_DEBUG}" \
+#  --file ./docker/php-cli/Dockerfile \
+#  --tag soprun/sandbox-php-cli:prod \
+#  --target prod \
+#  .
 
 docker build \
   --build-arg APP_ENV="${APP_ENV}" \
   --build-arg APP_DEBUG="${APP_DEBUG}" \
   --file ./docker/php/Dockerfile \
-  --tag soprun/sandbox-php \
+  --tag soprun/sandbox-php:latest \
+  --tag soprun/sandbox-php:${GIT_COMMIT_SHA} \
   .
 
 log_info "Starting detached containers: 🐳 "
