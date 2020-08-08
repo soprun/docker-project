@@ -50,7 +50,16 @@ RUN set -eux; \
 ###
 
 COPY ./docker/php/php.ini "/usr/local/etc/php/conf.d/php.ini,"
-COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint.sh"
+COPY ./docker/php-cli/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint.sh"
+
+###
+### Install composer
+###
+
+ENV COMPOSER_MEMORY_LIMIT="-1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 ###
 ### Change working directory
@@ -63,12 +72,6 @@ WORKDIR "${APP_DIR}"
 ###
 
 COPY . "${APP_DIR}"
-
-###
-### Install composer
-###
-
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN set -eux; \
     chmod +x /usr/local/bin/docker-entrypoint.sh; \
@@ -87,9 +90,6 @@ RUN set -eux; \
 ###
 
 FROM build AS dev
-
-ENV COMPOSER_MEMORY_LIMIT="-1"
-ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ###
 ### Install

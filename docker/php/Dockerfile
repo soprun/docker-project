@@ -67,8 +67,8 @@ COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint.sh"
 ### Install composer
 ###
 
-# ENV COMPOSER_MEMORY_LIMIT="-1"
-# ENV COMPOSER_ALLOW_SUPERUSER="1"
+ENV COMPOSER_MEMORY_LIMIT="-1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
