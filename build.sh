@@ -1,35 +1,17 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-source ./docker/scripts/logger.sh
+set -e
+set -u
+set -o pipefail
 
-# For bash shells:
-set -euo pipefail
+clear -x
 
-if ! type docker &>/dev/null; then
-  error "docker command not found."
-fi
+###
+### Globals
+###
 
-# export APP_DIR="$(pwd)"
-#source "${APP_DIR}/.env"
+DOCKER_DEBUG=0
+DOCKER_DETACHED_MODE=1
 
-# jq -s 'map(.[].name)' build.json
-
-#if [ ${#task_list[@]} -eq 0 ]; then
-#  error "empty task_list"
-#fi
-
-# initialize arrays a b c
-
-#array=([file: 23] 45 34 1 2 3)
-##To refer to all the array values
-#echo ${array[@]}
-
-#for i in (); do
-#  echo "Looping ... number $i"
-#done
-
-## basic construct
-#for arg in [list]
-#do
-# command(s)...
-#done
+DOCKER_PROJECT_PATH=
+DOCKER_PROJECT_NAME=
