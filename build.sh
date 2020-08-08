@@ -88,8 +88,8 @@ docker build \
   --build-arg APP_DEBUG="${APP_DEBUG}" \
   --file ./docker/php/Dockerfile \
   --tag soprun/sandbox-php:latest \
-  --tag "soprun/sandbox-php/${GIT_BRANCH}:latest" \
-  --tag "soprun/sandbox-php/${GIT_BRANCH}:${GIT_COMMIT_SHA}" \
+  --tag "soprun/sandbox-php:${GIT_BRANCH}" \
+  --tag "soprun/sandbox-php:${GIT_COMMIT_SHA}" \
   .
 
 log_info "Starting detached containers: 🐳 "

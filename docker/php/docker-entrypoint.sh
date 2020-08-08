@@ -47,7 +47,7 @@ if ! composer --version >/dev/null 2>/dev/null; then
 fi
 
 if ! composer global show hirak/prestissimo >/dev/null 2>/dev/null; then
-  error 'Composer "hirak/prestissimo" is not installed.'
+  log_info 'Composer "hirak/prestissimo" is not installed.'
 
   # Start it in the background
   # composer global require hirak/prestissimo --ignore-platform-reqs >/dev/null 2>&1

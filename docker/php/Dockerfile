@@ -108,7 +108,7 @@ RUN set -eux; \
     # chmod +x /usr/local/bin/init.sh; \
     chmod +x /usr/local/bin/docker-entrypoint.sh; \
     # composer dump-autoload --optimize --classmap-authoritative; \
-    composer global require hirak/prestissimo --ignore-platform-reqs; \
+    # composer global require hirak/prestissimo --ignore-platform-reqs; \
     composer install \
         --ignore-platform-reqs \
         --no-suggest \
