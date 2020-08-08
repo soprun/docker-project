@@ -5,18 +5,6 @@ all: docker-up
 # List containers
 container_all := docker container list --all --quiet
 
-docker-up:
-	@printf '\e[1;32m%-6s\e[m\n' "up.."
-	@docker-compose up --detach
-
-#docker-build:
-#	@printf '\e[1;32m%-6s\e[m\n' "Building and start containers.."
-#	@docker-compose up --build --detach --quiet-pull
-
-docker-build-force:
-	@printf '\e[1;32m%-6s\e[m\n' "Force recreate and start containers.."
-	@docker-compose up --build --detach --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes
-
 docker-down:
 	@printf '\n\e[1;32m%-6s\e[m\n' "Down docker... 🚛"
 	@echo "########################################"
@@ -51,9 +39,6 @@ docker-remove: docker-down
 	@ - docker rmi $(shell docker images --all --quiet) &> /dev/null
 	@sleep .5
 
-env-link:
-	@bash ./scripts/env-link.sh .env ../.env
-
 logs-fetch: # Fetch the logs of a container
 	@docker logs app --follow --details
 	# @tail -f var/logs/dev.log
@@ -64,6 +49,7 @@ app-cache-clear: # This is equivalent to running `composer run-script deploy`
 
 .PHONY: docker-list
 container_list_format := 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
+
 docker-list:
 	@docker container list --format $(container_list_format)
 
@@ -86,6 +72,13 @@ docker-port:
 docker-build:
 	@echo '=> building containers: 🐳 '
 	@bash build.sh
+
+docker-up:
+	@printf '\e[1;32m%-6s\e[m\n' "Starting detached containers: 🐳 "
+	@docker-compose --log-level info up \
+       --detach \
+       --force-recreate \
+       --remove-orphans
 
 docker-push:
 	@echo '=> Docker push images: 🐳 '

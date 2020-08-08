@@ -51,10 +51,10 @@ services:
       - ./config:/app/config:ro,cached
       - ./src:/app/src:ro,cached
 
-  php_cli:
+  php-cli:
     image: soprun/sandbox-php-cli:latest
-    hostname: php_cli
-    container_name: php_cli
+    hostname: php-cli
+    container_name: php-cli
     tty: true
     <<: *default-php
     volumes:

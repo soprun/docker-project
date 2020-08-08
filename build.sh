@@ -63,21 +63,21 @@ docker build \
   --build-arg APP_ENV="${APP_ENV}" \
   --build-arg APP_DEBUG="${APP_DEBUG}" \
   --file ./docker/nginx/Dockerfile \
-  --tag soprun/sandbox-nginx:latest \
+  --tag soprun/sandbox-nginx \
   .
 
 docker build \
   --build-arg APP_ENV="${APP_ENV}" \
   --build-arg APP_DEBUG="${APP_DEBUG}" \
-  --file ./docker/php_cli/Dockerfile \
-  --tag soprun/sandbox-php-cli:latest \
+  --file ./docker/php-cli/Dockerfile \
+  --tag soprun/sandbox-php-cli \
   .
 
 docker build \
   --build-arg APP_ENV="${APP_ENV}" \
   --build-arg APP_DEBUG="${APP_DEBUG}" \
   --file ./docker/php/Dockerfile \
-  --tag soprun/sandbox-php:latest \
+  --tag soprun/sandbox-php \
   .
 
 log_info "Starting detached containers: 🐳 "

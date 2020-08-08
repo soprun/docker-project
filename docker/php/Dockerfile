@@ -6,7 +6,7 @@ ARG APP_DEBUG
 ### Installation container
 ###
 
-FROM php:7.2-fpm-alpine AS builder
+FROM php:${PHP_VERSION}-alpine AS build
 
 ###
 ### Environment variables
@@ -41,27 +41,15 @@ LABEL "dev.sandbox.image.debug"="${APP_DEBUG}"
 LABEL "dev.sandbox.image.release"="${APP_RELEASE}"
 LABEL "dev.sandbox.image.commit_sha"="${APP_COMMIT_SHA}"
 
-# install php-extension-installer
-
-COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/bin/
-
 ###
 ### Install
 ###
 
+# install php-extension-installer
+COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/bin/
+
 RUN set -eux; \
-    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-        git \
-        make \
-        bash \
-        gnupg \
-        openssl \
-        curl \
-        ca-certificates \
-        vim \
-    ; \
-    install-php-extensions xdebug memcached opcache pdo_pgsql redis intl apcu; \
-    apk del .build-deps
+    install-php-extensions xdebug memcached opcache pdo_pgsql redis intl apcu;
 
 ###
 ### Install and enable PHP modules
@@ -84,7 +72,15 @@ ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+###
+### Change working directory
+###
+
 WORKDIR "${APP_DIR}"
+
+###
+### Copy source files to workdir
+###
 
 COPY . "${APP_DIR}"
 # COPY ./bin/ "${APP_DIR}"
@@ -108,7 +104,7 @@ RUN set -eux; \
         --classmap-authoritative;
 
 ###
-### Ports
+### Expose port
 ###
 
 EXPOSE 9000
