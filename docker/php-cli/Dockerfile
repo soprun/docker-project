@@ -6,7 +6,7 @@ ARG APP_DEBUG
 ### Installation container
 ###
 
-FROM php:${PHP_CLI_VERSION}-alpine AS build
+FROM php:${PHP_CLI_VERSION:-7.2}-cli-alpine AS build
 
 ###
 ### Environment variables
@@ -38,15 +38,14 @@ ENV PATH="${PATH}:${APP_DIR}/vendor/bin"
 RUN set -eux; \
     apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
         git \
-        make \
         bash \
+        make \
         gnupg \
         openssl \
         curl \
         ca-certificates \
         vim \
     ; \
-    install-php-extensions xdebug memcached opcache pdo_pgsql redis intl apcu; \
     apk del .build-deps
 
 ###
@@ -60,6 +59,18 @@ RUN set -eux; \
 COPY ./docker/php/php.ini "/usr/local/etc/php/conf.d/php.ini,"
 COPY ./docker/php/php-fpm.conf "/usr/local/etc/php-fpm.conf"
 COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint.sh"
+
+###
+### Change working directory
+###
+
+WORKDIR "${APP_DIR}"
+
+###
+### Copy source files to workdir
+###
+
+COPY . "${APP_DIR}"
 
 ###
 ### Install composer
@@ -83,22 +94,37 @@ RUN set -eux; \
         --classmap-authoritative;
 
 ###
-### Change working directory
-###
-
-WORKDIR "${APP_DIR}"
-
-###
-### Copy source files to workdir
-###
-
-COPY . "${APP_DIR}"
-
-###
 ### Entrypoint
 ###
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
-# FROM build AS development
-# FROM build AS production
+###
+### Installation building a development image from build.
+###
+
+FROM build AS dev
+
+###
+### Install
+###
+
+RUN set -eux; \
+    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+        git \
+        bash \
+        make \
+        gnupg \
+        openssl \
+        curl \
+        ca-certificates \
+        vim \
+    ; \
+    apk del .build-deps;
+
+###
+### Installation building a production image from build.
+###
+
+FROM build AS prod
+

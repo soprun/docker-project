@@ -6,7 +6,7 @@ ARG APP_DEBUG
 ### Installation container
 ###
 
-FROM php:${PHP_VERSION}-alpine AS build
+FROM php:${PHP_VERSION:-7.2}-fpm-alpine AS build
 
 ###
 ### Environment variables

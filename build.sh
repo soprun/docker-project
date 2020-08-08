@@ -70,7 +70,16 @@ docker build \
   --build-arg APP_ENV="${APP_ENV}" \
   --build-arg APP_DEBUG="${APP_DEBUG}" \
   --file ./docker/php-cli/Dockerfile \
-  --tag soprun/sandbox-php-cli \
+  --tag soprun/sandbox-php-cli:dev \
+  --target dev \
+  .
+
+docker build \
+  --build-arg APP_ENV="${APP_ENV}" \
+  --build-arg APP_DEBUG="${APP_DEBUG}" \
+  --file ./docker/php-cli/Dockerfile \
+  --tag soprun/sandbox-php-cli:prod \
+  --target prod \
   .
 
 docker build \
@@ -92,3 +101,5 @@ docker-compose --log-level info up \
 # command > /dev/null 2>&1 &
 # Здесь >/dev/null 2>&1 обозначает, что stdout будет перенаправлен на /dev/null,
 # а stderr — к stdout.
+
+git commit -a -S -m "Building image successfully: ${APP_RELEASE}"
