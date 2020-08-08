@@ -1,11 +1,7 @@
-config/packages/dev/
-config/packages/test/
-var/
-vendor/
-.dockerignore
-.gitignore
-*.md
+/.idea
+/.git
 
-.git/
-.idea/
-.DS_Store/
+/deploy/
+/web/bundles/
+/var/
+/vendor/

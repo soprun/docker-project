@@ -15,8 +15,8 @@ fi
 
 if ! composer global show hirak/prestissimo >/dev/null 2>/dev/null; then
   printf '\e[0;31m%-6s\e[m\n' 'Composer "hirak/prestissimo" is not installed.'
-  composer global require hirak/prestissimo --quiet
-  printf '\e[0;32m%-6s\e[m\n' 'Composer "hirak/prestissimo" is installed.'
+  # composer global require hirak/prestissimo
+  # printf '\e[0;32m%-6s\e[m\n' 'Composer "hirak/prestissimo" is installed.'
 fi
 
 if ! test -f ./vendor/autoload.php; then
@@ -40,6 +40,7 @@ fi
 # composer check-platform-reqs
 # composer install --no-suggest --no-interaction --prefer-dist --optimize-autoloader
 
+clear -x
 printf '\e[0;32m%-6s\e[m\n\n' "Successful deployment.";
 
 php-fpm --nodaemonize;

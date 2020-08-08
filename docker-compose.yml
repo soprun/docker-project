@@ -39,7 +39,7 @@ volumes:
 # https://github.com/docker/compose/issues/4675
 services:
   nginx:
-    image: sandbox/nginx:latest
+    image: soprun/sandbox-nginx:latest
     hostname: nginx
     container_name: nginx
     volumes:
@@ -51,7 +51,7 @@ services:
       - 443:443
 
   php:
-    image: sandbox/php:latest
+    image: soprun/sandbox-php:latest
     hostname: php
     container_name: php
     privileged: true
@@ -64,7 +64,7 @@ services:
       # - dynamicData:/app/var
 
   php_cli:
-    image: sandbox/php_cli:latest
+    image: soprun/sandbox-php-cli:latest
     hostname: php_cli
     container_name: php_cli
     tty: true

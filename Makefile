@@ -1,89 +1,84 @@
 .PHONY: all docker-up docker-build docker-build-force docker-down
 
-all: success
+all: docker-up
 
-success:
-	@echo Success...
+# List containers
+container_all := docker container list --all --quiet
 
-build-php-cli:
-	@docker build \
-	--build-arg app_env=dev \
-	--build-arg app_debug=true \
-	--file ./docker/php-cli/Dockerfile \
-	--tag sandbox/php-cli .
+docker-up:
+	@printf '\e[1;32m%-6s\e[m\n' "up.."
+	@docker-compose up --detach
 
-build-php-fpm:
-	@docker build \
-	--build-arg app_env=dev \
-	--build-arg app_debug=true \
-	--file ./docker/php-fpm/Dockerfile \
-	--tag sandbox/php-fpm \
-	.
+docker-build:
+	@printf '\e[1;32m%-6s\e[m\n' "Building and start containers.."
+	@docker-compose up --build --detach --quiet-pull
 
-run-php-cli: build-php-cli
-	@docker run --interactive --tty --rm --volume $(pwd):/app sandbox/php-cli bash
+docker-build-force:
+	@printf '\e[1;32m%-6s\e[m\n' "Force recreate and start containers.."
+	@docker-compose up --build --detach --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes
 
-run-php-fpm: build-php-fpm
-	@docker run --interactive --tty --rm --volume $(pwd):/app sandbox/php-fpm bash
+docker-down:
+	@printf '\n\e[1;32m%-6s\e[m\n' "Down docker... 🚛"
+	@echo "########################################"
+	@sleep .5
 
-#build-php-fpm:
-#	docker build --progress tty --file ./docker/php-fpm/Dockerfile --tag sandbox/php-fpm:7.4 .
-#	docker build --progress tty --file ./docker/php-fpm/Dockerfile --tag sandbox/php-fpm .
+	@echo "=> Stop all containers ✅"
+	@ - docker stop $(shell $(container_all)) &> /dev/null
+	@sleep .5s
 
-#SYS_PREFIX := $(shell $(SENTRY_EXE) -c "import sys; print(sys.prefix)")
-#
-#sentry-cli:
-	 @docker pull getsentry/sentry-cli
-#	@docker run --rm -v $(pwd):/work getsentry/sentry-cli $(call args,--help)
+	@echo "=> Remove all containers ✅"
+	@ - docker rm $(shell $(container_all)) &> /dev/null
+	@sleep .5
 
-#.PHONY: container-name
-#container-name:
-#	echo container-name
-#	# docker-compose -p $PROJECT_NAME up -d container-name
+	@echo "=> Remove all unused networks ✅"
+	@ - docker network prune --force &> /dev/null
+	@sleep .5
 
-build:
-	@echo 'RUN build.sh'
-	@sh ./docker/build.sh
+docker-remove: docker-down
+	@printf '\n\e[1;31m%-6s\e[m\n' "Remove docker... 🚒"
+	@echo "########################################"
+	@sleep .5
 
-clean:
-	@echo 'RUN clean...'
-	@echo 'RUN build.sh'
+	@echo "=> Remove all containers and volumes 🚒"
+	@ - docker rm $(shell $(container_all)) --link --volumes &> /dev/null
+	@sleep .5s
 
-release:
-	@echo 'RUN release...'
-	@sh ./docker/build.sh
+	@echo "=> Remove all networks 🚒"
+	@ - docker network rm $(shell $(container_all)) &> /dev/null
+	@sleep .5
 
-deploy:
-	@echo 'RUN build.sh'
-	@sh ./docker/deploy.sh
+	@echo "=> Remove all images 🚒"
+	@ - docker rmi $(shell docker images --all --quiet) &> /dev/null
+	@sleep .5
 
+env-link:
+	@bash ./scripts/env-link.sh .env ../.env
 
-composer:
-	@docker-compose exec -T app composer install
+logs-fetch: # Fetch the logs of a container
+	@docker logs app --follow --details
+	# @tail -f var/logs/dev.log
 
-check:
-	@docker-compose exec -T app php bin/console security:check
-
-down:
-	@docker-compose down --volumes
-	@make -s clean
-
-#clean:
-	@#docker system prune --volumes --force
-
-#all:
-#	@make -s build
-#	@make -s composer
-#	@make -s database
-#	@make -s test
-#	@make -s down
-#	@make -s clean
+app-cache-clear: # This is equivalent to running `composer run-script deploy`
+	@php bin/console cache:clear --no-debug --env=prod
+	@php bin/console cache:warmup --no-debug --env=prod
 
 .PHONY: docker-list
 container_list_format := 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
-
 docker-list:
 	@docker container list --format $(container_list_format)
 
 docker-port:
 	@docker container list --filter publish=80-443 --format $(container_list_format)
+
+# time php bin/console about
+
+#symfony-cli: $(objs)
+#	@docker run --rm symfonycorp/cli
+#	@docker run --rm -v $(pwd):$(pwd) -w $(pwd) symfonycorp/cli -o $@ $(objs)
+
+# docker network prune --force
+
+# docker volume rm --force billing_php
+# docker volume create --driver local --opt type=tmpfs --opt device=tmpfs php
+
+# https://github.com/wodby/drupal-php/blob/master/7/Makefile
