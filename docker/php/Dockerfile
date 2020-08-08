@@ -17,6 +17,7 @@ ENV APP_ENV="${APP_ENV:-dev}" \
     APP_SECRET="${APP_SECRET}" \
     APP_RELEASE="${APP_RELEASE}" \
     APP_COMMIT_SHA="${APP_COMMIT_SHA}" \
+    PATH="$PATH:${APP_PROJECT_PATH}/bin" \
     COMPOSER_MEMORY_LIMIT="-1" \
     COMPOSER_ALLOW_SUPERUSER="1"
 
@@ -63,19 +64,6 @@ RUN set -eux; \
 ### Install and enable PHP modules
 ###
 
-# Use the default production configuration
-
-###
-### Configure
-###
-RUN set -eux \
-	&& rm -rf /usr/local/etc/php-fpm.d \
-	&& mkdir -p /usr/local/etc/php-fpm.d \
-	&& mkdir -p /var/lib/php/session \
-	&& mkdir -p /var/lib/php/wsdlcache \
-	&& chown -R devilbox:devilbox /var/lib/php/session \
-	&& chown -R devilbox:devilbox /var/lib/php/wsdlcache
-
 ###
 ### Copy files
 ###
@@ -87,7 +75,7 @@ COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint.sh"
 #    chmod +x /usr/local/bin/init.sh; \
 #    chmod +x /usr/local/bin/docker-entrypoint.sh;
 
-WORKDIR /app
+WORKDIR "${APP_PROJECT_PATH}"
 
 # COPY composer.* /app
 # RUN composer install --no-dev --no-scripts --no-suggest --no-interaction --prefer-dist --optimize-autoloader
