@@ -1,7 +1,7 @@
 /.idea
 /.git
 
-/deploy/
-/web/bundles/
+/docker
+/docker-temp
 /var/
 /vendor/

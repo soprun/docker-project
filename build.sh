@@ -76,8 +76,9 @@ fi
 
 set -u
 
-# printenv | sort | less
-# printenv | grep ID_
+printenv | sort | less >> ./var/log/env.log
+
+# printenv | grep ID
 # printenv | grep APP_
 
 #echo $PATH;

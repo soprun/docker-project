@@ -1,10 +1,17 @@
-FROM nginx:alpine
+ARG APP_ENV
+ARG APP_DEBUG
+ARG APP_SECRET
+ARG APP_RELEASE
+ARG APP_COMMIT_SHA
+
+FROM nginx:alpine AS builder
 
 ENV \
-    APP_ENV="${app_env:-dev}" \
-    APP_DEBUG="${app_debug:-1}" \
-    APP_VERSION="${APP_VERSION}" \
-    APP_RELEASE="${APP_RELEASE}"
+    APP_ENV="${APP_ENV:-dev}" \
+    APP_DEBUG="${APP_DEBUG:-1}" \
+    APP_SECRET="${APP_SECRET}" \
+    APP_RELEASE="${APP_RELEASE}" \
+    APP_COMMIT_SHA="${APP_COMMIT_SHA}"
 
 LABEL maintainer="Vladislav Soprun <develop@soprun.com>"
 

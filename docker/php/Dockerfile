@@ -56,6 +56,7 @@ RUN set -eux; \
         openssl \
         curl \
         ca-certificates \
+        vim \
     ; \
     install-php-extensions xdebug memcached opcache pdo_pgsql redis intl apcu; \
     apk del .build-deps
