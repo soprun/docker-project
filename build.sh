@@ -22,16 +22,42 @@ fi
 
 readonly SHELL_SCRIPT_PATH="$(pwd)"
 
-if [ -e "${SHELL_SCRIPT_PATH}/.env" ]; then
-  set -o allexport
-  source "${SHELL_SCRIPT_PATH}/.env"
-  set +o allexport
+# 1. Check if .env file exists
+if [ -e .env ]; then
+  # shellcheck source=./.env
+  source .env
 fi
 
-if [ -e "${SHELL_SCRIPT_PATH}/.env.local" ]; then
-  set -o allexport
-  source "${SHELL_SCRIPT_PATH}/.env.local"
-  set +o allexport
+# 2. Check if .env.local file exists
+if [ -e .env.local ]; then
+  # shellcheck source=./.env.local
+  source .env.local
+fi
+
+#if [ -e "${SHELL_SCRIPT_PATH}/.env" ]; then
+#  set -o allexport
+#  # shellcheck source=./.env
+#  source "${SHELL_SCRIPT_PATH}/.env"
+#  set +o allexport
+#fi
+#
+#if [ -e "${SHELL_SCRIPT_PATH}/.env.local" ]; then
+#  set -o allexport
+#  # shellcheck source=./.env.local
+#  source "${SHELL_SCRIPT_PATH}/.env.local"
+#  set +o allexport
+#fi
+
+###
+### Create default network
+###
+
+# docker network remove "$NETWORK_NAME" 2>/dev/null
+
+if ! docker network inspect "$NETWORK_NAME" >/dev/null 2>/dev/null; then
+  log_info 'Network is not installed.'
+
+  docker network create "$NETWORK_OPTIONS" "$NETWORK_NAME"
 fi
 
 ###
@@ -39,20 +65,25 @@ fi
 ###
 
 if [ -z "${GIT_BRANCH}" ]; then
-  export GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+  GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 fi
 
 if [ -z "${GIT_COMMIT_SHA}" ]; then
-  export GIT_COMMIT_SHA="$(git rev-parse HEAD)"
+  GIT_COMMIT_SHA="$(git rev-parse HEAD)"
 fi
 
 if [ -z "${APP_SECRET}" ]; then
-  export APP_SECRET="$(openssl rand -hex 16)"
+  APP_SECRET="$(openssl rand -hex 16)"
 fi
 
 if [ -z "${APP_RELEASE}" ]; then
-  export APP_RELEASE="${GIT_COMMIT_SHA}"
+  APP_RELEASE="${GIT_COMMIT_SHA}"
 fi
+
+export GIT_BRANCH
+export GIT_COMMIT_SHA
+export APP_SECRET
+export APP_RELEASE
 
 set -u
 

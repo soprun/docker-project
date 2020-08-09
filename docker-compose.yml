@@ -3,7 +3,10 @@ version: "3.8"
 x-logging:
   &default-logging
   logging:
-    driver: json-file
+    driver: ${LOGGING_DRIVER:-json-file}
+    options:
+      max-size: ${LOGGING_MAX_SIZE:-2m}
+      max-file: ${LOGGING_MAX_FILE:-10}
 
 x-php:
   &default-php
@@ -32,6 +35,11 @@ volumes:
   rabbitmq: {}
   postgres: {}
 
+networks:
+  default:
+    external:
+      name: ${NETWORK_NAME}
+
 # https://github.com/docker/compose/issues/4675
 services:
   nginx:
@@ -42,8 +50,8 @@ services:
     depends_on:
       - php
     ports:
-      - 80:80
-      - 443:443
+      - "${NETWORK_IP}:${NETWORK_HTTP}:80"
+      - "${NETWORK_IP}:${NETWORK_HTTPS}:443"
 
   php:
     image: soprun/sandbox-php:latest

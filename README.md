@@ -28,6 +28,13 @@ https://github.com/soleo/wordpress/blob/master/php7.2/fpm-alpine/Dockerfile
 https://github.com/nunomaduro/phpinsights
 https://phpinsights.com/ide.html#supported-ide
 
+
+
+https://github.com/evertramos/docker-wordpress
+
+
+- [ ] https://github.com/FiloSottile/mkcert
+
 ## Containers
 
 - **nginx** : ...
@@ -66,3 +73,92 @@ https://phpinsights.com/ide.html#supported-ide
 | `/dev/stdin` | Стандартный поток ввода. |
 | `/dev/stdout` | Стандартный поток вывода. |
 | `/dev/stderr` | Стандартный поток ошибок. |
+
+
+# Updating our containers
+
+### Stop the container
+Firstly, stop the container.
+
+```bash
+docker stop <container_name>
+```
+
+## Remove the container
+Once the container has been stopped, remove it.
+
+```bash
+docker rm <container_name>
+```
+
+## Pull the latest version
+Now you can pull the latest version of the application image from Docker Hub.
+
+```bash
+docker pull linuxserver/<image_name>
+```
+
+## Recreate the container
+Finally, you can recreate the container.
+
+```bash
+docker create \
+  --name=<container_name> \
+  -v <path_to_data>:/config \
+  -e PUID=<uid> \
+  -e PGID=<gid> \
+  -p <host_port>:<app_port> \
+  linuxserver/<image_name>
+```
+
+## Docker Compose
+It is also possible to update a single container using Docker Compose:
+
+```bash
+docker-compose pull linuxserver/<image_name>
+docker-compose up -d <container_name>
+```
+
+Or, to update all containers at once:
+
+```bash
+docker-compose pull
+docker-compose up -d
+```
+
+## Removing old images
+Whenever a Docker image is updated, a fresh version of that image gets downloaded and stored on your host machine.
+
+```bash
+docker image prune
+```
+
+# Volumes
+
+# User / Group Identifiers
+
+In this instance `PUID=1000` and `PGID=1000`, to find yours use id user as below:
+
+```bash
+id username
+uid=1000(dockeruser) gid=1000(dockergroup) groups=1000(dockergroup)
+```
+
+# Logger
+
+Shell access whilst the container is running:
+```bash
+docker exec -it airsonic /bin/bash
+```
+
+To monitor the logs of the container in realtime:
+```bash
+docker logs -f airsonic
+```
+
+
+## Restarting proxy container
+
+```bash
+docker exec -it ${NGINX_WEB} nginx -s reload
+```
