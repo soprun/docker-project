@@ -162,3 +162,10 @@ docker logs -f airsonic
 ```bash
 docker exec -it ${NGINX_WEB} nginx -s reload
 ```
+
+
+## License
+
+MIT
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project?ref=badge_large)
