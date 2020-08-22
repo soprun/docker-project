@@ -85,3 +85,13 @@ docker-push:
 	@docker push soprun/sandbox-nginx
 	@docker push soprun/sandbox-php
 	@docker push soprun/sandbox-php-cli
+
+
+app-dev:
+	@symfony server:ca:install
+
+app-start:
+	@symfony server:start -d
+
+app-log:
+	@symfony server:log

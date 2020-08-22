@@ -71,7 +71,7 @@ services:
   #    <<: *default-php
 
   postgres:
-    image: postgres:latest
+    image: postgres:11-alpine
     hostname: "${POSTGRES_HOST}"
     container_name: postgres
     restart: on-failure
@@ -85,7 +85,6 @@ services:
       - POSTGRES_DB
       - POSTGRES_USERNAME
       - POSTGRES_PASSWORD
-      - POSTGRES_HOST_AUTH_METHOD
 
   rabbitmq:
     image: rabbitmq:3.8.5-alpine
@@ -111,7 +110,7 @@ services:
       - "${RABBITMQ_MANAGEMENT_PORT_EXTERNAL}:${RABBITMQ_MANAGEMENT_PORT}"
 
   memcached:
-    image: memcached:latest
+    image: memcached:latest-alpine
     hostname: "${MEMCACHED_HOST}"
     container_name: memcached
     restart: always
@@ -119,7 +118,7 @@ services:
       - "${MEMCACHED_PORT_EXTERNAL}:${MEMCACHED_PORT}"
 
   redis:
-    image: redis:latest
+    image: redis:latest-alpine
     hostname: "${REDIS_HOST}"
     container_name: redis
     command: ["redis-server", "--appendonly", "yes"]

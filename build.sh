@@ -145,3 +145,12 @@ docker-compose --log-level info up \
 
 
 # symfony server:ca:install
+
+symfony composer req logger
+symfony composer req debug --dev
+
+symfony composer req maker --dev
+symfony console list make
+
+symfony composer req annotations
+symfony composer req orm
