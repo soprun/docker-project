@@ -137,3 +137,8 @@ docker-compose --log-level info up \
 # а stderr — к stdout.
 
 # git commit -a -S -m "build image: ${APP_RELEASE}"
+
+
+#main() {
+#  bash "${BATS_TEST_DIRNAME}"/package-tarball
+#}
