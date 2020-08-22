@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-source "./docker/scripts/logger.sh"
+source "./.backup/logger.sh"
 
 ###
 ### Check docker
@@ -138,7 +138,10 @@ docker-compose --log-level info up \
 
 # git commit -a -S -m "build image: ${APP_RELEASE}"
 
-
 #main() {
 #  bash "${BATS_TEST_DIRNAME}"/package-tarball
 #}
+
+
+
+# symfony server:ca:install
