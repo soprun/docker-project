@@ -1,0 +1,14 @@
+version: "3.8"
+
+x-prod-environment:
+  &prod-environment
+  environment:
+    - APP_ENV=prod
+    - APP_DEBUG=0
+
+services:
+  nginx:
+    <<: *prod-environment
+
+  php:
+    <<: *prod-environment
