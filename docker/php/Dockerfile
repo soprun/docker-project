@@ -2,7 +2,7 @@
 ### Installation container
 ###
 
-FROM php:7.2-fpm-alpine AS build
+FROM php:7.4-fpm-alpine AS build
 
 ARG APP_DIR
 ARG APP_ENV

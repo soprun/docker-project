@@ -14,10 +14,10 @@ x-php:
   env_file:
     - .env
   environment:
-    - APP_ENV=${APP_ENV:?You need to set the APP_ENV environment variable}
-    - APP_DEBUG=${APP_DEBUG:-0}
-    - APP_SECRET=${APP_SECRET:?You need to set the APP_SECRET environment variable}
-    - APP_RELEASE=${APP_RELEASE:?You need to set the APP_RELEASE environment variable}
+    - APP_ENV
+    - APP_DEBUG
+    - APP_SECRET
+    - APP_RELEASE
   depends_on:
     - postgres
     - memcached
@@ -69,7 +69,7 @@ services:
   #    <<: *default-php
 
   postgres:
-    image: postgres:11-alpine
+    image: postgres:latest
     hostname: "${POSTGRES_HOST}"
     container_name: postgres
     restart: on-failure
@@ -106,9 +106,11 @@ services:
     restart: always
     ports:
       - "${RABBITMQ_MANAGEMENT_PORT_EXTERNAL}:${RABBITMQ_MANAGEMENT_PORT}"
+    depends_on:
+      - rabbitmq
 
   memcached:
-    image: memcached:latest-alpine
+    image: memcached:latest
     hostname: "${MEMCACHED_HOST}"
     container_name: memcached
     restart: always
@@ -116,7 +118,7 @@ services:
       - "${MEMCACHED_PORT_EXTERNAL}:${MEMCACHED_PORT}"
 
   redis:
-    image: redis:latest-alpine
+    image: redis:latest
     hostname: "${REDIS_HOST}"
     container_name: redis
     command: ["redis-server", "--appendonly", "yes"]
