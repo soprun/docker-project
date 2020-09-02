@@ -33,7 +33,6 @@ LABEL \
     com.app.commit_sha="${APP_COMMIT_SHA}" \
     com.app.namespace="${APP_NAMESPACE}" \
     com.app.name="php" \
-    com.app.version="${PHP_VERSION}" \
     com.app.host="${APP_HOST}" \
     com.app.title="..." \
     com.app.description="..." \
@@ -85,13 +84,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 ### Change working directory
 ###
 
-WORKDIR ${APP_DIR}
+WORKDIR "${APP_DIR}"
 
 ###
 ### Copy source files to workdir
 ###
 
-COPY ${APP_DOCUMENT_ROOT} ${APP_DIR}
+COPY "${APP_DOCUMENT_ROOT}" "${APP_DIR}"
 
 ###
 ### Install dependencies

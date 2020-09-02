@@ -120,12 +120,14 @@ log_info "Docker running building contractors! 🐳 "
 
 #exit 0
 
-#docker build \
-#  --build-arg APP_ENV="${APP_ENV}" \
-#  --build-arg APP_DEBUG="${APP_DEBUG}" \
-#  --file ./docker/nginx/Dockerfile \
-#  --tag soprun/sandbox-nginx \
-#  .
+docker build \
+  --build-arg APP_ENV="${APP_ENV}" \
+  --build-arg APP_DEBUG="${APP_DEBUG}" \
+  --file ./docker/nginx/Dockerfile \
+  --tag "soprun/sandbox-nginx:latest" \
+  --tag "soprun/sandbox-nginx:${GIT_BRANCH}" \
+  --tag "soprun/sandbox-nginx:${GIT_COMMIT_SHA}" \
+  .
 
 #docker build \
 #  --build-arg APP_ENV="${APP_ENV}" \

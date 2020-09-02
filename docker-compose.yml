@@ -48,6 +48,16 @@ services:
     hostname: nginx
     container_name: nginx
     <<: *default-logging
+    environment:
+      - APP_DIR
+      - APP_PUBLIC_DIR
+      - APP_ENV=${APP_ENV}
+      - APP_DEBUG=${APP_DEBUG}
+      - APP_SECRET=${APP_SECRET}
+      - GIT_TAG
+      - GIT_BRANCH
+      - GIT_COMMIT_ID
+      - GIT_COMMIT_SHA
     depends_on:
       - php
     ports:
