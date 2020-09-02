@@ -3,21 +3,14 @@ version: "3.8"
 x-logging:
   &default-logging
   logging:
-    driver: ${LOGGING_DRIVER:-json-file}
+    driver: ${LOGGING_DRIVER}
     options:
-      max-size: ${LOGGING_MAX_SIZE:-2m}
-      max-file: ${LOGGING_MAX_FILE:-10}
+      max-size: ${LOGGING_OPTIONS_MAX_SIZE}
+      max-file: ${LOGGING_OPTIONS_MAX_FILE}
 
 x-php:
   &default-php
   restart: "no"
-  volumes:
-    - ./bin:/app/bin:ro,cached
-    - ./config:/app/config:rw,cached
-    - ./public:/app/public:ro,cached
-    - ./src:/app/src:rw,cached
-    - ./vendor:/app/vendor:rw,cached
-    - ./docker:/app/docker:ro,cached
   env_file:
     - .env
   environment:
@@ -34,11 +27,15 @@ x-php:
 volumes:
   rabbitmq: {}
   postgres: {}
+  composer: {}
 
 networks:
+  # app-tier:
+  #   driver: bridge
   default:
-    external:
-      name: ${NETWORK_NAME}
+    driver: bridge
+    # external:
+    #   name: ${NETWORK_NAME}
 
 # https://github.com/docker/compose/issues/4675
 services:
@@ -60,8 +57,9 @@ services:
     privileged: true
     <<: *default-php
     <<: *default-logging
-    ports:
-      - 9000
+    volumes:
+      - ./:/app:rw,cached
+      - composer:/root/.composer/cache:rw,cached
 
   #  php-cli:
   #    image: soprun/sandbox-php-cli:latest
@@ -124,3 +122,21 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "${REDIS_PORT_EXTERNAL}:${REDIS_PORT}"
+
+  vault:
+    image: vault:latest
+    hostname: vault
+    container_name: vault
+    restart: always
+    environment:
+      - VAULT_ADDR=http://localhost:8200
+      - VAULT_API_ADDR=http://0.0.0.0:8200
+      - SKIP_SETCAP=true
+      - SKIP_CHOWN=true
+    ports:
+      - 8200:8200
+    cap_add:
+      - IPC_LOCK
+    command: server
+    volumes:
+      - ./docker/vault/config:/vault/config

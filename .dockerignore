@@ -1,15 +1,20 @@
 /.idea
 /.git
-
-/docker/scripts-old
-/docker-temp
-/var/
+/vendor
+/var
 
 # Files
-/.dockerignore
-/.gitignore
-/.hadolint.yaml
 /LICENSE
 /Makefile
-/README.md
 /docker-compose.yml
+/docker-compose.override.yml
+
+config/packages/dev/
+config/packages/test/
+
+.DS_Store
+*.md
+
+# Local files
+/.phpunit.result.cache
+/.php_cs.cache

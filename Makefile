@@ -95,3 +95,7 @@ app-start:
 
 app-log:
 	@symfony server:log
+
+
+# php -d memory_limit=2000M ~/.composer/vendor/bin/phpinsights analyse src --format=console > phpinsights.json
+

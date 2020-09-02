@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
+set -euox pipefail
 
 source "./.backup/logger.sh"
 
@@ -16,11 +16,20 @@ if ! docker-compose --version >/dev/null 2>/dev/null; then
   error 'Docker compose is not installed.'
 fi
 
+if ! mkcert --version >/dev/null 2>/dev/null; then
+  error 'mkcert is not installed.'
+fi
+
+if ! openssl version >/dev/null 2>/dev/null; then
+  error 'openssl is not installed.'
+fi
+
 ###
 ### Globals
 ###
 
-readonly SHELL_SCRIPT_PATH="$(pwd)"
+# readonly SHELL_SCRIPT_PATH="$(dirname "$(readlink "$BASH_SOURCE")")"
+# cd "$SHELL_SCRIPT_PATH"
 
 # 1. Check if .env file exists
 if [ -e .env ]; then
@@ -34,25 +43,11 @@ if [ -e .env.local ]; then
   source .env.local
 fi
 
-#if [ -e "${SHELL_SCRIPT_PATH}/.env" ]; then
-#  set -o allexport
-#  # shellcheck source=./.env
-#  source "${SHELL_SCRIPT_PATH}/.env"
-#  set +o allexport
-#fi
-#
-#if [ -e "${SHELL_SCRIPT_PATH}/.env.local" ]; then
-#  set -o allexport
-#  # shellcheck source=./.env.local
-#  source "${SHELL_SCRIPT_PATH}/.env.local"
-#  set +o allexport
-#fi
-
 ###
 ### Create default network
 ###
 
-# docker network remove "$NETWORK_NAME" 2>/dev/null
+#docker network remove "$NETWORK_NAME"  >/dev/null 2>&1
 
 if ! docker network inspect "$NETWORK_NAME" >/dev/null 2>/dev/null; then
   log_info 'Network is not installed.'
@@ -60,30 +55,58 @@ if ! docker network inspect "$NETWORK_NAME" >/dev/null 2>/dev/null; then
   docker network create "$NETWORK_OPTIONS" "$NETWORK_NAME"
 fi
 
+readonly NGINX_SSL_PATH="./docker/nginx/ssl"
+
+if [ ! -e "$NGINX_SSL_PATH/key.pem" ]; then
+  log_info 'Create locally-trusted development certificate.'
+
+  mkcert \
+    -key-file "$NGINX_SSL_PATH/key.pem" \
+    -cert-file "$NGINX_SSL_PATH/cert.pem" \
+    "$APP_HOST" "*.$APP_HOST" localhost 127.0.0.1 ::1
+fi
+
+if [ ! -e "$NGINX_SSL_PATH/dhparam.pem" ]; then
+  log_info "Create Diffie-Hellman 🔐"
+
+  openssl dhparam -out "$NGINX_SSL_PATH/dhparam.pem" 1024 >/dev/null 2>&1
+fi
+
 ###
 ### Application environment variables
 ###
 
-if [ -z "${GIT_BRANCH}" ]; then
+if [ -z "${GIT_TAG:-}" ]; then
+  GIT_TAG="$(git describe --tags --abbrev=0)"
+fi
+
+if [ -z "${GIT_BRANCH:-}" ]; then
   GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 fi
 
-if [ -z "${GIT_COMMIT_SHA}" ]; then
+if [ -z "${GIT_COMMIT_ID:-}" ]; then
+  GIT_COMMIT_ID="$(git rev-parse --short HEAD)"
+fi
+
+if [ -z "${GIT_COMMIT_SHA:-}" ]; then
   GIT_COMMIT_SHA="$(git rev-parse HEAD)"
 fi
 
-if [ -z "${APP_SECRET}" ]; then
+if [ -z "${APP_SECRET:-}" ]; then
   APP_SECRET="$(openssl rand -hex 16)"
 fi
 
-if [ -z "${APP_RELEASE}" ]; then
+if [ -z "${APP_RELEASE:-}" ]; then
   APP_RELEASE="${GIT_COMMIT_SHA}"
 fi
 
-export GIT_BRANCH
-export GIT_COMMIT_SHA
-export APP_SECRET
-export APP_RELEASE
+export GIT_BRANCH=${GIT_BRANCH}
+export GIT_COMMIT_ID=${GIT_COMMIT_ID}
+export GIT_COMMIT_SHA=${GIT_COMMIT_SHA}
+export APP_ENV=${APP_ENV}
+export APP_DEBUG=${APP_DEBUG}
+export APP_SECRET=${APP_SECRET}
+export APP_RELEASE=${APP_RELEASE}
 
 set -u
 
@@ -118,7 +141,7 @@ docker build \
   --build-arg APP_ENV="${APP_ENV}" \
   --build-arg APP_DEBUG="${APP_DEBUG}" \
   --file ./docker/php/Dockerfile \
-  --tag soprun/sandbox-php:latest \
+  --tag "soprun/sandbox-php:latest" \
   --tag "soprun/sandbox-php:${GIT_BRANCH}" \
   --tag "soprun/sandbox-php:${GIT_COMMIT_SHA}" \
   .
@@ -130,6 +153,14 @@ docker-compose --log-level info up \
   --force-recreate \
   --remove-orphans
 
+log_info '=> Docker push images: 🐳 '
+
+#docker push soprun/sandbox-nginx
+#docker push soprun/sandbox-php
+#docker push soprun/sandbox-php-cli
+
+# docker exec -ti php sh
+
 # env -i TERM="$TERM" PATH="$PATH" USER="$USER" HOME="$HOME" sh
 
 # command > /dev/null 2>&1 &
@@ -138,19 +169,20 @@ docker-compose --log-level info up \
 
 # git commit -a -S -m "build image: ${APP_RELEASE}"
 
+# docker buildx bake -f ./docker/php/Dockerfile
+
 #main() {
 #  bash "${BATS_TEST_DIRNAME}"/package-tarball
 #}
 
-
-
 # symfony server:ca:install
 
-symfony composer req logger
-symfony composer req debug --dev
-
-symfony composer req maker --dev
-symfony console list make
-
-symfony composer req annotations
-symfony composer req orm
+#symfony composer req logger
+#symfony composer req debug --dev
+#
+#symfony composer req maker --dev
+#symfony console list make
+#
+#symfony composer req annotations
+#symfony composer req orm
+#
