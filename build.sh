@@ -176,7 +176,7 @@ docker build \
   --file ./docker/nginx/Dockerfile \
   --tag "soprun/sandbox-nginx:latest" \
   --tag "soprun/sandbox-nginx:${GIT_BRANCH}" \
-  --tag "soprun/sandbox-nginx:${GIT_COMMIT_SHA}" \
+  --tag "soprun/sandbox-nginx:${GIT_COMMIT_ID}" \
   .
 
 success 'Build sandbox-nginx - is succeeded!'
@@ -187,7 +187,7 @@ docker build \
   --file ./docker/php-cli/Dockerfile \
   --tag "soprun/sandbox-php-cli:latest" \
   --tag "soprun/sandbox-php-cli:${GIT_BRANCH}" \
-  --tag "soprun/sandbox-php-cli:${GIT_COMMIT_SHA}" \
+  --tag "soprun/sandbox-php-cli:${GIT_COMMIT_ID}" \
   .
 
 success 'Build sandbox-php-cli - is succeeded!'
@@ -198,7 +198,7 @@ docker build \
   --file ./docker/php/Dockerfile \
   --tag "soprun/sandbox-php:latest" \
   --tag "soprun/sandbox-php:${GIT_BRANCH}" \
-  --tag "soprun/sandbox-php:${GIT_COMMIT_SHA}" \
+  --tag "soprun/sandbox-php:${GIT_COMMIT_ID}" \
   .
 
 success 'Build sandbox-php - is succeeded!'
