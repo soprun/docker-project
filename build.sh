@@ -3,7 +3,34 @@
 set -euo pipefail
 clear -x
 
-source "./.backup/logger.sh"
+# source "./.backup/logger.sh"
+# $(date)
+
+#
+# logger -p user.info -t "${BASH_SOURCE}" "$@"
+# logger -p user.warn -t "${BASH_SOURCE}" "$@"
+
+info() {
+  printf "=>\033[0;34m log.info: \033[0m%-6s\n" "$@"
+  logger -p user.info -t "$(basename "${0}")" "$@"
+}
+
+warn() {
+  printf "=>\033[0;33m log.warn: \033[0m%-6s\n" "$@"
+  logger -p user.warn -t "$(basename "${0}")" "$@"
+}
+
+error() {
+  printf "=>\033[0;31m log.error: \033[0m%-6s\n" "$@" >&2
+  logger -p user.error -t "$(basename "${0}")" "$@"
+  exit 1
+}
+
+info 'info'
+warn 'warn'
+error 'error'
+
+exit 0
 
 ###
 ### Check docker
@@ -113,12 +140,8 @@ export GIT_BRANCH=${GIT_BRANCH}
 export GIT_COMMIT_ID=${GIT_COMMIT_ID}
 export GIT_COMMIT_SHA=${GIT_COMMIT_SHA}
 
-set -u
-
-log_info $(printenv | sort | less)
+log_info "$(printenv | sort | less)"
 log_info "Docker running building contractors! 🐳 "
-
-#exit 0
 
 docker build \
   --build-arg APP_ENV="${APP_ENV}" \
@@ -129,22 +152,14 @@ docker build \
   --tag "soprun/sandbox-nginx:${GIT_COMMIT_SHA}" \
   .
 
-#docker build \
-#  --build-arg APP_ENV="${APP_ENV}" \
-#  --build-arg APP_DEBUG="${APP_DEBUG}" \
-#  --file ./docker/php-cli/Dockerfile \
-#  --tag soprun/sandbox-php-cli:dev \
-#  --tag soprun/sandbox-php-cli:latest \
-#  --target dev \
-#  .
-
-#docker build \
-#  --build-arg APP_ENV="${APP_ENV}" \
-#  --build-arg APP_DEBUG="${APP_DEBUG}" \
-#  --file ./docker/php-cli/Dockerfile \
-#  --tag soprun/sandbox-php-cli:prod \
-#  --target prod \
-#  .
+docker build \
+  --build-arg APP_ENV="${APP_ENV}" \
+  --build-arg APP_DEBUG="${APP_DEBUG}" \
+  --file ./docker/php-cli/Dockerfile \
+  --tag soprun/sandbox-php-cli:dev \
+  --tag soprun/sandbox-php-cli:latest \
+  --target dev \
+  .
 
 docker build \
   --build-arg APP_ENV="${APP_ENV}" \
@@ -164,9 +179,9 @@ docker-compose --log-level info up \
 
 log_info '=> Docker push images: 🐳 '
 
-#docker push soprun/sandbox-nginx
-#docker push soprun/sandbox-php
-#docker push soprun/sandbox-php-cli
+docker push soprun/sandbox-nginx
+docker push soprun/sandbox-php
+docker push soprun/sandbox-php-cli
 
 # docker exec -ti php sh
 
