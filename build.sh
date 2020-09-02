@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+clear -x
 
 source "./.backup/logger.sh"
 
@@ -9,11 +10,11 @@ source "./.backup/logger.sh"
 ###
 
 if ! docker --version >/dev/null 2>/dev/null; then
-  error 'Docker is not installed.'
+  error 'docker is not installed.'
 fi
 
 if ! docker-compose --version >/dev/null 2>/dev/null; then
-  error 'Docker compose is not installed.'
+  error 'docker-compose is not installed.'
 fi
 
 if ! mkcert --version >/dev/null 2>/dev/null; then
@@ -50,8 +51,6 @@ fi
 ###
 ### Create default network
 ###
-
-#docker network remove "$NETWORK_NAME"  >/dev/null 2>&1
 
 if ! docker network inspect "$NETWORK_NAME" >/dev/null 2>/dev/null; then
   log_info 'Network is not installed.'
@@ -96,12 +95,12 @@ if [ -z "${GIT_COMMIT_SHA:-}" ]; then
   GIT_COMMIT_SHA="$(git rev-parse HEAD)"
 fi
 
-if [ -z "${APP_SECRET:-}" ]; then
-  APP_SECRET="$(openssl rand -hex 16)"
+if [ -z "${GIT_COMMIT_SHA:-}" ]; then
+  GIT_COMMIT_SHA="${GIT_COMMIT_SHA}"
 fi
 
-if [ -z "${APP_RELEASE:-}" ]; then
-  APP_RELEASE="${GIT_COMMIT_SHA}"
+if [ -z "${APP_SECRET:-}" ]; then
+  APP_SECRET="$(openssl rand -hex 16)"
 fi
 
 export APP_DIR=${APP_DIR}
@@ -116,7 +115,7 @@ export GIT_COMMIT_SHA=${GIT_COMMIT_SHA}
 
 set -u
 
-log $(printenv | sort | less)
+log_info $(printenv | sort | less)
 log_info "Docker running building contractors! 🐳 "
 
 #exit 0

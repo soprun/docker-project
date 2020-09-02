@@ -14,9 +14,14 @@ x-php:
   env_file:
     - .env
   environment:
+    - APP_DIR
     - APP_ENV=${APP_ENV}
     - APP_DEBUG=${APP_DEBUG}
     - APP_SECRET=${APP_SECRET}
+    - GIT_TAG
+    - GIT_BRANCH
+    - GIT_COMMIT_ID
+    - GIT_COMMIT_SHA
   depends_on:
     - postgres
     - memcached
@@ -57,7 +62,7 @@ services:
     <<: *default-php
     <<: *default-logging
     volumes:
-      - ./:/var/www/html:rw,cached
+      - ./:/app:rw,cached
       - composer:/root/.composer/cache:rw,cached
 
   #  php-cli:
@@ -73,8 +78,6 @@ services:
     container_name: postgres
     restart: on-failure
     <<: *default-logging
-    ports:
-      - "${POSTGRES_PORT_EXTERNAL}:${POSTGRES_PORT}"
     volumes:
       - ./docker/postgres/dump.sql:/docker-entrypoint-initdb.d/dump.sql
       - postgres:/var/lib/postgresql/data
@@ -89,8 +92,6 @@ services:
     container_name: rabbitmq
     restart: on-failure
     <<: *default-logging
-    ports:
-      - "${RABBITMQ_PORT_EXTERNAL}:${RABBITMQ_PORT}"
     volumes:
       - rabbitmq:/var/lib/rabbitmq
     environment:
@@ -104,8 +105,6 @@ services:
     container_name: rabbitmq-management
     restart: always
     <<: *default-logging
-    ports:
-      - "${RABBITMQ_MANAGEMENT_PORT_EXTERNAL}:${RABBITMQ_MANAGEMENT_PORT}"
     depends_on:
       - rabbitmq
 
@@ -115,17 +114,14 @@ services:
     container_name: memcached
     restart: always
     <<: *default-logging
-    ports:
-      - "${MEMCACHED_PORT_EXTERNAL}:${MEMCACHED_PORT}"
 
   redis:
     image: redis:latest
     hostname: ${REDIS_HOST}
     container_name: redis
+    restart: always
     <<: *default-logging
     command: ["redis-server", "--appendonly", "yes"]
-    ports:
-      - "${REDIS_PORT_EXTERNAL}:${REDIS_PORT}"
 
   vault:
     image: vault:latest
