@@ -171,7 +171,6 @@ success 'Check SSL certificate - is succeeded!'
 info "Docker running building contractors! 🐳 "
 
 docker build \
-  --squash \
   --build-arg APP_ENV="${APP_ENV}" \
   --build-arg APP_DEBUG="${APP_DEBUG}" \
   --file ./docker/nginx/Dockerfile \
@@ -183,7 +182,6 @@ docker build \
 success 'Build sandbox-nginx - is succeeded!'
 
 docker build \
-  --squash \
   --build-arg APP_ENV="${APP_ENV}" \
   --build-arg APP_DEBUG="${APP_DEBUG}" \
   --file ./docker/php-cli/Dockerfile \
@@ -195,7 +193,6 @@ docker build \
 success 'Build sandbox-php-cli - is succeeded!'
 
 docker build \
-  --squash \
   --build-arg APP_ENV="${APP_ENV}" \
   --build-arg APP_DEBUG="${APP_DEBUG}" \
   --file ./docker/php/Dockerfile \
