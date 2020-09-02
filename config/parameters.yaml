@@ -1,0 +1,8 @@
+parameters:
+  env(APP_ENV): ''
+  env(APP_DEBUG): ''
+  env(APP_DEBUG_LEVEL): 'notice'
+  env(APP_SECRET): ''
+  env(APP_BRANCH): ''
+  env(APP_COMMIT_ID): ''
+  env(APP_COMMIT_SHA): ''

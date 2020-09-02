@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euox pipefail
+set -euo pipefail
 
 source "./.backup/logger.sh"
 
@@ -28,19 +28,23 @@ fi
 ### Globals
 ###
 
-# readonly SHELL_SCRIPT_PATH="$(dirname "$(readlink "$BASH_SOURCE")")"
-# cd "$SHELL_SCRIPT_PATH"
+APP_DOCUMENT_ROOT="$(dirname "$(readlink "$BASH_SOURCE")")"
+export APP_DOCUMENT_ROOT
 
 # 1. Check if .env file exists
-if [ -e .env ]; then
+if [ -e "${APP_DOCUMENT_ROOT}/.env" ]; then
+  # set -o allexport
   # shellcheck source=./.env
-  source .env
+  source "${APP_DOCUMENT_ROOT}/.env"
+  # set +o allexport
 fi
 
 # 2. Check if .env.local file exists
-if [ -e .env.local ]; then
+if [ -e "${APP_DOCUMENT_ROOT}/.env.local" ]; then
+  # set -o allexport
   # shellcheck source=./.env.local
-  source .env.local
+  source "${APP_DOCUMENT_ROOT}/.env.local"
+  # set +o allexport
 fi
 
 ###
@@ -55,21 +59,21 @@ if ! docker network inspect "$NETWORK_NAME" >/dev/null 2>/dev/null; then
   docker network create "$NETWORK_OPTIONS" "$NETWORK_NAME"
 fi
 
-readonly NGINX_SSL_PATH="./docker/nginx/ssl"
+readonly nginx_ssl_dir="./docker/nginx/ssl"
 
-if [ ! -e "$NGINX_SSL_PATH/key.pem" ]; then
+if [ ! -e "$nginx_ssl_dir/key.pem" ]; then
   log_info 'Create locally-trusted development certificate.'
 
   mkcert \
-    -key-file "$NGINX_SSL_PATH/key.pem" \
-    -cert-file "$NGINX_SSL_PATH/cert.pem" \
+    -key-file "$nginx_ssl_dir/key.pem" \
+    -cert-file "$nginx_ssl_dir/cert.pem" \
     "$APP_HOST" "*.$APP_HOST" localhost 127.0.0.1 ::1
 fi
 
-if [ ! -e "$NGINX_SSL_PATH/dhparam.pem" ]; then
+if [ ! -e "$nginx_ssl_dir/dhparam.pem" ]; then
   log_info "Create Diffie-Hellman 🔐"
 
-  openssl dhparam -out "$NGINX_SSL_PATH/dhparam.pem" 1024 >/dev/null 2>&1
+  openssl dhparam -out "$nginx_ssl_dir/dhparam.pem" 1024 >/dev/null 2>&1
 fi
 
 ###
@@ -100,25 +104,29 @@ if [ -z "${APP_RELEASE:-}" ]; then
   APP_RELEASE="${GIT_COMMIT_SHA}"
 fi
 
-export GIT_BRANCH=${GIT_BRANCH}
-export GIT_COMMIT_ID=${GIT_COMMIT_ID}
-export GIT_COMMIT_SHA=${GIT_COMMIT_SHA}
+export APP_DIR=${APP_DIR}
 export APP_ENV=${APP_ENV}
 export APP_DEBUG=${APP_DEBUG}
 export APP_SECRET=${APP_SECRET}
-export APP_RELEASE=${APP_RELEASE}
+
+export GIT_TAG=${GIT_TAG}
+export GIT_BRANCH=${GIT_BRANCH}
+export GIT_COMMIT_ID=${GIT_COMMIT_ID}
+export GIT_COMMIT_SHA=${GIT_COMMIT_SHA}
 
 set -u
 
 log $(printenv | sort | less)
 log_info "Docker running building contractors! 🐳 "
 
-docker build \
-  --build-arg APP_ENV="${APP_ENV}" \
-  --build-arg APP_DEBUG="${APP_DEBUG}" \
-  --file ./docker/nginx/Dockerfile \
-  --tag soprun/sandbox-nginx \
-  .
+#exit 0
+
+#docker build \
+#  --build-arg APP_ENV="${APP_ENV}" \
+#  --build-arg APP_DEBUG="${APP_DEBUG}" \
+#  --file ./docker/nginx/Dockerfile \
+#  --tag soprun/sandbox-nginx \
+#  .
 
 #docker build \
 #  --build-arg APP_ENV="${APP_ENV}" \
@@ -128,7 +136,7 @@ docker build \
 #  --tag soprun/sandbox-php-cli:latest \
 #  --target dev \
 #  .
-#
+
 #docker build \
 #  --build-arg APP_ENV="${APP_ENV}" \
 #  --build-arg APP_DEBUG="${APP_DEBUG}" \

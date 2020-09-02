@@ -1,20 +1,9 @@
 /.idea
 /.git
-/vendor
-/var
+.DS_Store
 
 # Files
 /LICENSE
+/README.md
 /Makefile
 /docker-compose.yml
-/docker-compose.override.yml
-
-config/packages/dev/
-config/packages/test/
-
-.DS_Store
-*.md
-
-# Local files
-/.phpunit.result.cache
-/.php_cs.cache

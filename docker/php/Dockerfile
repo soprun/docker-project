@@ -2,13 +2,24 @@
 ### Installation container
 ###
 
-FROM php:7.4-fpm-alpine AS build
+FROM php:${PHP_VERSION:-7.4}-fpm-alpine AS build
 
 ARG APP_DIR
 ARG APP_ENV
 ARG APP_DEBUG
 ARG APP_SECRET
-ARG APP_RELEASE
+
+###
+### Environment variables
+###
+
+ENV \
+    TZ=UTC \
+    LANG=en_US.UTF8 \
+    LANGUAGE=en \
+    PATH="${PATH}:${APP_DIR}/bin" \
+    APP_ENV="${APP_ENV:-dev}" \
+    APP_DEBUG="${APP_DEBUG:-1}"
 
 ###
 ### Labels
@@ -18,34 +29,19 @@ ARG APP_RELEASE
 LABEL \
     com.app.env="${APP_ENV}" \
     com.app.debug="${APP_DEBUG}" \
-    com.app.release="${APP_RELEASE}" \
+    com.app.branch="${APP_BRANCH}" \
     com.app.commit_id="${APP_COMMIT_ID}" \
     com.app.commit_sha="${APP_COMMIT_SHA}" \
-    com.app.namespace="billing" \
+    com.app.namespace="${APP_NAMESPACE}" \
     com.app.name="php" \
-    com.app.title="Billing api service." \
+    com.app.version="${PHP_VERSION}" \
+    com.app.host="${APP_HOST}" \
+    com.app.title="..." \
     com.app.description="..." \
     com.app.vendor="inspiritum.com" \
     com.app.authors="Vladislav Soprun <develop@soprun.com>" \
     com.app.source="https://github.com/soprun/docker-project" \
     com.app.documentation="https://github.com/soprun/docker-project/wiki"
-
-###
-### Environment variables
-###
-
-ENV APP_DIR="${APP_DIR:-/var/www/html}"
-ENV APP_ENV="${APP_ENV:-dev}"
-ENV APP_DEBUG="${APP_DEBUG:-1}"
-
-###
-### Context environment
-###
-
-ENV LANG="en_US.UTF-8"
-ENV LANGUAGE="en_US.UTF-8"
-ENV PATH="${PATH}:${APP_DIR}/bin"
-#ENV PATH="${PATH}:${APP_DIR}/vendor/bin"
 
 ###
 ### Install
@@ -63,7 +59,7 @@ RUN apk --no-cache add \
     vim
 
 # install php-extension-installer
-COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/bin/
+COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
 
 RUN install-php-extensions \
     xdebug \
@@ -137,9 +133,9 @@ RUN install-php-extensions \
 ### Copy configuration files
 ###
 
-COPY ./docker/php/php.ini "/usr/local/etc/php/conf.d/php.ini,"
-COPY ./docker/php/php-fpm.conf "/usr/local/etc/php-fpm.conf"
-COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint.sh"
+# COPY ./docker/php/php.ini "/usr/local/etc/php/conf.d/php.ini,"
+# COPY ./docker/php/php-fpm.conf "/usr/local/etc/php-fpm.conf"
+COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint"
 
 ###
 ### Install composer
@@ -149,7 +145,7 @@ ENV COMPOSER_MEMORY_LIMIT="-1"
 ENV COMPOSER_ALLOW_SUPERUSER="1"
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 ###
 ### Install composer
@@ -186,11 +182,11 @@ COPY . "${APP_DIR}"
 ###
 
 RUN set -eux; \
-    chmod +x /usr/local/bin/docker-entrypoint.sh; \
-    composer global require hirak/prestissimo \
-        --ignore-platform-reqs \
-        --quiet \
-        --profile; \
+    chmod +x /usr/bin/docker-entrypoint; \
+    # composer global require hirak/prestissimo \
+    #     --ignore-platform-reqs \
+    #     --quiet \
+    #     --profile; \
     composer install \
         --ignore-platform-reqs \
         --no-scripts \
@@ -207,12 +203,10 @@ EXPOSE 9000
 ### Entrypoint
 ###
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint"]
 
 ###
 ### Startup
 ###
-
-# USER www-data
 
 CMD ["php-fpm", "--nodaemonize"]

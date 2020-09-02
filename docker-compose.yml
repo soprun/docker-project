@@ -14,10 +14,9 @@ x-php:
   env_file:
     - .env
   environment:
-    - APP_ENV
-    - APP_DEBUG
-    - APP_SECRET
-    - APP_RELEASE
+    - APP_ENV=${APP_ENV}
+    - APP_DEBUG=${APP_DEBUG}
+    - APP_SECRET=${APP_SECRET}
   depends_on:
     - postgres
     - memcached
@@ -58,7 +57,7 @@ services:
     <<: *default-php
     <<: *default-logging
     volumes:
-      - ./:/app:rw,cached
+      - ./:/var/www/html:rw,cached
       - composer:/root/.composer/cache:rw,cached
 
   #  php-cli:
@@ -70,7 +69,7 @@ services:
 
   postgres:
     image: postgres:latest
-    hostname: "${POSTGRES_HOST}"
+    hostname: ${POSTGRES_HOST}
     container_name: postgres
     restart: on-failure
     <<: *default-logging
@@ -86,7 +85,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3.8.5-alpine
-    hostname: "${RABBITMQ_HOST}"
+    hostname: ${RABBITMQ_HOST}
     container_name: rabbitmq
     restart: on-failure
     <<: *default-logging
@@ -101,9 +100,10 @@ services:
 
   rabbitmq-management:
     image: rabbitmq:3.8.5-management-alpine
-    hostname: "${RABBITMQ_MANAGEMENT_HOST}"
+    hostname: ${RABBITMQ_MANAGEMENT_HOST}
     container_name: rabbitmq-management
     restart: always
+    <<: *default-logging
     ports:
       - "${RABBITMQ_MANAGEMENT_PORT_EXTERNAL}:${RABBITMQ_MANAGEMENT_PORT}"
     depends_on:
@@ -111,28 +111,31 @@ services:
 
   memcached:
     image: memcached:latest
-    hostname: "${MEMCACHED_HOST}"
+    hostname: ${MEMCACHED_HOST}
     container_name: memcached
     restart: always
+    <<: *default-logging
     ports:
       - "${MEMCACHED_PORT_EXTERNAL}:${MEMCACHED_PORT}"
 
   redis:
     image: redis:latest
-    hostname: "${REDIS_HOST}"
+    hostname: ${REDIS_HOST}
     container_name: redis
+    <<: *default-logging
     command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "${REDIS_PORT_EXTERNAL}:${REDIS_PORT}"
 
   vault:
     image: vault:latest
-    hostname: "${VAULT_HOST}"
+    hostname: ${VAULT_HOST}
     container_name: vault
     restart: always
+    <<: *default-logging
     environment:
-      - VAULT_ADDR
-      - VAULT_API_ADDR
+      - VAULT_ADDR=${VAULT_ADDR}
+      - VAULT_API_ADDR=${VAULT_API_ADDR}
       - SKIP_SETCAP=true
       - SKIP_CHOWN=true
     ports:

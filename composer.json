@@ -7,6 +7,9 @@
         "php": "^7.3",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-pdo": "*",
+        "ext-redis": "*",
+        "ext-memcached": "*",
         "composer/package-versions-deprecated": "1.10.99.1",
         "doctrine/doctrine-bundle": "^2.1",
         "doctrine/doctrine-migrations-bundle": "^3.0",
@@ -77,7 +80,8 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "5.1.*"
+            "require": "5.1.*",
+            "id": "01EH7SA8WZFGYTXJVVAQXT1JC7"
         }
     }
 }
