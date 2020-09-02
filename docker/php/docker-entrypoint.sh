@@ -14,7 +14,7 @@ echo "Checking DB connection ..."
 i=0
 until [ $i -ge 10 ]
 do
-  nc -z postgres 5432 && break
+  nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" && break
 
   i=$(( i + 1 ))
 
