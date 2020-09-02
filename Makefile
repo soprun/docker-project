@@ -101,7 +101,6 @@ docker-push:
 	@docker push soprun/sandbox-php
 	@docker push soprun/sandbox-php-cli
 
-
 app-dev:
 	@symfony server:ca:install
 
@@ -111,6 +110,8 @@ app-start:
 app-log:
 	@symfony server:log
 
+ci-shellcheck:
+	@shellcheck --external-sources build.sh
 
 # php -d memory_limit=2000M ~/.composer/vendor/bin/phpinsights analyse src --format=console > phpinsights.json
 
