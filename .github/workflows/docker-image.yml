@@ -53,7 +53,8 @@ jobs:
           # echo "::set-env name=action_state::yellow"
 
       - name: Build Nginx
-        run: docker build \
+        run: |
+          docker build \
           --build-arg APP_ENV=dev \
           --build-arg APP_DEBUG=1 \
           --file ${{ env.IMAGE_NGINX_FILE }} \
@@ -61,7 +62,8 @@ jobs:
           .
 
       - name: Build PHP-FPM
-        run: docker build \
+        run: |
+          docker build \
           --build-arg APP_ENV=dev \
           --build-arg APP_DEBUG=1 \
           --file ${{ env.IMAGE_PHP_FILE }} \
@@ -69,7 +71,8 @@ jobs:
           .
 
       - name: Build PHP-CLI
-        run: docker build \
+        run: |
+          docker build \
           --build-arg APP_ENV=dev \
           --build-arg APP_DEBUG=1 \
           --file ${{ env.IMAGE_PHP_CLI_FILE }} \
@@ -81,3 +84,6 @@ jobs:
           docker push ${{ env.IMAGE_NGINX_NAME }}
           docker push ${{ env.IMAGE_PHP_NAME }}
           docker push ${{ env.IMAGE_PHP_CLI_NAME }}
+
+
+
