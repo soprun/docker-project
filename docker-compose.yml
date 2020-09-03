@@ -13,14 +13,14 @@ x-php:
   restart: "no"
   env_file:
     - .env
-#  environment:
-#    - APP_ENV=${APP_ENV}
-#    - APP_DEBUG=${APP_DEBUG}
-#    - APP_SECRET=${APP_SECRET}
-#    - GIT_TAG
-#    - GIT_BRANCH
-#    - GIT_COMMIT_ID
-#    - GIT_COMMIT_SHA
+  #  environment:
+  #    - APP_ENV=${APP_ENV}
+  #    - APP_DEBUG=${APP_DEBUG}
+  #    - APP_SECRET=${APP_SECRET}
+  #    - GIT_TAG
+  #    - GIT_BRANCH
+  #    - GIT_COMMIT_ID
+  #    - GIT_COMMIT_SHA
   depends_on:
     - postgres
     - memcached
@@ -74,12 +74,12 @@ services:
       - ./:/app:rw,cached
       - composer:/root/.composer/cache:rw,cached
 
-  #  php-cli:
-  #    image: soprun/sandbox-php-cli:latest
-  #    hostname: php-cli
-  #    container_name: php-cli
-  #    tty: true
-  #    <<: *default-php
+  php-cli:
+    image: soprun/sandbox-php-cli:latest
+    hostname: php-cli
+    container_name: php-cli
+    tty: true
+    <<: *default-php
 
   postgres:
     image: postgres:latest

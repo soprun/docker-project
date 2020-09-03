@@ -48,14 +48,33 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
 
-          # see: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
-          # echo "::set-env name=action_state::yellow"
+          docker build \
+          --build-arg APP_ENV=dev \
+          --build-arg APP_DEBUG=1 \
+          --file ${{ env.IMAGE_NGINX_FILE }} \
+          --tag ${{ env.IMAGE_NGINX_NAME }}:$VERSION \
+          .
 
-          docker-compose build --paralle
+          docker build \
+          --build-arg APP_ENV=dev \
+          --build-arg APP_DEBUG=1 \
+          --file ${{ env.IMAGE_PHP_FILE }} \
+          --tag ${{ env.IMAGE_PHP_NAME }}:$VERSION \
+          .
+
+          docker build \
+          --build-arg APP_ENV=dev \
+          --build-arg APP_DEBUG=1 \
+          --file ${{ env.IMAGE_PHP_CLI_FILE }} \
+          --tag ${{ env.IMAGE_PHP_CLI_NAME }}:$VERSION \
+          .
 
           docker push ${{ env.IMAGE_NGINX_NAME }}
           docker push ${{ env.IMAGE_PHP_NAME }}
           docker push ${{ env.IMAGE_PHP_CLI_NAME }}
 
-
+          # docker-compose build --paralle
+          # docker tag docker-project_nginx ${{ env.IMAGE_NGINX_NAME }}:$VERSION
+          # docker tag pdocker-project_php ${{ env.IMAGE_PHP_NAME }}:$VERSION
+          # docker tag docker-project_php-cli ${{ env.IMAGE_PHP_CLI_NAME }}:$VERSION
 
