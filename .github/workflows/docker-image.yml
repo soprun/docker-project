@@ -29,54 +29,52 @@ jobs:
 
     strategy:
       matrix:
-        node: [6, 8, 10]
+        node: ['nginx', 'php', 'php-cli']
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Docker Lint - $IMAGE_TAG
+      - name: Docker Lint
         uses: luke142367/Docker-Lint-Action@v1.1.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          IMAGE_TAG: ${{ env.IMAGE_NGINX_TAG }}
-          IMAGE_FILE: ${{ env.IMAGE_NGINX_FILE }}
         with:
-          target: $IMAGE_TAG
+          target: ./docker/${{ matrix.os }}/Dockerfile
 
-      - name: Docker Lint - $IMAGE_TAG
-        uses: luke142367/Docker-Lint-Action@v1.1.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          IMAGE_TAG: ${{ env.IMAGE_PHP_TAG }}
-          IMAGE_FILE: ${{ env.IMAGE_PHP_FILE }}
-        with:
-          target: $IMAGE_TAG
-
-      - name: Docker Lint - $IMAGE_TAG
-        uses: luke142367/Docker-Lint-Action@v1.1.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          IMAGE_TAG: ${{ env.IMAGE_PHP_CLI_TAG }}
-          IMAGE_FILE: ${{ env.IMAGE_PHP_CLI_FILE }}
-        with:
-          target: $IMAGE_FILE
-
-      - name: Build the Docker image
-        run: |
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
-
-          echo $IMAGE_NAME
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
-          # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          # docker push $IMAGE_ID:$VERSION
+#      - name: Docker Lint - $IMAGE_TAG
+#        uses: luke142367/Docker-Lint-Action@v1.1.1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          IMAGE_TAG: ${{ env.IMAGE_PHP_TAG }}
+#          IMAGE_FILE: ${{ env.IMAGE_PHP_FILE }}
+#        with:
+#          target: $IMAGE_TAG
+#
+#      - name: Docker Lint - $IMAGE_TAG
+#        uses: luke142367/Docker-Lint-Action@v1.1.1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          IMAGE_TAG: ${{ env.IMAGE_PHP_CLI_TAG }}
+#          IMAGE_FILE: ${{ env.IMAGE_PHP_CLI_FILE }}
+#        with:
+#          target: $IMAGE_FILE
+#
+#      - name: Build the Docker image
+#        run: |
+#          # Strip git ref prefix from version
+#          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+#
+#          # Strip "v" prefix from tag name
+#          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+#
+#          # Use Docker `latest` tag convention
+#          [ "$VERSION" == "master" ] && VERSION=latest
+#
+#          echo $IMAGE_NAME
+#          echo IMAGE_ID=$IMAGE_ID
+#          echo VERSION=$VERSION
+#          # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+#          # docker push $IMAGE_ID:$VERSION
 
   push:
     needs: build
