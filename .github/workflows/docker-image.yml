@@ -14,6 +14,8 @@ on:
   pull_request:
 
 env:
+  VERSION: latest
+
   IMAGE_NGINX_NAME: soprun/sandbox-nginx
   IMAGE_NGINX_FILE: ./docker/php/Dockerfile
 
@@ -47,21 +49,23 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
 
+          # see: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+          # echo "::set-env name=action_state::yellow"
+
       - name: Build Nginx
-        run: |
-          docker build \
-            --build-arg APP_ENV=dev \
-            --build-arg APP_DEBUG=1 \
-            --file ${{ env.IMAGE_NGINX_FILE }} \
-            --tag "${{ env.IMAGE_NGINX_NAME }}:$VERSION" \
-            .
+        run: docker build \
+          --build-arg APP_ENV=dev \
+          --build-arg APP_DEBUG=1 \
+          --file ${{ env.IMAGE_NGINX_FILE }} \
+          --tag "${{ env.IMAGE_NGINX_NAME }}:${{ env.VERSION }}" \
+          .
 
       - name: Build PHP-FPM
         run: docker build \
           --build-arg APP_ENV=dev \
           --build-arg APP_DEBUG=1 \
           --file ${{ env.IMAGE_PHP_FILE }} \
-          --tag "${{ env.IMAGE_PHP_NAME }}:$VERSION" \
+          --tag "${{ env.IMAGE_PHP_NAME }}:${{ env.VERSION }}" \
           .
 
       - name: Build PHP-CLI
@@ -69,7 +73,7 @@ jobs:
           --build-arg APP_ENV=dev \
           --build-arg APP_DEBUG=1 \
           --file ${{ env.IMAGE_PHP_CLI_FILE }} \
-          --tag "${{ env.IMAGE_PHP_CLI_NAME }}:$VERSION" \
+          --tag "${{ env.IMAGE_PHP_CLI_NAME }}:${{ env.VERSION }}" \
           .
 
       - name: Pushe the Docker image
