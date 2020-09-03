@@ -14,8 +14,6 @@ on:
   pull_request:
 
 env:
-  VERSION: latest
-
   IMAGE_NGINX_NAME: soprun/sandbox-nginx
   IMAGE_NGINX_FILE: ./docker/nginx/Dockerfile
 
@@ -28,6 +26,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
     steps:
       - uses: actions/checkout@v2
@@ -38,7 +37,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Version detection
+      - name: Build the Docker image
         run: |
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -52,35 +51,27 @@ jobs:
           # see: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
           # echo "::set-env name=action_state::yellow"
 
-      - name: Build Nginx
-        run: |
           docker build \
           --build-arg APP_ENV=dev \
           --build-arg APP_DEBUG=1 \
           --file ${{ env.IMAGE_NGINX_FILE }} \
-          --tag ${{ env.IMAGE_NGINX_NAME }}:${{ env.VERSION }} \
+          --tag ${{ env.IMAGE_NGINX_NAME }}:$VERSION \
           .
 
-      - name: Build PHP-FPM
-        run: |
           docker build \
           --build-arg APP_ENV=dev \
           --build-arg APP_DEBUG=1 \
           --file ${{ env.IMAGE_PHP_FILE }} \
-          --tag ${{ env.IMAGE_PHP_NAME }}:${{ env.VERSION }} \
+          --tag ${{ env.IMAGE_PHP_NAME }}:$VERSION \
           .
 
-      - name: Build PHP-CLI
-        run: |
           docker build \
           --build-arg APP_ENV=dev \
           --build-arg APP_DEBUG=1 \
           --file ${{ env.IMAGE_PHP_CLI_FILE }} \
-          --tag ${{ env.IMAGE_PHP_CLI_NAME }}:${{ env.VERSION }} \
+          --tag ${{ env.IMAGE_PHP_CLI_NAME }}:$VERSION \
           .
 
-      - name: Pushe the Docker image
-        run: |
           docker push ${{ env.IMAGE_NGINX_NAME }}
           docker push ${{ env.IMAGE_PHP_NAME }}
           docker push ${{ env.IMAGE_PHP_CLI_NAME }}
