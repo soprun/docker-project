@@ -13,14 +13,14 @@ x-php:
   restart: "no"
   env_file:
     - .env
-  environment:
-    - APP_ENV=${APP_ENV}
-    - APP_DEBUG=${APP_DEBUG}
-    - APP_SECRET=${APP_SECRET}
-    - GIT_TAG
-    - GIT_BRANCH
-    - GIT_COMMIT_ID
-    - GIT_COMMIT_SHA
+#  environment:
+#    - APP_ENV=${APP_ENV}
+#    - APP_DEBUG=${APP_DEBUG}
+#    - APP_SECRET=${APP_SECRET}
+#    - GIT_TAG
+#    - GIT_BRANCH
+#    - GIT_COMMIT_ID
+#    - GIT_COMMIT_SHA
   depends_on:
     - postgres
     - memcached
@@ -43,18 +43,15 @@ networks:
 # https://github.com/docker/compose/issues/4675
 services:
   nginx:
-    image: soprun/sandbox-nginx:latest
+    build:
+      dockerfile: ./docker/nginx/Dockerfile
+      context: .
+      args:
+        - APP_ENV=dev
+        - APP_DEBUG=1
     hostname: nginx
     container_name: nginx
     <<: *default-logging
-    environment:
-      - APP_ENV=${APP_ENV}
-      - APP_DEBUG=${APP_DEBUG}
-      - APP_SECRET=${APP_SECRET}
-      - GIT_TAG
-      - GIT_BRANCH
-      - GIT_COMMIT_ID
-      - GIT_COMMIT_SHA
     depends_on:
       - php
     ports:
@@ -62,7 +59,12 @@ services:
       - "${NETWORK_IP}:${NETWORK_HTTPS}:443"
 
   php:
-    image: soprun/sandbox-php:latest
+    build:
+      dockerfile: ./docker/php/Dockerfile
+      context: .
+      args:
+        - APP_ENV=dev
+        - APP_DEBUG=1
     hostname: php
     container_name: php
     privileged: true

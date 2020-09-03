@@ -16,8 +16,8 @@ ENV \
     LANG=en_US.UTF8 \
     LANGUAGE=en \
     APP_DIR=${APP_DIR:-/app} \
-    APP_ENV="${APP_ENV:-dev}" \
-    APP_DEBUG="${APP_DEBUG:-1}" \
+    APP_ENV="${APP_ENV}" \
+    APP_DEBUG="${APP_DEBUG}" \
     PATH="${PATH}:${APP_BIN_DIR}"
 
 ###
