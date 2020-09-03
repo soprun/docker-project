@@ -24,7 +24,7 @@ env:
   IMAGE_PHP_CLI_FILE: ./docker/php-cli/Dockerfile
 
 jobs:
-  build:
+  liint:
     runs-on: ubuntu-latest
 
     strategy:
@@ -39,7 +39,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          target: ./docker/${{ matrix.os }}/Dockerfile
+          target: ./docker/${{ matrix.node }}/Dockerfile
 
 #      - name: Docker Lint - $IMAGE_TAG
 #        uses: luke142367/Docker-Lint-Action@v1.1.1
@@ -76,14 +76,14 @@ jobs:
 #          # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
 #          # docker push $IMAGE_ID:$VERSION
 
-  push:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Build image
-        run: |
-          docker build . --file Dockerfile --tag $IMAGE_NAME
+#  push:
+#    needs: build
+#    runs-on: ubuntu-latest
+#    if: github.event_name == 'push'
+#
+#    steps:
+#      - uses: actions/checkout@v2
+#
+#      - name: Build image
+#        run: |
+#          docker build . --file Dockerfile --tag $IMAGE_NAME
