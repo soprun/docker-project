@@ -41,15 +41,29 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
 
-          echo $IMAGE_NAME
-          echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
+          echo GITHUB_REF=$GITHUB_REF
+          echo GITHUB_HEAD_REF=$GITHUB_HEAD_REF
+          echo GITHUB_BASE_REF=$GITHUB_BASE_REF
+
+#          docker build \
+#            --build-arg APP_ENV=dev \
+#            --build-arg APP_DEBUG=1 \
+#            --file ${{ env.IMAGE_NGINX_FILE }} \
+#            --tag "soprun/sandbox-php:latest" \
+#            --tag "soprun/sandbox-php:${GIT_BRANCH}" \
+#            --tag "soprun/sandbox-php:${GIT_COMMIT_ID}" \
+#            .
+
+
+
+
           # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           # docker push $IMAGE_ID:$VERSION
 
-          docker build . \
-            --file ${{ env.IMAGE_PHP_FILE }} \
-            --tag ${{ env.IMAGE_PHP_CLI_NAME }}
+  #          docker build . \
+  #            --file ${{ env.IMAGE_NGINX_FILE }} \
+  #            --tag ${{ env.IMAGE_PHP_CLI_NAME }}
 
 
   #  liint:
