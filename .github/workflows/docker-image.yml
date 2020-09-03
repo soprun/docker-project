@@ -17,7 +17,7 @@ env:
   VERSION: latest
 
   IMAGE_NGINX_NAME: soprun/sandbox-nginx
-  IMAGE_NGINX_FILE: ./docker/php/Dockerfile
+  IMAGE_NGINX_FILE: ./docker/nginx/Dockerfile
 
   IMAGE_PHP_NAME: soprun/sandbox-php
   IMAGE_PHP_FILE: ./docker/php/Dockerfile
