@@ -48,12 +48,13 @@ jobs:
           [ "$VERSION" == "master" ] && VERSION=latest
 
       - name: Build Nginx
-        run: docker build \
-          --build-arg APP_ENV=dev \
-          --build-arg APP_DEBUG=1 \
-          --file ${{ env.IMAGE_NGINX_FILE }} \
-          --tag "${{ env.IMAGE_NGINX_NAME }}:$VERSION" \
-          .
+        run: |
+          docker build \
+            --build-arg APP_ENV=dev \
+            --build-arg APP_DEBUG=1 \
+            --file ${{ env.IMAGE_NGINX_FILE }} \
+            --tag "${{ env.IMAGE_NGINX_NAME }}:$VERSION" \
+            .
 
       - name: Build PHP-FPM
         run: docker build \
