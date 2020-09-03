@@ -36,7 +36,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build the Docker image
+      - name: Version detection
         run: |
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -47,27 +47,32 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
 
-          docker build \
-            --build-arg APP_ENV=dev \
-            --build-arg APP_DEBUG=1 \
-            --file ${{ env.IMAGE_NGINX_FILE }} \
-            --tag "${{ env.IMAGE_NGINX_NAME }}:$VERSION" \
-            .
+      - name: Build Nginx
+        run: docker build \
+          --build-arg APP_ENV=dev \
+          --build-arg APP_DEBUG=1 \
+          --file ${{ env.IMAGE_NGINX_FILE }} \
+          --tag "${{ env.IMAGE_NGINX_NAME }}:$VERSION" \
+          .
 
-          docker build \
-            --build-arg APP_ENV=dev \
-            --build-arg APP_DEBUG=1 \
-            --file ${{ env.IMAGE_PHP_FILE }} \
-            --tag "${{ env.IMAGE_PHP_NAME }}:$VERSION" \
-            .
+      - name: Build PHP-FPM
+        run: docker build \
+          --build-arg APP_ENV=dev \
+          --build-arg APP_DEBUG=1 \
+          --file ${{ env.IMAGE_PHP_FILE }} \
+          --tag "${{ env.IMAGE_PHP_NAME }}:$VERSION" \
+          .
 
-          docker build \
-            --build-arg APP_ENV=dev \
-            --build-arg APP_DEBUG=1 \
-            --file ${{ env.IMAGE_PHP_CLI_FILE }} \
-            --tag "${{ env.IMAGE_PHP_CLI_NAME }}:$VERSION" \
-            .
+      - name: Build PHP-CLI
+        run: docker build \
+          --build-arg APP_ENV=dev \
+          --build-arg APP_DEBUG=1 \
+          --file ${{ env.IMAGE_PHP_CLI_FILE }} \
+          --tag "${{ env.IMAGE_PHP_CLI_NAME }}:$VERSION" \
+          .
 
+      - name: Pushe the Docker image
+        run: |
           docker push ${{ env.IMAGE_NGINX_NAME }}
           docker push ${{ env.IMAGE_PHP_NAME }}
           docker push ${{ env.IMAGE_PHP_CLI_NAME }}
