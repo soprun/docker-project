@@ -30,26 +30,32 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Docker Lint - ${{ IMAGE_NGINX_TAG }}
+      - name: Docker Lint - $IMAGE_TAG
         uses: luke142367/Docker-Lint-Action@v1.1.1
-        with:
-          target: ${IMAGE_NGINX_FILE}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: $IMAGE_NGINX_TAG
+          IMAGE_FILE: $IMAGE_NGINX_FILE
+        with:
+          target: ${IMAGE_FILE}
 
-      - name: Docker Lint - ${{ IMAGE_PHP_TAG }}
+      - name: Docker Lint - $IMAGE_TAG
         uses: luke142367/Docker-Lint-Action@v1.1.1
-        with:
-          target: ${IMAGE_PHP_FILE}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: $IMAGE_PHP_TAG
+          IMAGE_FILE: $IMAGE_PHP_FILE
+        with:
+          target: ${IMAGE_FILE}
 
-      - name: Docker Lint - ${{ IMAGE_PHP_CLI_TAG }}
+      - name: Docker Lint - $IMAGE_TAG
         uses: luke142367/Docker-Lint-Action@v1.1.1
-        with:
-          target: ${IMAGE_PHP_CLI_FILE}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: $IMAGE_PHP_CLI_TAG
+          IMAGE_FILE: $IMAGE_PHP_CLI_FILE
+        with:
+          target: ${IMAGE_FILE}
 
       - name: Build the Docker image
         run: |
