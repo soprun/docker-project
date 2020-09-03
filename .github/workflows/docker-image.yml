@@ -57,7 +57,7 @@ jobs:
           --build-arg APP_ENV=dev \
           --build-arg APP_DEBUG=1 \
           --file ${{ env.IMAGE_NGINX_FILE }} \
-          --tag "${{ env.IMAGE_NGINX_NAME }}:${{ env.VERSION }}" \
+          --tag ${{ env.IMAGE_NGINX_NAME }}:${{ env.VERSION }} \
           .
 
       - name: Build PHP-FPM
@@ -65,7 +65,7 @@ jobs:
           --build-arg APP_ENV=dev \
           --build-arg APP_DEBUG=1 \
           --file ${{ env.IMAGE_PHP_FILE }} \
-          --tag "${{ env.IMAGE_PHP_NAME }}:${{ env.VERSION }}" \
+          --tag ${{ env.IMAGE_PHP_NAME }}:${{ env.VERSION }} \
           .
 
       - name: Build PHP-CLI
@@ -73,7 +73,7 @@ jobs:
           --build-arg APP_ENV=dev \
           --build-arg APP_DEBUG=1 \
           --file ${{ env.IMAGE_PHP_CLI_FILE }} \
-          --tag "${{ env.IMAGE_PHP_CLI_NAME }}:${{ env.VERSION }}" \
+          --tag ${{ env.IMAGE_PHP_CLI_NAME }}:${{ env.VERSION }} \
           .
 
       - name: Pushe the Docker image
