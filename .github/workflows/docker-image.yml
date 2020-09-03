@@ -50,27 +50,21 @@ jobs:
             --build-arg APP_ENV=dev \
             --build-arg APP_DEBUG=1 \
             --file ${{ env.IMAGE_NGINX_FILE }} \
-            --tag "${{ env.IMAGE_NGINX_NAME }}:latest" \
-            --tag "${{ env.IMAGE_NGINX_NAME }}:${{ github.GITHUB_RUN_ID }}" \
-            --tag "${{ env.IMAGE_NGINX_NAME }}:${{ github.GITHUB_ACTION }}" \
+            --tag "${{ env.IMAGE_NGINX_NAME }}:$VERSION" \
             .
 
           docker build \
             --build-arg APP_ENV=dev \
             --build-arg APP_DEBUG=1 \
             --file ${{ env.IMAGE_PHP_FILE }} \
-            --tag "${{ env.IMAGE_PHP_NAME }}:latest" \
-            --tag "${{ env.IMAGE_PHP_NAME }}:${{ github.GITHUB_RUN_ID }}" \
-            --tag "${{ env.IMAGE_PHP_NAME }}:${{ github.GITHUB_ACTION }}" \
+            --tag "${{ env.IMAGE_PHP_NAME }}:$VERSION" \
             .
 
           docker build \
             --build-arg APP_ENV=dev \
             --build-arg APP_DEBUG=1 \
             --file ${{ env.IMAGE_PHP_CLI_FILE }} \
-            --tag "${{ env.IMAGE_PHP_CLI_NAME }}:latest" \
-            --tag "${{ env.IMAGE_PHP_CLI_NAME }}:${{ github.GITHUB_RUN_ID }}" \
-            --tag "${{ env.IMAGE_PHP_CLI_NAME }}:${{ github.GITHUB_ACTION }}" \
+            --tag "${{ env.IMAGE_PHP_CLI_NAME }}:$VERSION" \
             .
 
           docker push ${{ env.IMAGE_NGINX_NAME }}
