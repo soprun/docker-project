@@ -23,7 +23,12 @@ ENV PHP_EXT_MEMCACHED_VERSION=3.1.4
 ###
 
 RUN set -eu; \
-    apk --no-cache add git curl zip
+    apk --no-cache add git curl zip vim
+
+# gnupg
+# bash
+# openssl
+# openssh-client
 
 ###
 ### Install language-level dependencies
@@ -33,15 +38,16 @@ RUN set -eu; \
     apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
         libzip-dev \
         libmemcached-dev \
-        postgresql-dev
-
-RUN docker-php-ext-install \
-    pdo \
-    pdo_pgsql \
-    opcache \
-    intl \
-    curl \
-    zip
+        postgresql-dev \
+    && docker-php-source extract \
+    && docker-php-ext-install \
+        pdo \
+        pdo_pgsql \
+        opcache \
+        intl \
+        zip \
+    # cleanup
+    && docker-php-source delete
 
 RUN set -eu; \
     pecl install redis-${PHP_EXT_REDIS_VERSION}; \
@@ -66,15 +72,20 @@ COPY ./docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
 ### Install extensions and utilities
 ###
 
-# COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-
 ### Install composer
-RUN curl --location --output /usr/local/bin/composer https://getcomposer.org/composer-stable.phar
-RUN chmod +x /usr/local/bin/composer
+ENV COMPOSER_HOME=/composer
+ENV COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
+ENV COMPOSER_MEMORY_LIMIT=-1
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+RUN \
+    curl --location --output /usr/local/bin/composer https://getcomposer.org/composer-stable.phar; \
+    chmod +x /usr/local/bin/composer
 
 ### Install phpunit
-RUN curl --location --output /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar
-RUN chmod +x /usr/local/bin/phpunit
+RUN \
+    curl --location --output /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar; \
+    chmod +x /usr/local/bin/phpunit
 
 ###
 ### Change working directory
