@@ -2,9 +2,9 @@
 
 # git flow feature start
 
-git flow release start 0.1.5
+git flow release start 0.0.1
 
-git flow release finish '0.1.5'
+git flow release finish 0.1.5
 
 # release finish
 
@@ -12,3 +12,8 @@ git commit -S -m "signed commit..."
 
 git push
 git push origin --tags --signed=yes
+
+
+git flow release finish -m "Your message" "release1"
+git checkout master
+git push --all origin
