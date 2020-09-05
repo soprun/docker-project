@@ -1,15 +1,9 @@
 /.idea
 /.git
-
-/docker/scripts-old
-/docker-temp
-/var/
+.DS_Store
 
 # Files
-/.dockerignore
-/.gitignore
-/.hadolint.yaml
 /LICENSE
-/Makefile
 /README.md
+/Makefile
 /docker-compose.yml

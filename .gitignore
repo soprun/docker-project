@@ -1,8 +1,12 @@
 /.idea
+.DS_Store
 
 # Composer files
 # composer.phar
 # vendor/
+
+/public/report/
+.php_cs.cache
 
 ###> symfony/framework-bundle ###
 /.env.local

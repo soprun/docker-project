@@ -1,80 +1,60 @@
-ARG APP_DIR
-ARG APP_ENV
-ARG APP_DEBUG
-
 ###
 ### Installation container
 ###
 
-FROM php:7.2-fpm-alpine AS build
+FROM php:${PHP_VERSION:-7.4}-fpm-alpine AS build
+
+ARG APP_ENV
+ARG APP_DEBUG
 
 ###
 ### Environment variables
 ###
 
-ENV APP_DIR="${APP_DIR:-/app}"
-ENV APP_ENV="${APP_ENV:-dev}"
-ENV APP_DEBUG="${APP_DEBUG:-1}"
-
-###
-### Context environment
-###
-
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US.UTF-8
-
-# ENV PATH="${PATH}:${HOME}/.composer/vendor/bin"
-ENV PATH="${PATH}:${APP_DIR}/bin"
-ENV PATH="${PATH}:${APP_DIR}/vendor/bin"
+ENV \
+    TZ=UTC \
+    LANG=en_US.UTF8 \
+    LANGUAGE=en \
+    APP_DIR=${APP_DIR:-/app} \
+    APP_ENV="${APP_ENV}" \
+    APP_DEBUG="${APP_DEBUG}" \
+    PATH="${PATH}:${APP_BIN_DIR}"
 
 ###
 ### Labels
 ### https://github.com/opencontainers/image-spec/blob/master/annotations.md
 ###
 
-LABEL "maintainer"="Vladislav Soprun <develop@soprun.com>"
-LABEL "dev.sandbox.image.vendor"="soprun"
-LABEL "dev.sandbox.image.source"="https://github.com/soprun/docker-project"
-LABEL "dev.sandbox.image.documentation"="https://github.com/soprun/docker-project/wiki"
-LABEL "dev.sandbox.image.title"="PHP-FPM"
-LABEL "dev.sandbox.image.description"="Docker project: PHP-FPM"
-
-LABEL "dev.sandbox.image.env"="${APP_ENV}"
-LABEL "dev.sandbox.image.debug"="${APP_DEBUG}"
-LABEL "dev.sandbox.image.release"="${APP_RELEASE}"
-LABEL "dev.sandbox.image.commit_sha"="${APP_COMMIT_SHA}"
+LABEL \
+    com.app.env="${APP_ENV}" \
+    com.app.debug="${APP_DEBUG}" \
+    com.app.branch="${APP_BRANCH}" \
+    com.app.commit_id="${APP_COMMIT_ID}" \
+    com.app.commit_sha="${APP_COMMIT_SHA}" \
+    com.app.namespace="${APP_NAMESPACE}" \
+    com.app.name="php" \
+    com.app.host="${APP_HOST}" \
+    com.app.title="..." \
+    com.app.description="..." \
+    com.app.vendor="inspiritum.com" \
+    com.app.authors="Vladislav Soprun <develop@soprun.com>" \
+    com.app.source="https://github.com/soprun/docker-project" \
+    com.app.documentation="https://github.com/soprun/docker-project/wiki"
 
 ###
 ### Install
 ###
-
-# install php-extension-installer
-COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/bin/
-
-RUN set -eux; \
-    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-        git \
-        make \
-        gnupg \
-        openssl \
-        curl \
-        ca-certificates \
-        vim \
-    ; \
-    install-php-extensions xdebug memcached opcache pdo_pgsql redis intl apcu; \
-    apk del .build-deps;
+RUN \
+    set -eu; \
+    apk --no-cache add bash
 
 ###
-### Install and enable PHP modules
+### Copy configuration files
 ###
 
-###
-### Copy files
-###
-
-COPY ./docker/php/php.ini "/usr/local/etc/php/conf.d/php.ini,"
-COPY ./docker/php/php-fpm.conf "/usr/local/etc/php-fpm.conf"
-COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint.sh"
+# COPY ./docker/php/php.ini "/usr/local/etc/php/conf.d/php.ini,"
+# COPY ./docker/php/php-fpm.conf "/usr/local/etc/php-fpm.conf"
+COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint"
 
 ###
 ### Install composer
@@ -82,8 +62,23 @@ COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint.sh"
 
 ENV COMPOSER_MEMORY_LIMIT="-1"
 ENV COMPOSER_ALLOW_SUPERUSER="1"
+ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+###
+### Install composer
+###
+
+# RUN curl --location --output /usr/local/bin/composer https://getcomposer.org/composer-stable.phar
+# RUN chmod +x /usr/local/bin/composer
+
+###
+### Install phpunit
+###
+
+# RUN curl --location --output /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar
+# RUN chmod +x /usr/local/bin/phpunit
 
 ###
 ### Change working directory
@@ -95,27 +90,19 @@ WORKDIR "${APP_DIR}"
 ### Copy source files to workdir
 ###
 
-COPY . "${APP_DIR}"
-# COPY ./bin/ "${APP_DIR}"
-# COPY ./config/ "${APP_DIR}"
-# COPY ./public/ "${APP_DIR}"
-# COPY ./src/ "${APP_DIR}"
-# COPY ./vendor/ "${APP_DIR}"
-# COPY composer.* "${APP_DIR}"
-# COPY symfony.lock "${APP_DIR}"
+COPY "${APP_DOCUMENT_ROOT}" "${APP_DIR}"
 
-RUN set -eux; \
-    # chmod +x /usr/local/bin/init.sh; \
-    chmod +x /usr/local/bin/docker-entrypoint.sh; \
-    # composer dump-autoload --optimize --classmap-authoritative; \
-    composer global require hirak/prestissimo --ignore-platform-reqs; \
+###
+### Install dependencies
+###
+
+RUN set -eu; \
+    chmod +x /usr/local/bin/docker-entrypoint; \
     composer install \
         --ignore-platform-reqs \
-        --no-suggest \
-        --no-interaction \
-        --prefer-dist \
+        --no-scripts \
         --optimize-autoloader \
-        --classmap-authoritative;
+        --classmap-authoritative
 
 ###
 ### Expose port
@@ -124,13 +111,13 @@ RUN set -eux; \
 EXPOSE 9000
 
 ###
+### Entrypoint
+###
+
+ENTRYPOINT ["docker-entrypoint"]
+
+###
 ### Startup
 ###
 
 CMD ["php-fpm", "--nodaemonize"]
-
-###
-### Entrypoint
-###
-
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

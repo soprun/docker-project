@@ -1,7 +1,6 @@
 # PHP project using docker containers - sandbox
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project?ref=badge_shield)
 
-
 ...
 
 ## Running
@@ -150,12 +149,12 @@ uid=1000(dockeruser) gid=1000(dockergroup) groups=1000(dockergroup)
 
 Shell access whilst the container is running:
 ```bash
-docker exec -it airsonic /bin/bash
+docker exec -it <container_name> /bin/bash
 ```
 
 To monitor the logs of the container in realtime:
 ```bash
-docker logs -f airsonic
+docker logs -f <container_name>
 ```
 
 
@@ -163,7 +162,39 @@ docker logs -f airsonic
 
 ```bash
 docker exec -it ${NGINX_WEB} nginx -s reload
+
+```
+docker exec -it <container_name> nginx -s reload
+```
+
+
+---
+
+
+SAPI
+PHP on Debian/Ubuntu is divided by version and Server Application Programming Interface. A SAPI is the context in which PHP is run. The most common are:
+
+cli - when running on the command line
+fpm - when fulfilling a web request via fastcgi
+apache2 - when run in Apache's mod-php
+
+---
+
+Now you'll be able to see any PHP error logs as part of the docker container log stream:
+```bash
+docker logs -f <container_name>
+```
+
+To display only errors and hide the access log, you can pipe stdout to /dev/null:
+```bash
+docker logs -f <container_name> >/dev/null
+```
+
+To follow only the access log, you can pipe stderr to /dev/null:
+```bash
+docker logs -f <container_name> 2>/dev/null
 ```
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project?ref=badge_large)
+=======

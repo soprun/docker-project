@@ -56,6 +56,21 @@ docker-list:
 docker-port:
 	@docker container list --filter publish=80-443 --format $(container_list_format)
 
+
+docker-exec: # Shell access
+	@docker exec -ti php sh
+
+docker-exec-cli: # Shell access
+	@docker exec -ti php-cli sh
+
+docker-log: # Tailing the logs
+	@docker logs -f --tail=50 php
+
+docker-lint: # Tailing the logs
+	hadolint ./docker/php/Dockerfile
+	hadolint ./docker/php-cli/Dockerfile
+	hadolint ./docker/nginx/Dockerfile
+
 # time php bin/console about
 
 #symfony-cli: $(objs)
@@ -85,3 +100,18 @@ docker-push:
 	@docker push soprun/sandbox-nginx
 	@docker push soprun/sandbox-php
 	@docker push soprun/sandbox-php-cli
+
+app-dev:
+	@symfony server:ca:install
+
+app-start:
+	@symfony server:start -d
+
+app-log:
+	@symfony server:log
+
+ci-shellcheck:
+	@shellcheck --external-sources build.sh
+
+# php -d memory_limit=2000M ~/.composer/vendor/bin/phpinsights analyse src --format=console > phpinsights.json
+

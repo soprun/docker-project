@@ -1,0 +1,17 @@
+{
+  "storage": {
+    "file": {
+      "path": "vault/file"
+    }
+  },
+  "listener": {
+    "tcp": {
+      "address": "0.0.0.0:8200",
+      "tls_disable": true
+    }
+  },
+  "ui": true,
+  "max_lease_ttl": "8760h",
+  "default_lease_ttl": "8760h",
+  "disable_mlock": true
+}

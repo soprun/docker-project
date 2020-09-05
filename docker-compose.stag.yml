@@ -1,0 +1,14 @@
+version: "3.8"
+
+x-staging-environment:
+  &staging-environment
+  environment:
+    - APP_ENV=stag
+    - APP_DEBUG=0
+
+services:
+  nginx:
+    <<: *staging-environment
+
+  php:
+    <<: *staging-environment
