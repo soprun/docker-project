@@ -45,7 +45,7 @@ LABEL \
 ### Install
 ###
 RUN \
-    set -e; \
+    set -eu; \
     apk --no-cache add bash
 
 ###

@@ -1,13 +1,14 @@
 version: "3.8"
 
-x-stag-environment:
-  &stag-environment
+x-staging-environment:
+  &staging-environment
   environment:
     - APP_ENV=stag
     - APP_DEBUG=0
 
 services:
   nginx:
-    <<: *stag-environment
+    <<: *staging-environment
+
   php:
-    <<: *stag-environment
+    <<: *staging-environment

@@ -75,7 +75,7 @@ services:
       - composer:/root/.composer/cache:rw,cached
 
   php-cli:
-    image: soprun/sandbox-php-cli:latest
+    dockerfile: ./docker/php-cli/Dockerfile
     hostname: php-cli
     container_name: php-cli
     tty: true
