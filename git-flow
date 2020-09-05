@@ -8,6 +8,7 @@ git flow release finish '0.1.5'
 
 # release finish
 
-git push origin --signed=yes
+git commit -S -m "signed commit..."
 
+git push
 git push origin --tags --signed=yes
