@@ -1,8 +1,14 @@
 parameters:
-  env(APP_ENV): ''
-  env(APP_DEBUG): ''
+  env(APP_ENV): 'dev'
+  env(APP_DEBUG): 'true'
   env(APP_DEBUG_LEVEL): 'notice'
   env(APP_SECRET): ''
-  env(APP_BRANCH): ''
-  env(APP_COMMIT_ID): ''
-  env(APP_COMMIT_SHA): ''
+  env(APP_HOST): ''
+  env(APP_URL): ''
+
+  app.env: '%env(string:APP_ENV)%'
+  app.debug: '%env(bool:APP_DEBUG)%'
+  app.debug_level: '%env(string:APP_DEBUG_LEVEL)%'
+
+  app.host: '%env(bool:APP_HOST)%'
+  app.url: '%env(bool:APP_URL)%'

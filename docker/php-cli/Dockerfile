@@ -1,7 +1,3 @@
-ARG APP_DIR
-ARG APP_ENV
-ARG APP_DEBUG
-
 ###
 ### Installation container
 ###
@@ -12,9 +8,9 @@ FROM php:7.2-cli-alpine AS build
 ### Environment variables
 ###
 
-ENV APP_DIR="${APP_DIR:-/app}"
-ENV APP_ENV="${APP_ENV:-dev}"
-ENV APP_DEBUG="${APP_DEBUG:-1}"
+#ENV APP_DIR="${APP_DIR:-/app}"
+#ENV APP_ENV="${APP_ENV:-dev}"
+#ENV APP_DEBUG="${APP_DEBUG:-1}"
 
 ###
 ### Install

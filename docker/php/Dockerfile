@@ -8,11 +8,11 @@ FROM php:${PHP_VERSION:-7.4}-fpm-alpine AS build
 ### Environment variables
 ###
 
-ENV \
-    TZ=UTC \
-    LANG=en_US.UTF8 \
-    LANGUAGE=en \
-    PATH="${PATH}:${APP_BIN_DIR}"
+#ENV \
+#    TZ=UTC \
+#    LANG=en_US.UTF8 \
+#    LANGUAGE=en \
+#    PATH="${PATH}:${APP_BIN_DIR}"
 
 ###
 ### Labels
@@ -26,7 +26,7 @@ LABEL \
     com.app.git_branch="${GIT_BRANCH}" \
     com.app.git_commit_id="${GIT_COMMIT_ID}" \
     com.app.git_commit_sha="${GIT_COMMIT_SHA}" \
-    com.app.namespace="${APP_NAMESPACE}" \
+    com.app.project_name="${PROJECT_NAME}" \
     com.app.name="php" \
     com.app.host="${APP_HOST}" \
     com.app.title="..." \
@@ -39,9 +39,16 @@ LABEL \
 ###
 ### Install
 ###
-RUN \
-    set -eu; \
-    apk --no-cache add bash
+#RUN set -eu \
+#    apk --no-cache add \
+#    gnupg \
+#    bash \
+#    bash-completion \
+#    openssl \
+#    openssh-client \
+#    curl \
+#    vim \
+#    git
 
 ###
 ### Copy configuration files
@@ -79,25 +86,26 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 ### Change working directory
 ###
 
-WORKDIR "${APP_DIR}"
+WORKDIR /app
 
 ###
 ### Copy source files to workdir
 ###
 
-COPY "${APP_DOCUMENT_ROOT}" "${APP_DIR}"
+COPY . /app
 
 ###
 ### Install dependencies
 ###
 
-RUN set -eu; \
+RUN set -eu \
     chmod +x /usr/local/bin/docker-entrypoint; \
     composer install \
         --ignore-platform-reqs \
         --no-scripts \
         --optimize-autoloader \
-        --classmap-authoritative
+        --classmap-authoritative \
+        --profile;
 
 ###
 ### Expose port
@@ -109,7 +117,9 @@ EXPOSE 9000
 ### Entrypoint
 ###
 
-ENTRYPOINT ["docker-entrypoint"]
+#ENTRYPOINT ["docker-entrypoint"]
+#COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+#ENTRYPOINT ["docker-entrypoint.sh"]
 
 ###
 ### Startup

@@ -4,7 +4,8 @@ x-staging-environment:
   &staging-environment
   environment:
     - APP_ENV=stag
-    - APP_DEBUG=0
+    - APP_DEBUG=false
+    - APP_DEBUG_LEVEL=notice
 
 services:
   nginx:

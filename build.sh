@@ -48,6 +48,17 @@ error() {
 ### Check docker
 ###
 
+#command_exists() {
+#  command -v "$@" >/dev/null 2>&1
+#}
+#
+#command_exists mkcert || {
+#  error "git is not installed"
+#  exit 1
+#}
+#
+#exit 0
+
 info 'Check system required dependencies'
 
 if ! docker --version >/dev/null 2>/dev/null; then
@@ -76,12 +87,32 @@ success 'Check system required dependencies - is succeeded!'
 ### Globals
 ###
 
+# Determine the build script's actual directory, following symlinks
+SOURCE="${BASH_SOURCE[0]}"
+
+while [ -h "$SOURCE" ]; do
+  SOURCE="$(readlink "$SOURCE")"
+done
+
+BUILD_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+export BUILD_DIR
+
+# Derive the project name from the directory
+PROJECT_NAME="$(basename "$BUILD_DIR")"
+export PROJECT_NAME
+
+# readonly DIR=$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+
+# tar -cf - docker | md5sum
+
 info 'Load environment variables'
 
 # 1. Check if .env file exists
-if [ -e .env ]; then
-  # shellcheck source=./.env
-  source .env
+if [ -e "${BUILD_DIR}/.env" ]; then
+  # set -o allexport
+  #shellcheck source=./.env
+  source "${BUILD_DIR}/.env"
+  # set +o allexport
 fi
 
 success 'Load environment variables - is succeeded!'
@@ -116,7 +147,7 @@ if [ -z "${APP_SECRET:-}" ]; then
   APP_SECRET="$(openssl rand -hex 16)"
 fi
 
-export APP_DIR=${APP_DIR}
+#export APP_DIR=${APP_DIR}
 export APP_ENV=${APP_ENV}
 export APP_DEBUG=${APP_DEBUG}
 export APP_SECRET=${APP_SECRET}
@@ -130,8 +161,8 @@ export GIT_COMMIT_SHA=${GIT_COMMIT_SHA}
 #echo $GIT_BRANCH
 #echo $GIT_COMMIT_ID
 
-printenv | sort | less
-exit 1
+#printenv | sort
+#exit 1
 
 success 'Check application environment variables - is succeeded!'
 log "$(printenv | sort | less)"
@@ -177,31 +208,16 @@ success 'Check SSL certificate - is succeeded!'
 
 info "Docker running building contractors! 🐳 "
 
-docker build \
-  --build-arg APP_ENV="${APP_ENV}" \
-  --build-arg APP_DEBUG="${APP_DEBUG}" \
-  --file ./docker/nginx/Dockerfile \
-  --tag "soprun/sandbox-nginx:latest" \
-  --tag "soprun/sandbox-nginx:${GIT_BRANCH}" \
-  --tag "soprun/sandbox-nginx:${GIT_COMMIT_ID}" \
-  .
-
-success 'Build sandbox-nginx - is succeeded!'
+#docker build \
+#  --file ./docker/nginx/Dockerfile \
+#  --tag "soprun/sandbox-nginx:latest" \
+#  --tag "soprun/sandbox-nginx:${GIT_BRANCH}" \
+#  --tag "soprun/sandbox-nginx:${GIT_COMMIT_ID}" \
+#  .
+#
+#success 'Build sandbox-nginx - is succeeded!'
 
 docker build \
-  --build-arg APP_ENV="${APP_ENV}" \
-  --build-arg APP_DEBUG="${APP_DEBUG}" \
-  --file ./docker/php-cli/Dockerfile \
-  --tag "soprun/sandbox-php-cli:latest" \
-  --tag "soprun/sandbox-php-cli:${GIT_BRANCH}" \
-  --tag "soprun/sandbox-php-cli:${GIT_COMMIT_ID}" \
-  .
-
-success 'Build sandbox-php-cli - is succeeded!'
-
-docker build \
-  --build-arg APP_ENV="${APP_ENV}" \
-  --build-arg APP_DEBUG="${APP_DEBUG}" \
   --file ./docker/php/Dockerfile \
   --tag "soprun/sandbox-php:latest" \
   --tag "soprun/sandbox-php:${GIT_BRANCH}" \
@@ -210,18 +226,27 @@ docker build \
 
 success 'Build sandbox-php - is succeeded!'
 
+#docker build \
+#  --file ./docker/php-cli/Dockerfile \
+#  --tag "soprun/sandbox-php-cli:latest" \
+#  --tag "soprun/sandbox-php-cli:${GIT_BRANCH}" \
+#  --tag "soprun/sandbox-php-cli:${GIT_COMMIT_ID}" \
+#  .
+#
+#success 'Build sandbox-php-cli - is succeeded!'
+
 info "Starting detached containers: 🐳 "
 
-docker-compose --log-level info up \
+docker-compose up \
   --detach \
   --force-recreate \
   --remove-orphans
 
 info '=> Docker push images: 🐳 '
 
-docker push soprun/sandbox-nginx
-docker push soprun/sandbox-php
-docker push soprun/sandbox-php-cli
+#docker push soprun/sandbox-nginx
+#docker push soprun/sandbox-php
+#docker push soprun/sandbox-php-cli
 
 # docker exec -ti php sh
 
@@ -249,3 +274,9 @@ docker push soprun/sandbox-php-cli
 #
 #symfony composer req annotations
 #symfony composer req orm
+
+# grep processor /proc/cpuinfo | wc -l
+
+# nginx: worker_processes
+
+# https://amplify.nginx.com/signup/

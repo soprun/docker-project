@@ -16,11 +16,14 @@
 
 #exit 0
 
-docker-compose \
-  --file ./docker-compose.yml \
-  --env-file ./.env \
-  --env-file ./docker/environment.yaml \
-  up -d --build php
+#docker-compose \
+#  --file ./docker-compose.yml \
+#  --env-file ./.env \
+#  --env-file ./docker/environment.yaml \
+#  up -d --build php
+#
+#
+#exit 0
 
 
-exit 0
+vault server -dev
