@@ -7,30 +7,38 @@ PROJECT_NAME=$(shell basename "$(PWD)")
 
 
 # .PHONY: build test push shell run start stop logs clean release
-.PHONY: init
+.PHONY: up
 
-default: build
+default: up
 
-init:
+up: # Builds, (re)creates, starts, and attaches to containers for a service.
+	# docker-compose up --detach --force-recreate --remove-orphans --renew-anon-volumes
+	@docker-compose up --detach
+
+build:
 	@docker-compose down &> /dev/null
-	@make build-nginx
-	@make build-php
+	@make docker-build-nginx
+	@make docker-build-php
+	@make docker-build-php-cli
 	@make up
 
-build-php:
+docker-build-php:
 	@docker build \
 	--file ./docker/php/Dockerfile \
 	--tag "soprun/sandbox-php:latest" \
 	.
 
-build-nginx:
+docker-build-php-cli:
 	@docker build \
-	  --file ./docker/nginx/Dockerfile \
-	  --tag "soprun/sandbox-nginx:latest" \
-	  .
+	--file ./docker/php-cli/Dockerfile \
+	--tag "soprun/sandbox-php-cli:latest" \
+	.
 
-up: # Builds, (re)creates, starts, and attaches to containers for a service.
-	@docker-compose up --detach --force-recreate --remove-orphans --renew-anon-volumes
+docker-build-nginx:
+	@docker build \
+	--file ./docker/nginx/Dockerfile \
+	--tag "soprun/sandbox-nginx:latest" \
+	.
 
 docker-exec: # Shell access
 	@docker exec -ti php sh

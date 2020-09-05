@@ -15,22 +15,14 @@ x-logging:
 
 x-php:
   &default-php
-  restart: "no"
-  env_file:
-    - .env
-  #  environment:
-  #    - APP_ENV=${APP_ENV}
-  #    - APP_DEBUG=${APP_DEBUG}
-  #    - APP_SECRET=${APP_SECRET}
-  #    - GIT_TAG
-  #    - GIT_BRANCH
-  #    - GIT_COMMIT_ID
-  #    - GIT_COMMIT_SHA
-  # depends_on:
-  #   - postgres
-  #   - memcached
-  #   - redis
-  #   - rabbitmq
+  volumes:
+    - ./:/app:rw,consistent
+    - ~/.composer/cache:/composer/cache:rw,cached
+  depends_on:
+    - postgres
+    - memcached
+    - redis
+    - rabbitmq
 
 volumes:
   rabbitmq:
@@ -50,9 +42,7 @@ services:
   nginx:
     image: soprun/sandbox-nginx:latest
     container_name: nginx
-    restart: unless-stopped
     <<: *default-logging
-    command: [nginx-debug, '-g', 'daemon off;']
     depends_on:
       - php
     ports:
@@ -62,35 +52,20 @@ services:
   php:
     image: soprun/sandbox-php:latest
     container_name: php
-    restart: unless-stopped
     privileged: true
+    <<: *default-php
     <<: *default-logging
-    depends_on:
-      - postgres
-    env_file:
-      - .env
-    environment:
-      - APP_ENV
-      - APP_DEBUG
-      - APP_SECRET
-    volumes:
-      - ./:/app:rw,consistent
-      - ~/.composer/cache:/composer/cache:rw,cached
 
-  #  php-cli:
-  #    build:
-  #      dockerfile: ./docker/php-cli/Dockerfile
-  #      context: .
-  #    hostname: php-cli
-  #    container_name: php-cli
-  #    tty: true
-  #    <<: *default-php
+  php-cli:
+    image: soprun/sandbox-php-cli:latest
+    container_name: php-cli
+    tty: true
+    <<: *default-php
+    <<: *default-logging
 
   postgres:
     image: postgres:latest
-    hostname: ${POSTGRES_HOST}
     container_name: postgres
-    restart: unless-stopped
     <<: *default-logging
     volumes:
       # - ./docker/postgres/dump.sql:/docker-entrypoint-initdb.d/dump.sql
@@ -100,58 +75,51 @@ services:
       - POSTGRES_USERNAME
       - POSTGRES_PASSWORD
 
-#  rabbitmq:
-#    image: rabbitmq:3.8.5-alpine
-#    hostname: ${RABBITMQ_HOST}
-#    container_name: rabbitmq
-#    restart: on-failure
-#    <<: *default-logging
-#    volumes:
-#      - rabbitmq:/var/lib/rabbitmq
-#    environment:
-#      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
-#      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
-#      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST}
-#
-#  rabbitmq-management:
-#    image: rabbitmq:3.8.5-management-alpine
-#    hostname: ${RABBITMQ_MANAGEMENT_HOST}
-#    container_name: rabbitmq-management
-#    restart: always
-#    <<: *default-logging
-#    depends_on:
-#      - rabbitmq
-#
-#  memcached:
-#    image: memcached:latest
-#    hostname: ${MEMCACHED_HOST}
-#    container_name: memcached
-#    restart: always
-#    <<: *default-logging
-#
-#  redis:
-#    image: redis:latest
-#    hostname: ${REDIS_HOST}
-#    container_name: redis
-#    restart: always
-#    <<: *default-logging
-#    command: ["redis-server", "--appendonly", "yes"]
-#
-#  vault:
-#    image: vault:latest
-#    container_name: vault
-#    restart: unless-stopped
-#    <<: *default-logging
-#    environment:
-#      - VAULT_ADDR=http://0.0.0.0:8200
-#      - VAULT_API_ADDR=http://0.0.0.0:8200
-#      - SKIP_SETCAP=true
-#      - SKIP_CHOWN=true
-#    ports:
-#      - 8200:8200
-#    cap_add:
-#      - IPC_LOCK
-#    command: server
-#    volumes:
-#      - ./docker/vault/config:/vault/config
-#      - ./docker/vault/file:/vault/file
+  rabbitmq:
+    image: rabbitmq:3.8.5-alpine
+    container_name: rabbitmq
+    <<: *default-logging
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST}
+
+  rabbitmq-management:
+    image: rabbitmq:3.8.5-management-alpine
+    container_name: rabbitmq-management
+    <<: *default-logging
+    depends_on:
+      - rabbitmq
+
+  memcached:
+    image: memcached:latest
+    hostname: ${MEMCACHED_HOST}
+    container_name: memcached
+    <<: *default-logging
+
+  redis:
+    image: redis:latest
+    hostname: ${REDIS_HOST}
+    container_name: redis
+    <<: *default-logging
+    command: ["redis-server", "--appendonly", "yes"]
+
+  vault:
+    image: vault:latest
+    container_name: vault
+    <<: *default-logging
+    environment:
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_API_ADDR=http://0.0.0.0:8200
+      - SKIP_SETCAP=true
+      - SKIP_CHOWN=true
+    ports:
+      - 8200:8200
+    cap_add:
+      - IPC_LOCK
+    command: server
+    volumes:
+      - ./docker/vault/config:/vault/config
+      - ./docker/vault/file:/vault/file

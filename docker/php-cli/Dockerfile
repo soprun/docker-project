@@ -2,40 +2,72 @@
 ### Installation container
 ###
 
-FROM php:7.2-cli-alpine AS build
+FROM php:${PHP_CLI_VERSION:-7.4}-cli-alpine AS build
 
 ###
 ### Environment variables
 ###
 
-#ENV APP_DIR="${APP_DIR:-/app}"
-#ENV APP_ENV="${APP_ENV:-dev}"
-#ENV APP_DEBUG="${APP_DEBUG:-1}"
+ENV \
+    TZ=UTC \
+    LANG=en_US.UTF8 \
+    LANGUAGE=en
 
 ###
 ### Install
 ###
 
-RUN set -eux; \
+RUN set -eu; \
     apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
         bash \
+        gnupg \
+        openssl \
+        openssh-client \
+        curl \
+        vim \
+        git \
     ; \
     apk del .build-deps
 
 ###
-### Installation building a development image from build.
+### Copy configuration files
 ###
 
-FROM build AS dev
-
-ENV APP_ENV="${APP_ENV:-dev}"
-ENV APP_DEBUG="${APP_DEBUG:-1}"
+COPY ./docker/php/php.ini /usr/local/etc/php/conf.d/php.ini
+COPY ./docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
+COPY ./docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 
 ###
-### Installation building a production image from build.
+### Install composer
 ###
 
-FROM build AS prod
+#ENV COMPOSER_MEMORY_LIMIT="-1"
+#ENV COMPOSER_ALLOW_SUPERUSER="1"
+#ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
-ENV APP_ENV="${APP_ENV:-prod}"
-ENV APP_DEBUG="${APP_DEBUG:-0}"
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+###
+### Change working directory
+###
+
+WORKDIR /app
+
+###
+### Copy source files to workdir
+###
+
+COPY . /app
+
+###
+### Install dependencies
+###
+
+RUN set -eu \
+    chmod +x /usr/local/bin/docker-entrypoint; \
+    composer install \
+        --ignore-platform-reqs \
+        --no-scripts \
+        --optimize-autoloader \
+        --classmap-authoritative \
+        --profile;
