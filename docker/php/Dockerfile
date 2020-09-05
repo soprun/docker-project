@@ -26,6 +26,7 @@ LABEL \
     com.app.git_commit_id="${GIT_COMMIT_ID}" \
     com.app.git_commit_sha="${GIT_COMMIT_SHA}" \
     com.app.project_name="${PROJECT_NAME}" \
+    com.app.tier="backend" \
     com.app.name="php" \
     com.app.host="${APP_HOST}" \
     com.app.title="..." \

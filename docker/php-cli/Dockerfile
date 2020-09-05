@@ -29,6 +29,7 @@ RUN set -eu; \
 # bash
 # openssl
 # openssh-client
+ # g++ make autoconf
 
 ###
 ### Install language-level dependencies
@@ -39,15 +40,12 @@ RUN set -eu; \
         libzip-dev \
         libmemcached-dev \
         postgresql-dev \
-    && docker-php-source extract \
     && docker-php-ext-install \
         pdo \
         pdo_pgsql \
         opcache \
         intl \
-        zip \
-    # cleanup
-    && docker-php-source delete
+        zip
 
 RUN set -eu; \
     pecl install redis-${PHP_EXT_REDIS_VERSION}; \
@@ -60,6 +58,10 @@ RUN set -eu; \
 RUN set -eu; \
     pecl install memcached-${PHP_EXT_MEMCACHED_VERSION}; \
     docker-php-ext-enable memcached
+
+RUN set -eu; \
+    # cleanup
+    docker-php-source delete
 
 ###
 ### Copy configuration files

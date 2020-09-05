@@ -29,13 +29,11 @@ volumes:
   postgres:
   composer:
 
-#networks:
-#  front-tier:
-#    external:
-#      name: ${NETWORK_NAME}
-#  back-tier: # backend
-#    external:
-#      name: ${NETWORK_NAME}
+networks:
+  frontend-tier:
+    driver: bridge
+  backend-tier:
+    driver: bridge
 
 # https://github.com/docker/compose/issues/4675
 services:

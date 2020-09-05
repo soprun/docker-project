@@ -9,6 +9,14 @@
 
 # 3-tier application architecture
 
+
+https://benebsworth.com/kubernetes-cicd-part-1/
+
+----
+https://github.com/galexrt/docker-nginx-php-fpm
+
+---
+
 client-tier
 app-tier
 database-tier
@@ -194,3 +202,14 @@ docker logs -f <container_name> 2>/dev/null
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project?ref=badge_large)
+
+
+
+
+---
+
+https://olvlvl.com/2019-06-install-php-ext-source
+
+https://github.com/EugenMayer/docker-sync
+
+https://github.com/castlemilk/kubernetes-cicd
