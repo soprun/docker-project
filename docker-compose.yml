@@ -44,8 +44,8 @@ services:
     depends_on:
       - php
     ports:
-      - "${NETWORK_IP}:${NETWORK_HTTP}:80"
-      - "${NETWORK_IP}:${NETWORK_HTTPS}:443"
+      - 80:80
+      - 443:443
 
   php:
     image: soprun/sandbox-php:latest
@@ -58,6 +58,12 @@ services:
     image: soprun/sandbox-php-cli:latest
     container_name: php-cli
     tty: true
+    <<: *default-php
+    <<: *default-logging
+
+  php-supervisor:
+    image: soprun/sandbox-php-cli:latest
+    container_name: php-supervisor
     <<: *default-php
     <<: *default-logging
 
@@ -102,7 +108,6 @@ services:
     hostname: ${REDIS_HOST}
     container_name: redis
     <<: *default-logging
-    command: ["redis-server", "--appendonly", "yes"]
 
   vault:
     image: vault:latest
