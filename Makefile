@@ -23,19 +23,22 @@ build:
 	@make up
 
 docker-build-php:
-	@docker build \
+	@docker buildx build \
+	--progress tty \
 	--file ./docker/php/Dockerfile \
 	--tag "soprun/sandbox-php:latest" \
 	.
 
 docker-build-php-cli:
-	@docker build \
+	@docker buildx build \
+	--progress tty \
 	--file ./docker/php-cli/Dockerfile \
 	--tag "soprun/sandbox-php-cli:latest" \
 	.
 
 docker-build-nginx:
-	@docker build \
+	@docker buildx build \
+	--progress tty \
 	--file ./docker/nginx/Dockerfile \
 	--tag "soprun/sandbox-nginx:latest" \
 	.
@@ -58,3 +61,6 @@ vault-exec: # Shell access
 
 php-env-vars:
 	@docker exec -ti php bin/console debug:container --env-vars --show-hidden
+
+php-cli-check-platform-reqs:
+	@docker exec -ti php-cli composer check-platform-reqs
