@@ -62,17 +62,17 @@ if ! composer --version >/dev/null 2>/dev/null; then
   error 'Composer is not installed.'
 fi
 
-if ! composer global show hirak/prestissimo >/dev/null 2>/dev/null; then
-  log_info 'Composer "hirak/prestissimo" is not installed.'
-
-  # Start it in the background
-  composer global require hirak/prestissimo \
-    --ignore-platform-reqs \
-    --quiet \
-    --profile
-
-  log_info 'Composer "hirak/prestissimo" is installed.'
-fi
+#if ! composer global show hirak/prestissimo >/dev/null 2>/dev/null; then
+#  log_info 'Composer "hirak/prestissimo" is not installed.'
+#
+#  # Start it in the background
+#  composer global require hirak/prestissimo \
+#    --ignore-platform-reqs \
+#    --quiet \
+#    --profile
+#
+#  log_info 'Composer "hirak/prestissimo" is installed.'
+#fi
 
 if ! test -f ./vendor/autoload.php; then
   log_info 'Composer dependencies are not installed.'

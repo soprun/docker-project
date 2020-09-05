@@ -4,9 +4,6 @@
 
 FROM php:${PHP_VERSION:-7.4}-fpm-alpine AS build
 
-ARG APP_ENV
-ARG APP_DEBUG
-
 ###
 ### Environment variables
 ###
@@ -15,9 +12,6 @@ ENV \
     TZ=UTC \
     LANG=en_US.UTF8 \
     LANGUAGE=en \
-    APP_DIR=${APP_DIR:-/app} \
-    APP_ENV="${APP_ENV}" \
-    APP_DEBUG="${APP_DEBUG}" \
     PATH="${PATH}:${APP_BIN_DIR}"
 
 ###
@@ -28,9 +22,10 @@ ENV \
 LABEL \
     com.app.env="${APP_ENV}" \
     com.app.debug="${APP_DEBUG}" \
-    com.app.branch="${APP_BRANCH}" \
-    com.app.commit_id="${APP_COMMIT_ID}" \
-    com.app.commit_sha="${APP_COMMIT_SHA}" \
+    com.app.git_tag="${GIT_TAG}" \
+    com.app.git_branch="${GIT_BRANCH}" \
+    com.app.git_commit_id="${GIT_COMMIT_ID}" \
+    com.app.git_commit_sha="${GIT_COMMIT_SHA}" \
     com.app.namespace="${APP_NAMESPACE}" \
     com.app.name="php" \
     com.app.host="${APP_HOST}" \
@@ -60,9 +55,9 @@ COPY ./docker/php/docker-entrypoint.sh "/usr/local/bin/docker-entrypoint"
 ### Install composer
 ###
 
-ENV COMPOSER_MEMORY_LIMIT="-1"
-ENV COMPOSER_ALLOW_SUPERUSER="1"
-ENV PATH="${PATH}:/root/.composer/vendor/bin"
+#ENV COMPOSER_MEMORY_LIMIT="-1"
+#ENV COMPOSER_ALLOW_SUPERUSER="1"
+#ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 

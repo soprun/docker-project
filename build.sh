@@ -15,13 +15,13 @@ log() {
 success() {
   printf "=>\033[0;32m log: \033[0m%-6s\n" "$*"
   logger -p user.info -t "$(basename "${0}")" "$@"
-  sleep .3
+  sleep .2
 }
 
 info() {
   printf "=>\033[0;34m log: \033[0m%-6s\n" "$*"
   logger -p user.info -t "$(basename "${0}")" "$@"
-  sleep .3
+  sleep .2
 }
 
 warn() {
@@ -125,6 +125,13 @@ export GIT_TAG=${GIT_TAG}
 export GIT_BRANCH=${GIT_BRANCH}
 export GIT_COMMIT_ID=${GIT_COMMIT_ID}
 export GIT_COMMIT_SHA=${GIT_COMMIT_SHA}
+
+#echo $GIT_TAG
+#echo $GIT_BRANCH
+#echo $GIT_COMMIT_ID
+
+printenv | sort | less
+exit 1
 
 success 'Check application environment variables - is succeeded!'
 log "$(printenv | sort | less)"

@@ -21,11 +21,11 @@ x-php:
   #    - GIT_BRANCH
   #    - GIT_COMMIT_ID
   #    - GIT_COMMIT_SHA
-  depends_on:
-    - postgres
-    - memcached
-    - redis
-    - rabbitmq
+  # depends_on:
+  #   - postgres
+  #   - memcached
+  #   - redis
+  #   - rabbitmq
 
 volumes:
   rabbitmq: {}
@@ -62,20 +62,25 @@ services:
     build:
       dockerfile: ./docker/php/Dockerfile
       context: .
-      args:
-        - APP_ENV=dev
-        - APP_DEBUG=1
     hostname: php
     container_name: php
     privileged: true
-    <<: *default-php
     <<: *default-logging
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+#    environment:
+#      - APP_ENV=stag
+#      - APP_DEBUG=0
     volumes:
       - ./:/app:rw,cached
-      - composer:/root/.composer/cache:rw,cached
+      - ~/.composer/cache:/composer/cache:rw,cached
 
   php-cli:
-    dockerfile: ./docker/php-cli/Dockerfile
+    build:
+      dockerfile: ./docker/php-cli/Dockerfile
+      context: .
     hostname: php-cli
     container_name: php-cli
     tty: true
