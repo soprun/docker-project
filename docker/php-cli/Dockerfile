@@ -11,7 +11,8 @@ FROM php:${PHP_CLI_VERSION:-7.4}-cli-alpine AS build
 ENV \
     TZ=UTC \
     LANG=en_US.UTF8 \
-    LANGUAGE=en
+    LANGUAGE=en \
+    PATH="${PATH}:/app/bin:/composer/vendor/bin"
 
 ###
 ### Install OS-level dependencies - persistent / runtime deps
@@ -80,7 +81,8 @@ RUN \
     chmod +x /usr/local/bin/composer; \
     ### Install phpunit
     curl --location --output /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar; \
-    chmod +x /usr/local/bin/phpunit;
+    chmod +x /usr/local/bin/phpunit; \
+    composer global require hirak/prestissimo --profile;
 
 ###
 ### Change working directory
