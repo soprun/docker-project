@@ -8,11 +8,6 @@ x-logging:
       max-size: ${LOGGING_OPTIONS_MAX_SIZE}
       max-file: ${LOGGING_OPTIONS_MAX_FILE}
 
-#x-network:
-#  &default-network
-#  networks:
-#    - back-tier
-
 x-php:
   &default-php
   volumes:
