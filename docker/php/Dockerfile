@@ -2,15 +2,15 @@
 ### Installation container
 ###
 
-FROM php:${PHP_VERSION:-7.4}-fpm-alpine
+FROM php:7.4-fpm-alpine
 
 ###
 ### Environment variables
 ###
 
-ENV TZ=UTC
-ENV LANG=en_US.UTF8
-ENV LANGUAGE=en
+#ENV TZ=UTC
+#ENV LANG=en_US.UTF8
+#ENV LANGUAGE=en
 
 ENV PATH="${PATH}:/app/bin"
 ENV PATH="${PATH}:/composer/vendor/bin"
@@ -83,10 +83,7 @@ LABEL \
 ### Copy configuration files
 ###
 
-# Use the default production configuration
-# RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-# /usr/local/etc/php/php.ini
-COPY ./docker/php/php.ini "$PHP_INI_DIR/php.ini"
+COPY ./docker/php/php.ini /usr/local/etc/php/conf.d/php.ini
 COPY ./docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
 
 ###

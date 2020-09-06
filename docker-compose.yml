@@ -36,7 +36,10 @@ volumes:
 # https://github.com/docker/compose/issues/4675
 services:
   nginx:
-    image: soprun/sandbox-nginx:latest
+    # image: soprun/sandbox-nginx:latest
+    build:
+      dockerfile: ./docker/php/Dockerfile
+      context: .
     container_name: nginx
     <<: *default-logging
     depends_on:
@@ -46,7 +49,10 @@ services:
       - 443:443
 
   php:
-    image: soprun/sandbox-php:latest
+    # image: soprun/sandbox-php:latest
+    build:
+      dockerfile: ./docker/php/Dockerfile
+      context: .
     container_name: php
     privileged: true
     <<: *default-php
