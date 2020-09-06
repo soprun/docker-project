@@ -26,8 +26,11 @@ x-php:
 
 volumes:
   rabbitmq:
+    driver: local
   postgres:
+    driver: local
   composer:
+    driver: local
 
 networks:
   frontend-tier:
@@ -90,13 +93,6 @@ services:
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST}
 
-  rabbitmq-management:
-    image: rabbitmq:3.8.5-management-alpine
-    container_name: rabbitmq-management
-    <<: *default-logging
-    depends_on:
-      - rabbitmq
-
   memcached:
     image: memcached:latest
     hostname: ${MEMCACHED_HOST}
@@ -109,20 +105,3 @@ services:
     container_name: redis
     <<: *default-logging
 
-  vault:
-    image: vault:latest
-    container_name: vault
-    <<: *default-logging
-    environment:
-      - VAULT_ADDR=http://0.0.0.0:8200
-      - VAULT_API_ADDR=http://0.0.0.0:8200
-      - SKIP_SETCAP=true
-      - SKIP_CHOWN=true
-    ports:
-      - 8200:8200
-    cap_add:
-      - IPC_LOCK
-    command: server
-    volumes:
-      - ./docker/vault/config:/vault/config
-      - ./docker/vault/file:/vault/file

@@ -1,11 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-set -euo pipefail
-clear -x
+set -e
 
 # first arg is `-f` or `--some-option`
 if [ "${1#-}" != "$1" ]; then
-  set -- php-cli "$@"
+  set -- php "$@"
 fi
 
 ## if our command is a valid wp-cli subcommand, let's invoke it through wp-cli instead

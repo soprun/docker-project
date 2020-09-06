@@ -1,5 +1,38 @@
 version: "3.8"
 
+x-logging:
+  &default-logging
+  logging:
+    driver: ${LOGGING_DRIVER}
+    options:
+      max-size: ${LOGGING_OPTIONS_MAX_SIZE}
+      max-file: ${LOGGING_OPTIONS_MAX_FILE}
+
 services:
   nginx:
     command: ['nginx-debug', '-g', 'daemon off;']
+
+  rabbitmq-management:
+    image: rabbitmq:3.8.5-management-alpine
+    container_name: rabbitmq-management
+    <<: *default-logging
+    depends_on:
+      - rabbitmq
+
+  vault:
+    image: vault:latest
+    container_name: vault
+    <<: *default-logging
+    environment:
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_API_ADDR=http://0.0.0.0:8200
+      - SKIP_SETCAP=true
+      - SKIP_CHOWN=true
+    ports:
+      - 8200:8200
+    cap_add:
+      - IPC_LOCK
+    command: server
+    volumes:
+      - ./docker/vault/config:/vault/config
+      - ./docker/vault/file:/vault/file

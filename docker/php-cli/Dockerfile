@@ -13,55 +13,57 @@ ENV \
     LANG=en_US.UTF8 \
     LANGUAGE=en
 
-# ENV EXT_IGBINARY_VERSION=3.0.1
-ENV PHP_EXT_REDIS_VERSION=5.1.1
-ENV PHP_EXT_XDEBUG_VERSION=2.8.1
-ENV PHP_EXT_MEMCACHED_VERSION=3.1.4
-
 ###
-### Install OS-level dependencies
+### Install OS-level dependencies - persistent / runtime deps
 ###
 
-RUN set -eu; \
-    apk --no-cache add git curl zip vim
+RUN apk add --no-cache \
+        openssl \
+        openssh-client \
+		ca-certificates \
+		git \
+		curl \
+		zip \
+		vim \
+		gnupg \
+		bash \
+		make \
+		autoconf
 
-# gnupg
-# bash
-# openssl
-# openssh-client
- # g++ make autoconf
+# make
 
 ###
 ### Install language-level dependencies
 ###
 
-RUN set -eu; \
-    apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
+RUN set -e; \
+	apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
         libzip-dev \
         libmemcached-dev \
         postgresql-dev \
     && docker-php-ext-install \
         pdo \
         pdo_pgsql \
+        pgsql \
         opcache \
         intl \
-        zip
-
-RUN set -eu; \
-    pecl install redis-${PHP_EXT_REDIS_VERSION}; \
-    docker-php-ext-enable redis
-
-RUN set -eu; \
-    pecl install xdebug-${PHP_EXT_XDEBUG_VERSION}; \
-    docker-php-ext-enable xdebug
-
-RUN set -eu; \
-    pecl install memcached-${PHP_EXT_MEMCACHED_VERSION}; \
-    docker-php-ext-enable memcached
-
-RUN set -eu; \
+        zip \
     # cleanup
-    docker-php-source delete
+    && docker-php-source delete
+
+ENV PHP_EXTENSION_APCU_VERSION=5.1.17
+ENV PHP_EXTENSION_REDIS_VERSION=5.1.1
+ENV PHP_EXTENSION_XDEBUG_VERSION=2.8.1
+ENV PHP_EXTENSION_MEMCACHED_VERSION=3.1.4
+
+RUN pecl install redis-${PHP_EXTENSION_REDIS_VERSION} \
+    && docker-php-ext-enable redis
+
+RUN pecl install xdebug-${PHP_EXTENSION_XDEBUG_VERSION} \
+    && docker-php-ext-enable xdebug
+
+RUN pecl install memcached-${PHP_EXTENSION_MEMCACHED_VERSION} \
+    && docker-php-ext-enable memcached
 
 ###
 ### Copy configuration files
@@ -75,11 +77,6 @@ COPY ./docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
 ###
 
 ### Install composer
-ENV COMPOSER_HOME=/composer
-ENV COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
-ENV COMPOSER_MEMORY_LIMIT=-1
-ENV COMPOSER_ALLOW_SUPERUSER=1
-
 RUN \
     curl --location --output /usr/local/bin/composer https://getcomposer.org/composer-stable.phar; \
     chmod +x /usr/local/bin/composer
@@ -93,13 +90,13 @@ RUN \
 ### Change working directory
 ###
 
-WORKDIR /app
+WORKDIR ${PROJECT_DIR}
 
 ###
 ### Copy source files to workdir
 ###
 
-COPY . /app
+COPY . ${PROJECT_DIR}
 
 ###
 ### Install application dependencies
@@ -113,3 +110,5 @@ RUN set -eu; \
         --optimize-autoloader \
         --classmap-authoritative \
         --profile;
+
+CMD ["php", "-a"]

@@ -1,7 +1,11 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-set -euo pipefail
-clear -x
+set -e
+
+# first arg is `-f` or `--some-option`
+if [ "${1#-}" != "$1" ]; then
+  set -- php "$@"
+fi
 
 ###
 ### Globals
