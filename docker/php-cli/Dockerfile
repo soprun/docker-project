@@ -28,9 +28,8 @@ RUN apk add --no-cache \
 		gnupg \
 		bash \
 		make \
-		autoconf
-
-# make
+		autoconf \
+		make
 
 ###
 ### Install language-level dependencies
@@ -48,7 +47,6 @@ RUN set -e; \
         opcache \
         intl \
         zip \
-    # cleanup
     && docker-php-source delete
 
 ENV PHP_EXTENSION_APCU_VERSION=5.1.17
@@ -76,15 +74,13 @@ COPY ./docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
 ### Install extensions and utilities
 ###
 
-### Install composer
 RUN \
+    ### Install composer
     curl --location --output /usr/local/bin/composer https://getcomposer.org/composer-stable.phar; \
-    chmod +x /usr/local/bin/composer
-
-### Install phpunit
-RUN \
+    chmod +x /usr/local/bin/composer; \
+    ### Install phpunit
     curl --location --output /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar; \
-    chmod +x /usr/local/bin/phpunit
+    chmod +x /usr/local/bin/phpunit;
 
 ###
 ### Change working directory
@@ -102,13 +98,23 @@ COPY . ${PROJECT_DIR}
 ### Install application dependencies
 ###
 
-RUN set -eu; \
-    composer check-platform-reqs; \
-    composer install \
-        --ignore-platform-reqs \
-        --no-scripts \
-        --optimize-autoloader \
-        --classmap-authoritative \
-        --profile;
+#RUN set -eu; \
+#    composer check-platform-reqs; \
+#    composer install \
+#        --ignore-platform-reqs \
+#        --no-scripts \
+#        --optimize-autoloader \
+#        --classmap-authoritative \
+#        --profile;
+
+###
+### Mount
+###
+
+VOLUME ["/app"]
+
+###
+### Startup
+###
 
 CMD ["php", "-a"]

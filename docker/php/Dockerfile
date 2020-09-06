@@ -114,6 +114,12 @@ COPY . /app
 EXPOSE 9000
 
 ###
+### Mount
+###
+
+VOLUME ["/app"]
+
+###
 ### Entrypoint
 ###
 

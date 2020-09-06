@@ -36,6 +36,7 @@ COPY ./public /app/public
 ###
 ### Ports
 ###
+
 EXPOSE 80 443
 
 ###
