@@ -32,11 +32,11 @@ volumes:
   composer:
     driver: local
 
-networks:
-  frontend-tier:
-    driver: bridge
-  backend-tier:
-    driver: bridge
+#networks:
+#  frontend-tier:
+#    driver: bridge
+#  backend-tier:
+#    driver: bridge
 
 # https://github.com/docker/compose/issues/4675
 services:
@@ -64,9 +64,9 @@ services:
     <<: *default-php
     <<: *default-logging
 
-  php-supervisor:
+  php-workspace:
     image: soprun/sandbox-php-cli:latest
-    container_name: php-supervisor
+    container_name: php-workspace
     <<: *default-php
     <<: *default-logging
 

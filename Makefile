@@ -21,31 +21,7 @@ up: # Builds, (re)creates, starts, and attaches to containers for a service.
 
 build:
 	@docker-compose down &> /dev/null
-	@make docker-build-nginx
-	@make docker-build-php
-	@make docker-build-php-cli
 	@make up
-
-docker-build-php:
-	@docker buildx build \
-	--progress tty \
-	--file ./docker/php/Dockerfile \
-	--tag "soprun/sandbox-php:latest" \
-	.
-
-docker-build-php-cli:
-	@docker buildx build \
-	--progress tty \
-	--file ./docker/php-cli/Dockerfile \
-	--tag "soprun/sandbox-php-cli:latest" \
-	.
-
-docker-build-nginx:
-	@docker buildx build \
-	--progress tty \
-	--file ./docker/nginx/Dockerfile \
-	--tag "soprun/sandbox-nginx:latest" \
-	.
 
 docker-exec: # Shell access
 	@docker exec -ti php sh

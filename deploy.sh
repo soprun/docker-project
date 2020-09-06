@@ -2,10 +2,6 @@
 
 set -euo pipefail
 
-log() {
-  logger -p user.debug -t "$(basename "${0}")" "$@"
-}
-
 success() {
   printf "=>\033[0;32m log: \033[0m%-6s\n" "$*"
   logger -p user.info -t "$(basename "${0}")" "$@"
@@ -18,16 +14,33 @@ info() {
   sleep .2
 }
 
-warn() {
-  printf "=>\033[0;33m warn: \033[0m%-6s\n" "$*"
-  logger -p user.warn -t "$(basename "${0}")" "$@"
-}
-
 error() {
   printf "=>\033[0;31m error: \033[0m%-6s\n" "$*" >&2
   logger -p user.error -t "$(basename "${0}")" "$@"
   exit 1
 }
+
+success 'Linting dependencies 🗂.'
+
+if ! docker --version >/dev/null 2>/dev/null; then
+  error 'docker is not installed.'
+fi
+
+if ! docker-compose --version >/dev/null 2>/dev/null; then
+  error 'docker-compose is not installed.'
+fi
+
+if ! mkcert --version >/dev/null 2>/dev/null; then
+  error 'mkcert is not installed.'
+fi
+
+if ! openssl version >/dev/null 2>/dev/null; then
+  error 'openssl is not installed.'
+fi
+
+if ! shellcheck --version >/dev/null 2>/dev/null; then
+  error 'shellcheck is not installed.'
+fi
 
 # Determine the build script's actual directory, following symlinks
 SOURCE="${BASH_SOURCE[0]}"
@@ -46,16 +59,28 @@ if [ -e "${BUILD_DIR}/.env" ]; then
 fi
 
 # Derive the project name from the directory
-if [ -z "${PROJECT_NAME:-}" ]; then
-  PROJECT_NAME="$(basename "$BUILD_DIR")"
+if [ -z "${PROJECT_NAME}" ]; then
+  PROJECT_NAME="$(basename "${BUILD_DIR}")"
   export PROJECT_NAME
 fi
 
-#echo $BUILD_DIR
-#echo $PROJECT_NAME
-#printenv | sort
+#info "$(printenv | sort | less)"
+set -u
+
+docker build \
+  --file ./docker/nginx/Dockerfile \
+  --tag "soprun/sandbox-nginx:latest" \
+  .
+
+docker build \
+  --file ./docker/php/Dockerfile \
+  --tag "soprun/sandbox-php:latest" \
+  .
 
 docker build \
   --file ./docker/php-cli/Dockerfile \
   --tag "soprun/sandbox-php-cli:latest" \
   .
+
+info "Starting detached containers: 🐳 "
+docker-compose up --detach --force-recreate --remove-orphans
