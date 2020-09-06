@@ -88,7 +88,6 @@ LABEL \
 # /usr/local/etc/php/php.ini
 COPY ./docker/php/php.ini "$PHP_INI_DIR/php.ini"
 COPY ./docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
-COPY ./docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 
 ###
 ### Install extensions and utilities
@@ -113,8 +112,7 @@ WORKDIR /app
 
 COPY . /app
 
-RUN \
- chmod +x /usr/local/bin/docker-entrypoint;
+#RUN \
 ## Install composer
 # curl --location --output /usr/local/bin/composer https://getcomposer.org/composer-stable.phar; \
 # chmod +x /usr/local/bin/composer; \
@@ -144,7 +142,9 @@ VOLUME ["/app"]
 ### Entrypoint
 ###
 
-ENTRYPOINT ["docker-entrypoint"]
+#COPY ./docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+#RUN chmod +x /usr/local/bin/docker-entrypoint;
+#ENTRYPOINT ["docker-entrypoint"]
 
 ###
 ### Startup
