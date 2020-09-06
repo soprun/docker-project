@@ -1,3 +1,11 @@
+FROM composer AS composer
+
+COPY composer.json /app
+COPY composer.lock /app
+COPY symfony.lock /app
+
+RUN composer install
+
 ###
 ### Installation container
 ###
@@ -88,17 +96,20 @@ RUN \
 ### Change working directory
 ###
 
-WORKDIR ${PROJECT_DIR}
+WORKDIR /app
 
 ###
 ### Copy source files to workdir
 ###
 
-COPY . ${PROJECT_DIR}
+COPY . /app
 
 ###
 ### Install application dependencies
 ###
+
+COPY --from=composer /app/vendor /app/vendor
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 #RUN set -eu; \
 #    composer check-platform-reqs; \
