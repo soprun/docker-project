@@ -18,18 +18,18 @@ ENV \
 ###
 
 RUN apk add --no-cache \
-        openssl \
-        openssh-client \
-		ca-certificates \
-		git \
-		curl \
-		zip \
-		vim \
-		gnupg \
-		bash \
-		make \
-		autoconf \
-		make
+    openssl \
+    openssh-client \
+    ca-certificates \
+    git \
+    curl \
+    zip \
+    vim \
+    gnupg \
+    bash \
+    make \
+    autoconf \
+    make
 
 ###
 ### Install language-level dependencies
@@ -49,10 +49,10 @@ RUN set -e; \
         zip \
     && docker-php-source delete
 
-ENV PHP_EXTENSION_APCU_VERSION=5.1.17
-ENV PHP_EXTENSION_REDIS_VERSION=5.1.1
-ENV PHP_EXTENSION_XDEBUG_VERSION=2.8.1
-ENV PHP_EXTENSION_MEMCACHED_VERSION=3.1.4
+# ARG PHP_EXTENSION_APCU_VERSION=5.1.17
+ARG PHP_EXTENSION_REDIS_VERSION=5.1.1
+ARG PHP_EXTENSION_XDEBUG_VERSION=2.8.1
+ARG PHP_EXTENSION_MEMCACHED_VERSION=3.1.4
 
 RUN pecl install redis-${PHP_EXTENSION_REDIS_VERSION} \
     && docker-php-ext-enable redis
