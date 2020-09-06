@@ -48,3 +48,10 @@ php-env-vars:
 
 php-cli-check-platform-reqs:
 	@docker exec -ti php-cli composer check-platform-reqs
+
+
+lol:
+	@docker build \
+		--file ./docker/php/Dockerfile \
+		--tag "soprun/sandbox-php:latest" \
+		.

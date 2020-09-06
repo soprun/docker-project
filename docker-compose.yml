@@ -55,7 +55,7 @@ services:
   ###
   ### php-worker | php-workspace
   php-cli:
-    image: soprun/sandbox-php-cli:latest
+    image: soprun/sandbox-php:latest
     container_name: php-cli
     tty: true
     <<: *default-php
@@ -64,14 +64,14 @@ services:
   ###
   ### Simple Queue Service (SQS)
   php-sqs-producer:
-    image: soprun/sandbox-php-cli:latest
+    image: soprun/sandbox-php:latest
     container_name: sqs-producer
     tty: true
     <<: *default-php
     <<: *default-logging
 
   php-sqs-consumer:
-    image: soprun/sandbox-php-cli:latest
+    image: soprun/sandbox-php:latest
     container_name: sqs-consumer
     tty: true
     <<: *default-php

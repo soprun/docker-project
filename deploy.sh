@@ -64,8 +64,7 @@ if [ -z "${PROJECT_NAME}" ]; then
   export PROJECT_NAME
 fi
 
-#info "$(printenv | sort | less)"
-set -u
+#error "$(printenv | sort | less)"
 
 docker build \
   --file ./docker/nginx/Dockerfile \
@@ -77,19 +76,12 @@ docker build \
   --tag "soprun/sandbox-php:latest" \
   .
 
-docker build \
-  --file ./docker/php-cli/Dockerfile \
-  --tag "soprun/sandbox-php-cli:latest" \
-  .
-
 info 'Starting detached containers: 🐳 '
 docker-compose up --detach --force-recreate --remove-orphans
 
 info 'Docker push images: 🚢 '
-
 docker push soprun/sandbox-nginx
 docker push soprun/sandbox-php
-docker push soprun/sandbox-php-cli
 success 'Docker push images is succeeded!'
 
 # success code
