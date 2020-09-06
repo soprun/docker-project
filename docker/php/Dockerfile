@@ -12,11 +12,6 @@ ENV TZ=UTC
 ENV LANG=en_US.UTF8
 ENV LANGUAGE=en
 
-ENV COMPOSER_HOME=/composer
-ENV COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
-ENV COMPOSER_MEMORY_LIMIT=-1
-ENV COMPOSER_ALLOW_SUPERUSER=1
-
 ENV PATH="${PATH}:/app/bin"
 ENV PATH="${PATH}:/composer/vendor/bin"
 
@@ -44,6 +39,47 @@ LABEL \
 #    com.app.documentation="https://github.com/soprun/docker-project/wiki"
 
 ###
+### Install OS-level dependencies - persistent / runtime deps
+### Install language-level dependencies
+###
+
+#RUN set -eu; \
+#	apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+#        libzip-dev \
+#        libmemcached-dev \
+#        postgresql-dev \
+#        openssl \
+#        openssh-client \
+#        ca-certificates \
+#        git \
+#        curl \
+#        zip \
+#        vim \
+#        gnupg \
+#        bash \
+#        make \
+#        autoconf \
+#        make \
+#    && docker-php-ext-install \
+#        pdo \
+#        pdo_pgsql \
+#        pgsql \
+#        opcache \
+#        intl \
+#        zip \
+#    && RUN rm -rf /var/cache/apk/* \
+#    && rm -rf /tmp/* \
+#    && apk del .build-deps
+
+#&& pecl install xdebug-2.8.1 \
+#&& docker-php-ext-enable xdebug
+#&& pecl install redis-5.1.1 \
+#&& docker-php-ext-enable  redis \
+#&& pecl install memcached-3.1.4 \
+#&& docker-php-ext-enable memcached \
+#&& docker-php-source delete \
+
+###
 ### Copy configuration files
 ###
 
@@ -55,50 +91,15 @@ COPY ./docker/php/php-fpm.conf /usr/local/etc/php-fpm.conf
 COPY ./docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 
 ###
-### Install OS-level dependencies - persistent / runtime deps
-### Install language-level dependencies
+### Install extensions and utilities
 ###
 
-ARG PHP_EXTENSION_APCU_VERSION=5.1.17
-ARG PHP_EXTENSION_REDIS_VERSION=5.1.1
-ARG PHP_EXTENSION_XDEBUG_VERSION=2.8.1
-ARG PHP_EXTENSION_MEMCACHED_VERSION=3.1.4
+ENV COMPOSER_HOME=/composer
+ENV COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
+ENV COMPOSER_MEMORY_LIMIT=-1
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
-RUN set -eu; \
-	apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-        libzip-dev \
-        libmemcached-dev \
-        postgresql-dev \
-        openssl \
-        openssh-client \
-        ca-certificates \
-        git \
-        curl \
-        zip \
-        vim \
-        gnupg \
-        bash \
-        make \
-        autoconf \
-        make \
-    && docker-php-ext-install \
-        pdo \
-        pdo_pgsql \
-        pgsql \
-        opcache \
-        intl \
-        zip \
-    && pecl install redis-5.1.1 \
-    && pecl install memcached-3.1.4 \
-    && pecl install xdebug-2.8.1 \
-    && docker-php-ext-enable \
-        redis \
-        memcached \
-        xdebug \
-    && docker-php-source delete \
-    && RUN rm -rf /var/cache/apk/* \
-    && rm -rf /tmp/* \
-    && apk del .build-deps
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 ###
 ### Change working directory
@@ -112,30 +113,27 @@ WORKDIR /app
 
 COPY . /app
 
-###
-### Install extensions and utilities
-###
-
 RUN \
-    chmod +x /usr/local/bin/docker-entrypoint; \
-    ## Install composer
-    curl --location --output /usr/local/bin/composer https://getcomposer.org/composer-stable.phar; \
-    chmod +x /usr/local/bin/composer; \
-    ## Install phpunit
-    curl --location --output /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar; \
-    chmod +x /usr/local/bin/phpunit; \
-    ## composer check-platform-reqs
-    composer check-platform-reqs; \
-    ## Install composer plugin
-    composer global require hirak/prestissimo; \
-    ## Compiles .env files to .env.local.php.
-    composer symfony:dump-env dev; \
-    ## Install application dependencies
-    composer install \
-        --no-scripts \
-        --optimize-autoloader \
-        --classmap-authoritative \
-        --profile; \
+ chmod +x /usr/local/bin/docker-entrypoint;
+## Install composer
+# curl --location --output /usr/local/bin/composer https://getcomposer.org/composer-stable.phar; \
+# chmod +x /usr/local/bin/composer; \
+## Install phpunit
+# curl --location --output /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar; \
+# chmod +x /usr/local/bin/phpunit; \
+## composer check-platform-reqs
+# composer check-platform-reqs; \
+## Install composer plugin
+# composer global require hirak/prestissimo; \
+## Compiles .env files to .env.local.php.
+# composer symfony:dump-env dev; \
+## Install application dependencies
+# composer install \
+#     --no-scripts \
+#     --optimize-autoloader \
+#     --classmap-authoritative \
+#     --profile; \
+
 ###
 ### Mount
 ###
