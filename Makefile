@@ -44,7 +44,7 @@ vault-exec: # Shell access
 	@docker exec -ti vault sh
 
 php-env-vars:
-	@docker exec -ti php bin/console debug:container --env-vars --show-hidden
+	@docker exec -ti php-cli bin/console debug:container --env-vars --show-hidden
 
 php-cli-check-platform-reqs:
 	@docker exec -ti php-cli composer check-platform-reqs

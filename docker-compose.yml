@@ -52,6 +52,8 @@ services:
     <<: *default-php
     <<: *default-logging
 
+  ###
+  ### php-worker | php-workspace
   php-cli:
     image: soprun/sandbox-php-cli:latest
     container_name: php-cli
@@ -59,12 +61,37 @@ services:
     <<: *default-php
     <<: *default-logging
 
-  php-workspace:
+  ###
+  ### Simple Queue Service (SQS)
+  php-sqs-producer:
     image: soprun/sandbox-php-cli:latest
-    container_name: php-workspace
+    container_name: sqs-producer
+    tty: true
     <<: *default-php
     <<: *default-logging
 
+  php-sqs-consumer:
+    image: soprun/sandbox-php-cli:latest
+    container_name: sqs-consumer
+    tty: true
+    <<: *default-php
+    <<: *default-logging
+
+  ###
+  ### Message bus
+  rabbitmq:
+    image: rabbitmq:3.8.5-alpine
+    container_name: rabbitmq
+    <<: *default-logging
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST}
+
+  ###
+  ### PostgreSQL
   postgres:
     image: postgres:latest
     container_name: postgres
@@ -77,17 +104,8 @@ services:
       - POSTGRES_USERNAME
       - POSTGRES_PASSWORD
 
-  rabbitmq:
-    image: rabbitmq:3.8.5-alpine
-    container_name: rabbitmq
-    <<: *default-logging
-    volumes:
-      - rabbitmq:/var/lib/rabbitmq
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
-      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST}
-
+  ###
+  ### KV Storage
   memcached:
     image: memcached:latest
     hostname: ${MEMCACHED_HOST}

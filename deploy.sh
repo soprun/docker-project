@@ -20,7 +20,7 @@ error() {
   exit 1
 }
 
-success 'Linting dependencies 🗂.'
+success 'Linting dependencies & utilities 🗂.'
 
 if ! docker --version >/dev/null 2>/dev/null; then
   error 'docker is not installed.'
@@ -82,5 +82,15 @@ docker build \
   --tag "soprun/sandbox-php-cli:latest" \
   .
 
-info "Starting detached containers: 🐳 "
+info 'Starting detached containers: 🐳 '
 docker-compose up --detach --force-recreate --remove-orphans
+
+info 'Docker push images: 🚢 '
+
+docker push soprun/sandbox-nginx
+docker push soprun/sandbox-php
+docker push soprun/sandbox-php-cli
+success 'Docker push images is succeeded!'
+
+# success code
+exit 0
