@@ -1,23 +1,23 @@
-version: "3.8"
+version: "3.3"
 
-x-logging:
-  &default-logging
-  logging:
-    driver: ${LOGGING_DRIVER}
-    options:
-      max-size: ${LOGGING_OPTIONS_MAX_SIZE}
-      max-file: ${LOGGING_OPTIONS_MAX_FILE}
+#x-logging:
+#  &default-logging
+#  logging:
+#    driver: ${LOGGING_DRIVER}
+#    options:
+#      max-size: ${LOGGING_OPTIONS_MAX_SIZE}
+#      max-file: ${LOGGING_OPTIONS_MAX_FILE}
 
-x-php:
-  &default-php
-  volumes:
-    - ./:/app:rw,consistent
-    - ~/.composer/cache:/composer/cache:rw,cached
-  depends_on:
-    - postgres
-    - memcached
-    - redis
-    - rabbitmq
+#x-php:
+#  &default-php
+#  volumes:
+#    - ./:/app:rw,consistent
+#    - ~/.composer/cache:/composer/cache:rw,cached
+#  depends_on:
+#    - postgres
+#    - memcached
+#    - redis
+#    - rabbitmq
 
 volumes:
   rabbitmq:
@@ -41,7 +41,6 @@ services:
       dockerfile: ./docker/php/Dockerfile
       context: .
     container_name: nginx
-    <<: *default-logging
     depends_on:
       - php
     ports:
@@ -55,8 +54,14 @@ services:
       context: .
     container_name: php
     privileged: true
-    <<: *default-php
-    <<: *default-logging
+    volumes:
+      - ./:/app:rw,consistent
+      - ~/.composer/cache:/composer/cache:rw,cached
+    depends_on:
+      - postgres
+      - memcached
+      - redis
+      - rabbitmq
 
   #  ###
   #  ### php-worker | php-workspace
@@ -88,7 +93,6 @@ services:
   rabbitmq:
     image: rabbitmq:3.8.5-alpine
     container_name: rabbitmq
-    <<: *default-logging
     volumes:
       - rabbitmq:/var/lib/rabbitmq
     environment:
@@ -101,7 +105,6 @@ services:
   postgres:
     image: postgres:latest
     container_name: postgres
-    <<: *default-logging
     volumes:
       # - ./docker/postgres/dump.sql:/docker-entrypoint-initdb.d/dump.sql
       - postgres:/var/lib/postgresql/data
@@ -116,10 +119,12 @@ services:
     image: memcached:latest
     hostname: ${MEMCACHED_HOST}
     container_name: memcached
-    <<: *default-logging
 
   redis:
     image: redis:latest
     hostname: ${REDIS_HOST}
     container_name: redis
-    <<: *default-logging
+
+
+'https://www.lenkino.sex/54132'
+'https://www.pornhubpremium.com/view_video.php?viewkey=ph5f4389e5c6ad2'
