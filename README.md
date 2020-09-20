@@ -1,25 +1,32 @@
 # PHP project using docker containers - sandbox
 
----
+Do not use in production!.
 
-- [ ] https://github.com/devilbox/docker-php-fpm
-- [ ] https://github.com/bsramin/dch-project-sample
-
-...
-
-## Running
+## Installation
 
 ...
 
-# 3-tier application architecture
+## Available services
+
+- Nginx ...
+- PHP-FPM ...
+- PostgreSQL: 13-alpine
+- Memcached ...
+- Redis ...
 
 
-https://benebsworth.com/kubernetes-cicd-part-1/
 
-----
-https://github.com/galexrt/docker-nginx-php-fpm
 
----
+
+
+
+
+
+
+
+==============
+
+http://www.phpinternalsbook.com/php5/build_system/building_php.html
 
 client-tier
 app-tier

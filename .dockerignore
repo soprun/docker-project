@@ -11,8 +11,4 @@ docker-compose.yml
 
 .DS_Store
 .gitignore
-
-build.sh
-deploy.sh
-
-phpinsights.php
+.dockerignore
