@@ -46,21 +46,34 @@ jobs:
           [ "$VERSION" == "master" ] && VERSION=latest
 
           docker build \
-          --build-arg APP_ENV=dev \
-          --build-arg APP_DEBUG=1 \
-          --file ${{ env.IMAGE_NGINX_FILE }} \
-          --tag ${{ env.IMAGE_NGINX_NAME }}:$VERSION \
-          .
+          --file "${{ env.IMAGE_NGINX_FILE }}" \
+          --tag "${{ env.IMAGE_NGINX_NAME }}:$VERSION" \
+          "."
 
           docker build \
-          --build-arg APP_ENV=dev \
-          --build-arg APP_DEBUG=1 \
-          --file ${{ env.IMAGE_PHP_FILE }} \
-          --tag ${{ env.IMAGE_PHP_NAME }}:$VERSION \
-          .
+          --file "${{ env.IMAGE_PHP_FILE }}" \
+          --target "composer" \
+          --tag "${{ env.IMAGE_PHP_NAME }}:composer" \
+          "."
 
-          docker push ${{ env.IMAGE_NGINX_NAME }}
-          docker push ${{ env.IMAGE_PHP_NAME }}
+          docker build \
+          --cache-from "${{ env.IMAGE_PHP_NAME }}:composer" \
+          --file "${{ env.IMAGE_PHP_FILE }}" \
+          --target "build" \
+          --tag "${{ env.IMAGE_PHP_NAME }}:latest" \
+          --tag "${{ env.IMAGE_PHP_NAME }}:build" \
+          "."
+
+          docker build \
+          --cache-from "${{ env.IMAGE_PHP_NAME }}:composer" \
+          --cache-from "${{ env.IMAGE_PHP_NAME }}:build" \
+          --file "${{ env.IMAGE_PHP_FILE }}" \
+          --target "dev" \
+          --tag "${{ env.IMAGE_PHP_NAME }}:dev" \
+          "."
+
+          docker push "${{ env.IMAGE_NGINX_NAME }}"
+          docker push "${{ env.IMAGE_PHP_NAME }}"
 
           # docker-compose build --paralle
           # docker tag docker-project_nginx ${{ env.IMAGE_NGINX_NAME }}:$VERSION

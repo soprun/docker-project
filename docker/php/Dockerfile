@@ -45,8 +45,8 @@ RUN set -e \
 
 FROM php:7.4-fpm-alpine AS build
 
-RUN set -eu \
-    && apk add --update --no-cache $PHPIZE_DEPS \
+RUN apk update \
+    && apk add --no-cache $PHPIZE_DEPS \
         libzip-dev \
         postgresql-dev \
     && docker-php-ext-install \
@@ -116,7 +116,7 @@ ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
 
 ## Install dependencies
 RUN apk update \
- && apk add --no-cache $PHPIZE_DEPS \
+ && apk add --no-cache \
     bash \
     git \
     zip \
