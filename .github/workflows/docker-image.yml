@@ -54,7 +54,6 @@ jobs:
           --file "${{ env.IMAGE_PHP_FILE }}" \
           --target "build" \
           --tag "${{ env.IMAGE_PHP_NAME }}:latest" \
-          --tag "${{ env.IMAGE_PHP_NAME }}:build" \
           "."
 
           docker build \
