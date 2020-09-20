@@ -1,3 +1,4 @@
+/.backup
 /.idea
 /.git
 /.github
@@ -12,3 +13,7 @@ docker-compose.yml
 .DS_Store
 .gitignore
 .dockerignore
+
+build.sh
+deploy.sh
+phpinsights.php

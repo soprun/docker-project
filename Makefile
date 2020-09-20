@@ -22,3 +22,8 @@ up: # Builds, (re)creates, starts, and attaches to containers for a service.
 
 build:
 	@docker-compose build --file docker-compose.yml
+
+build-php:
+	@docker build --file "./docker/php/Dockerfile" --tag "docker-php:composer" --target composer "."
+	@docker build --cache-from "docker-php:composer" --file "./docker/php/Dockerfile" --tag "docker-php:builder" --target builder "."
+	@docker build --cache-from "docker-php:builder" --file=./docker/php/Dockerfile --tag "docker-php:development" --target development "."

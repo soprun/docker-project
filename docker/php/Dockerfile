@@ -2,28 +2,41 @@
 ### Installation dependencies container
 ###
 
-FROM composer:2 as composer
+FROM composer:latest as composer
+
+ENV COMPOSER_HOME="/composer"
+ENV COMPOSER_MEMORY_LIMIT="-1"
+#ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 COPY ./composer.* /app/
 COPY ./symfony.lock /app/
 
 RUN set -e; \
+    ## Install composer plugin
+    composer global require hirak/prestissimo \
+        --no-progress \
+        --no-scripts \
+        --no-interaction \
+        --ignore-platform-reqs \
+        --ansi \
+        --profile; \
+    ## Install application dependencies
     composer install \
+        --no-progress \
         --no-scripts \
         --no-interaction \
         --no-autoloader \
-        --no-dev \
-        --prefer-dist \
         --ignore-platform-reqs \
+        --ansi \
         --profile;
 
 COPY . /app
 
 RUN set -e; \
     composer dump-autoload \
-    --no-dev \
     --optimize \
     --classmap-authoritative \
+    --ansi \
     --profile;
 
 ###
@@ -32,30 +45,27 @@ RUN set -e; \
 
 FROM php:7.4-fpm-alpine AS builder
 
-#ENV TZ="UTC"
-#ENV LANG="en_US.UTF8"
-#ENV LANGUAGE="en"
-
-ENV COMPOSER_HOME="/composer"
-ENV COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
-ENV COMPOSER_MEMORY_LIMIT="-1"
-ENV COMPOSER_ALLOW_SUPERUSER="1"
-
-# ENV PATH="${PATH}:/app/bin"
-ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
+ENV TZ="UTC"
+ENV LANG="en_US.UTF8"
+ENV LANGUAGE="en"
 
 RUN set -e; \
-    apk add --no-cache $PHPIZE_DEPS \
-        postgresql-libs \
-        icu-libs \
+    apk add --update --no-cache $PHPIZE_DEPS \
+        libzip-dev \
+        postgresql-dev \
     && docker-php-ext-install \
         opcache \
         pdo \
         pdo_pgsql \
-        mbstring \
+        pgsql \
         intl \
+        zip \
+    && pecl install redis-5.1.1 \
+    && pecl install xdebug-2.8.1 \
     && docker-php-ext-enable \
         opcache \
+        redis \
+        xdebug \
     && rm -rf \
         /var/cache/apk/* \
         /var/lib/apt/lists/*
@@ -63,6 +73,9 @@ RUN set -e; \
 ###
 ### Copy configuration files
 ###
+
+# Use the default production configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 COPY ./docker/php/php.ini /usr/local/etc/php/conf.d/php.override.ini
 COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
@@ -91,38 +104,28 @@ FROM builder AS development
 ENV APP_ENV="${APP_ENV:-dev}"
 ENV APP_DEBUG="${APP_DEBUG:-1}"
 
+ENV COMPOSER_HOME="/composer"
+ENV COMPOSER_MEMORY_LIMIT="-1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
+
+ENV PATH="${PATH}:/app/bin"
+ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
+
 # Install dependencies
+#RUN set -e; \
+#    apk add --no-cache \
+#        git
 
-RUN set -e; \
-    apk add --no-cache $PHPIZE_DEPS \
-        git \
-    && docker-php-ext-install \
-        xdebug \
-    && docker-php-ext-enable \
-        xdebug \
-    && rm -rf \
-        /var/cache/apk/* \
-        /var/lib/apt/lists/*
-
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer /composer /composer
 
 RUN set -e; \
     ## Install composer plugin
-    composer global require hirak/prestissimo \
-        --prefer-dist \
-        --prefer-stable \
+    composer global require nunomaduro/phpinsights phpstan/phpstan phpmetrics/phpmetrics \
         --no-progress \
         --no-scripts \
         --no-interaction \
-        --ansi; \
-    ## Install application dependencies
-    composer install \
-        --no-interaction \
-        --no-scripts \
-        --prefer-dist \
-        --optimize-autoloader \
-        --classmap-authoritative \
-        --ignore-platform-reqs \
+        --ansi \
         --profile;
 
 ###
