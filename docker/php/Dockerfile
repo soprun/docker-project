@@ -6,22 +6,22 @@ FROM composer:latest as composer
 
 ENV COMPOSER_HOME="/composer"
 ENV COMPOSER_MEMORY_LIMIT="-1"
-#ENV COMPOSER_ALLOW_SUPERUSER="1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 COPY ./composer.* /app/
 COPY ./symfony.lock /app/
 
-RUN set -e; \
+RUN set -e \
     ## Install composer plugin
-    composer global require hirak/prestissimo \
+    && composer global require hirak/prestissimo \
         --no-progress \
         --no-scripts \
         --no-interaction \
         --ignore-platform-reqs \
         --ansi \
-        --profile; \
+        --profile \
     ## Install application dependencies
-    composer install \
+    && composer install \
         --no-progress \
         --no-scripts \
         --no-interaction \
@@ -32,12 +32,12 @@ RUN set -e; \
 
 COPY . /app
 
-RUN set -e; \
-    composer dump-autoload \
-    --optimize \
-    --classmap-authoritative \
-    --ansi \
-    --profile;
+RUN set -e \
+    && composer dump-autoload \
+        --optimize \
+        --classmap-authoritative \
+        --ansi \
+        --profile;
 
 ###
 ### Installation base container
@@ -45,12 +45,8 @@ RUN set -e; \
 
 FROM php:7.4-fpm-alpine AS builder
 
-ENV TZ="UTC"
-ENV LANG="en_US.UTF8"
-ENV LANGUAGE="en"
-
-RUN set -e; \
-    apk add --update --no-cache $PHPIZE_DEPS \
+RUN set -eu \
+    && apk add --update --no-cache $PHPIZE_DEPS \
         libzip-dev \
         postgresql-dev \
     && docker-php-ext-install \
@@ -66,6 +62,8 @@ RUN set -e; \
         opcache \
         redis \
         xdebug \
+    && docker-php-source delete \
+    && apk cache clean \
     && rm -rf \
         /var/cache/apk/* \
         /var/lib/apt/lists/*
@@ -89,6 +87,14 @@ COPY . /app
 COPY --from=composer /app/vendor /app/vendor
 
 ###
+### Entrypoint
+###
+
+COPY ./docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+RUN chmod +x /usr/local/bin/docker-entrypoint;
+ENTRYPOINT ["docker-entrypoint"]
+
+###
 ### Startup
 ###
 
@@ -101,9 +107,6 @@ CMD ["php-fpm", "--nodaemonize"]
 
 FROM builder AS development
 
-ENV APP_ENV="${APP_ENV:-dev}"
-ENV APP_DEBUG="${APP_DEBUG:-1}"
-
 ENV COMPOSER_HOME="/composer"
 ENV COMPOSER_MEMORY_LIMIT="-1"
 ENV COMPOSER_ALLOW_SUPERUSER="1"
@@ -111,22 +114,16 @@ ENV COMPOSER_ALLOW_SUPERUSER="1"
 ENV PATH="${PATH}:/app/bin"
 ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
 
-# Install dependencies
-#RUN set -e; \
-#    apk add --no-cache \
-#        git
+## Install dependencies
+RUN apk update \
+ && apk add --no-cache $PHPIZE_DEPS \
+    bash \
+    git \
+    zip \
+    unzip
 
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 COPY --from=composer /composer /composer
-
-RUN set -e; \
-    ## Install composer plugin
-    composer global require nunomaduro/phpinsights phpstan/phpstan phpmetrics/phpmetrics \
-        --no-progress \
-        --no-scripts \
-        --no-interaction \
-        --ansi \
-        --profile;
 
 ###
 ### Installation building a production image from build.
