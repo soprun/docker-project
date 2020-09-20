@@ -17,7 +17,7 @@ services:
         max-file: $LOGGING_OPTIONS_MAX_FILE
 
   php:
-    image: soprun/sandbox-php-cli:dev
+    image: soprun/sandbox-php:dev
     # build:
     #   dockerfile: ./docker/php/Dockerfile
     #   context: .
