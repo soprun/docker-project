@@ -3,9 +3,6 @@ version: "3.4"
 services:
   nginx:
     image: soprun/sandbox-nginx:latest
-    # build:
-    #   dockerfile: ./docker/nginx/Dockerfile
-    #   context: .
     container_name: nginx
     depends_on:
       - php
@@ -17,11 +14,7 @@ services:
         max-file: $LOGGING_OPTIONS_MAX_FILE
 
   php:
-    image: soprun/sandbox-php:dev
-    # build:
-    #   dockerfile: ./docker/php/Dockerfile
-    #   context: .
-    #   target: dev
+    image: soprun/sandbox-php:latest
     container_name: php
     privileged: true
     volumes:
