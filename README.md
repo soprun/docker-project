@@ -206,16 +206,12 @@ To follow only the access log, you can pipe stderr to /dev/null:
 docker logs -f <container_name> 2>/dev/null
 ```
 
-## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project?ref=badge_large)
-
-
-
-
----
-
 https://olvlvl.com/2019-06-install-php-ext-source
 
 https://github.com/EugenMayer/docker-sync
 
 https://github.com/castlemilk/kubernetes-cicd
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project?ref=badge_large)
+=======
