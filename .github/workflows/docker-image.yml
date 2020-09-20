@@ -52,15 +52,7 @@ jobs:
 
           docker build \
           --file "${{ env.IMAGE_PHP_FILE }}" \
-          --target "build" \
-          --tag "${{ env.IMAGE_PHP_NAME }}:latest" \
-          "."
-
-          docker build \
-          --cache-from "${{ env.IMAGE_PHP_NAME }}:latest" \
-          --file "${{ env.IMAGE_PHP_FILE }}" \
-          --target "dev" \
-          --tag "${{ env.IMAGE_PHP_NAME }}:dev" \
+          --tag "${{ env.IMAGE_PHP_NAME }}:$VERSION" \
           "."
 
           docker push "${{ env.IMAGE_NGINX_NAME }}"
