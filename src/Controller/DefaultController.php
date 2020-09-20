@@ -15,10 +15,8 @@ final class DefaultController extends AbstractController
 {
     public function index(): Response
     {
-        echo '<pre>';
-
-//        $this->getParameter('')
-
+        // echo '<pre>';
+        // dd($this->getParameter('debug'));
 
         try {
             $connection = new PDO(

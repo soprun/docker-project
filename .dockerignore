@@ -1,9 +1,18 @@
 /.idea
 /.git
-.DS_Store
+/.github
+/var
+/vendor
 
 # Files
-/LICENSE
-/README.md
-/Makefile
-/docker-compose.yml
+README.md
+Makefile
+docker-compose.yml
+
+.DS_Store
+.gitignore
+
+build.sh
+deploy.sh
+
+phpinsights.php

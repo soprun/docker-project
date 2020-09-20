@@ -1,117 +1,57 @@
-.PHONY: all docker-up docker-build docker-build-force docker-down
+-include .env
 
-all: docker-up
+# Bash is required as the shell
+SHELL := /bin/bash
 
-# List containers
-container_all := docker container list --all --quiet
+VERSION := $(shell git describe --tags --abbrev=0)
+BUILD := $(shell git rev-parse --short HEAD)
+BUILD_DIR=$(shell "$(PWD)")
+PROJECT_NAME=$(shell basename "$(PWD)")
+RELEASE_TAG := v$(shell date +%Y%m%d-%H%M%S-%3N)
 
-docker-down:
-	@printf '\n\e[1;32m%-6s\e[m\n' "Down docker... 🚛"
-	@echo "########################################"
-	@sleep .5
 
-	@echo "=> Stop all containers ✅"
-	@ - docker stop $(shell $(container_all)) &> /dev/null
-	@sleep .5s
+# .PHONY: build test push shell run start stop logs clean release
+.PHONY: up
 
-	@echo "=> Remove all containers ✅"
-	@ - docker rm $(shell $(container_all)) &> /dev/null
-	@sleep .5
+default: up
 
-	@echo "=> Remove all unused networks ✅"
-	@ - docker network prune --force &> /dev/null
-	@sleep .5
+up: # Builds, (re)creates, starts, and attaches to containers for a service.
+	# docker-compose up --detach --force-recreate --remove-orphans --renew-anon-volumes
+	@docker-compose up --detach
 
-docker-remove: docker-down
-	@printf '\n\e[1;31m%-6s\e[m\n' "Remove docker... 🚒"
-	@echo "########################################"
-	@sleep .5
-
-	@echo "=> Remove all containers and volumes 🚒"
-	@ - docker rm $(shell $(container_all)) --link --volumes &> /dev/null
-	@sleep .5s
-
-	@echo "=> Remove all networks 🚒"
-	@ - docker network rm $(shell $(container_all)) &> /dev/null
-	@sleep .5
-
-	@echo "=> Remove all images 🚒"
-	@ - docker rmi $(shell docker images --all --quiet) &> /dev/null
-	@sleep .5
-
-logs-fetch: # Fetch the logs of a container
-	@docker logs app --follow --details
-	# @tail -f var/logs/dev.log
-
-app-cache-clear: # This is equivalent to running `composer run-script deploy`
-	@php bin/console cache:clear --no-debug --env=prod
-	@php bin/console cache:warmup --no-debug --env=prod
-
-.PHONY: docker-list
-container_list_format := 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
-
-docker-list:
-	@docker container list --format $(container_list_format)
-
-docker-port:
-	@docker container list --filter publish=80-443 --format $(container_list_format)
-
+build:
+	@docker-compose down &> /dev/null
+	@make up
 
 docker-exec: # Shell access
 	@docker exec -ti php sh
 
-docker-exec-cli: # Shell access
-	@docker exec -ti php-cli sh
+docker-clean:
+	@docker-compose down &> /dev/null
+	@docker system prune --volumes --force
 
-docker-log: # Tailing the logs
-	@docker logs -f --tail=50 php
+docker-config:
+	@docker-compose config
 
-docker-lint: # Tailing the logs
-	hadolint ./docker/php/Dockerfile
-	hadolint ./docker/php-cli/Dockerfile
-	hadolint ./docker/nginx/Dockerfile
+docker-release:
+	@git tag $(RELEASE_TAG)
+	@git push origin $(RELEASE_TAG)
 
-# time php bin/console about
+composer:
+	@docker-compose exec -T $(PHP_SERVICE) composer install
 
-#symfony-cli: $(objs)
-#	@docker run --rm symfonycorp/cli
-#	@docker run --rm -v $(pwd):$(pwd) -w $(pwd) symfonycorp/cli -o $@ $(objs)
+vault-exec: # Shell access
+	@docker exec -ti vault sh
 
-# docker network prune --force
+php-env-vars:
+	@docker exec -ti php-cli bin/console debug:container --env-vars --show-hidden
 
-# docker volume rm --force billing_php
-# docker volume create --driver local --opt type=tmpfs --opt device=tmpfs php
+php-cli-check-platform-reqs:
+	@docker exec -ti php-cli composer check-platform-reqs
 
-# https://github.com/wodby/drupal-php/blob/master/7/Makefile
 
-docker-build:
-	@echo '=> building containers: 🐳 '
-	@bash build.sh
-
-docker-up:
-	@printf '\e[1;32m%-6s\e[m\n' "Starting detached containers: 🐳 "
-	@docker-compose --log-level info up \
-       --detach \
-       --force-recreate \
-       --remove-orphans
-
-docker-push:
-	@echo '=> Docker push images: 🐳 '
-	@docker push soprun/sandbox-nginx
-	@docker push soprun/sandbox-php
-	@docker push soprun/sandbox-php-cli
-
-app-dev:
-	@symfony server:ca:install
-
-app-start:
-	@symfony server:start -d
-
-app-log:
-	@symfony server:log
-
-ci-shellcheck:
-	@shellcheck --external-sources build.sh
-
-# php -d memory_limit=2000M ~/.composer/vendor/bin/phpinsights analyse src --format=console > phpinsights.json
-
+lol:
+	@docker build \
+		--file ./docker/php/Dockerfile \
+		--tag "soprun/sandbox-php:latest" \
+		.

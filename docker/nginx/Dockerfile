@@ -2,38 +2,26 @@
 ### Installation container
 ###
 
-FROM nginx:alpine AS builder
-
-ARG APP_ENV
-ARG APP_DEBUG
+FROM nginx:alpine
 
 ###
 ### Environment variables
 ###
 
-ENV \
-    TZ=UTC \
-    LANG=en_US.UTF8 \
-    LANGUAGE=en \
-    APP_DIR=${APP_DIR:-/app} \
-    APP_ENV="${APP_ENV:-dev}" \
-    APP_DEBUG="${APP_DEBUG:-1}" \
-    PATH="${PATH}:${APP_BIN_DIR}"
-
 ###
 ### Copy files nginx configuration
 ###
 
-COPY ./docker/nginx/server.conf /etc/nginx/server.conf
+COPY ./docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY ./docker/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY ./docker/nginx/snippets/* /etc/nginx/snippets/
-COPY ./docker/nginx/ssl/* /etc/nginx/ssl/
+#COPY ./docker/nginx/snippets/* /etc/nginx/snippets/
+#COPY ./docker/nginx/ssl/* /etc/nginx/ssl/
 
 ###
 ### Change working directory
 ###
 
-WORKDIR ${APP_DIR}
+WORKDIR /app
 
 ###
 ### Copy files
@@ -48,6 +36,7 @@ COPY ./public /app/public
 ###
 ### Ports
 ###
+
 EXPOSE 80 443
 
 ###

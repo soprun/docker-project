@@ -1,106 +1,73 @@
-version: "3.8"
+version: "3.3"
 
-x-logging:
-  &default-logging
-  logging:
-    driver: ${LOGGING_DRIVER}
-    options:
-      max-size: ${LOGGING_OPTIONS_MAX_SIZE}
-      max-file: ${LOGGING_OPTIONS_MAX_FILE}
+#x-logging:
+#  &default-logging
+#  logging:
+#    driver: ${LOGGING_DRIVER}
+#    options:
+#      max-size: ${LOGGING_OPTIONS_MAX_SIZE}
+#      max-file: ${LOGGING_OPTIONS_MAX_FILE}
 
-x-php:
-  &default-php
-  restart: "no"
-  env_file:
-    - .env
-  #  environment:
-  #    - APP_ENV=${APP_ENV}
-  #    - APP_DEBUG=${APP_DEBUG}
-  #    - APP_SECRET=${APP_SECRET}
-  #    - GIT_TAG
-  #    - GIT_BRANCH
-  #    - GIT_COMMIT_ID
-  #    - GIT_COMMIT_SHA
-  depends_on:
-    - postgres
-    - memcached
-    - redis
-    - rabbitmq
+#x-php:
+#  &default-php
+#  volumes:
+#    - ./:/app:rw,consistent
+#    - ~/.composer/cache:/composer/cache:rw,cached
+#  depends_on:
+#    - postgres
+#    - memcached
+#    - redis
+#    - rabbitmq
 
 volumes:
-  rabbitmq: {}
-  postgres: {}
-  composer: {}
+  rabbitmq:
+    driver: local
+  postgres:
+    driver: local
+  composer:
+    driver: local
 
-networks:
-  # app-tier:
-  #   driver: bridge
-  default:
-    driver: bridge
-    # external:
-    #   name: ${NETWORK_NAME}
+#networks:
+#  frontend-tier:
+#    driver: bridge
+#  backend-tier:
+#    driver: bridge
 
 # https://github.com/docker/compose/issues/4675
 services:
   nginx:
-    build:
-      dockerfile: ./docker/nginx/Dockerfile
-      context: .
-      args:
-        - APP_ENV=dev
-        - APP_DEBUG=1
-    hostname: nginx
-    container_name: nginx
-    <<: *default-logging
-    depends_on:
-      - php
-    ports:
-      - "${NETWORK_IP}:${NETWORK_HTTP}:80"
-      - "${NETWORK_IP}:${NETWORK_HTTPS}:443"
-
-  php:
+    # image: soprun/sandbox-nginx:latest
     build:
       dockerfile: ./docker/php/Dockerfile
       context: .
-      args:
-        - APP_ENV=dev
-        - APP_DEBUG=1
-    hostname: php
+    container_name: nginx
+    depends_on:
+      - php
+    ports:
+      - 80:80
+      - 443:443
+
+  php:
+    # image: soprun/sandbox-php:latest
+    build:
+      dockerfile: ./docker/php/Dockerfile
+      context: .
     container_name: php
     privileged: true
-    <<: *default-php
-    <<: *default-logging
     volumes:
-      - ./:/app:rw,cached
-      - composer:/root/.composer/cache:rw,cached
+      - ./:/app:rw,consistent
+      - ~/.composer/cache:/composer/cache:rw,cached
+    depends_on:
+      - postgres
+      - memcached
+      - redis
+      - rabbitmq
 
-  php-cli:
-    dockerfile: ./docker/php-cli/Dockerfile
-    hostname: php-cli
-    container_name: php-cli
-    tty: true
-    <<: *default-php
-
-  postgres:
-    image: postgres:latest
-    hostname: ${POSTGRES_HOST}
-    container_name: postgres
-    restart: on-failure
-    <<: *default-logging
-    volumes:
-      - ./docker/postgres/dump.sql:/docker-entrypoint-initdb.d/dump.sql
-      - postgres:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB
-      - POSTGRES_USERNAME
-      - POSTGRES_PASSWORD
-
+  ###
+  ### Message bus
   rabbitmq:
     image: rabbitmq:3.8.5-alpine
-    hostname: ${RABBITMQ_HOST}
     container_name: rabbitmq
-    restart: on-failure
-    <<: *default-logging
     volumes:
       - rabbitmq:/var/lib/rabbitmq
     environment:
@@ -108,45 +75,27 @@ services:
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST}
 
-  rabbitmq-management:
-    image: rabbitmq:3.8.5-management-alpine
-    hostname: ${RABBITMQ_MANAGEMENT_HOST}
-    container_name: rabbitmq-management
-    restart: always
-    <<: *default-logging
-    depends_on:
-      - rabbitmq
+  ###
+  ### PostgreSQL
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    volumes:
+      # - ./docker/postgres/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+      - postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USERNAME
+      - POSTGRES_PASSWORD
 
+  ###
+  ### KV Storage
   memcached:
     image: memcached:latest
     hostname: ${MEMCACHED_HOST}
     container_name: memcached
-    restart: always
-    <<: *default-logging
 
   redis:
     image: redis:latest
     hostname: ${REDIS_HOST}
     container_name: redis
-    restart: always
-    <<: *default-logging
-    command: ["redis-server", "--appendonly", "yes"]
-
-  vault:
-    image: vault:latest
-    hostname: ${VAULT_HOST}
-    container_name: vault
-    restart: always
-    <<: *default-logging
-    environment:
-      - VAULT_ADDR=${VAULT_ADDR}
-      - VAULT_API_ADDR=${VAULT_API_ADDR}
-      - SKIP_SETCAP=true
-      - SKIP_CHOWN=true
-    ports:
-      - 8200:8200
-    cap_add:
-      - IPC_LOCK
-    command: server
-    volumes:
-      - ./docker/vault/config:/vault/config

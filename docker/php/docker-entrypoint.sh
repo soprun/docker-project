@@ -1,30 +1,34 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-set -euo pipefail
-clear -x
+set -e
+
+# first arg is `-f` or `--some-option`
+if [ "${1#-}" != "$1" ]; then
+  set -- php "$@"
+fi
 
 ###
 ### Globals
 ###
 
-echo "Checking DB connection ..."
-
-i=0
-until [ $i -ge 10 ]; do
-  nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" && break
-
-  i=$((i + 1))
-
-  echo "$i: Waiting for DB 1 second ..."
-  sleep 1
-done
-
-if [ $i -eq 10 ]; then
-  echo "DB connection refused, terminating ..."
-  exit 1
-fi
-
-echo "DB is up ..."
+#echo "Checking DB connection ..."
+#
+#i=0
+#until [ $i -ge 10 ]; do
+#  nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" && break
+#
+#  i=$((i + 1))
+#
+#  echo "$i: Waiting for DB 1 second ..."
+#  sleep 1
+#done
+#
+#if [ $i -eq 10 ]; then
+#  echo "DB connection refused, terminating ..."
+#  exit 1
+#fi
+#
+#echo "DB is up ..."
 
 ############################################################
 # Functions
@@ -62,17 +66,17 @@ if ! composer --version >/dev/null 2>/dev/null; then
   error 'Composer is not installed.'
 fi
 
-if ! composer global show hirak/prestissimo >/dev/null 2>/dev/null; then
-  log_info 'Composer "hirak/prestissimo" is not installed.'
-
-  # Start it in the background
-  composer global require hirak/prestissimo \
-    --ignore-platform-reqs \
-    --quiet \
-    --profile
-
-  log_info 'Composer "hirak/prestissimo" is installed.'
-fi
+#if ! composer global show hirak/prestissimo >/dev/null 2>/dev/null; then
+#  log_info 'Composer "hirak/prestissimo" is not installed.'
+#
+#  # Start it in the background
+#  composer global require hirak/prestissimo \
+#    --ignore-platform-reqs \
+#    --quiet \
+#    --profile
+#
+#  log_info 'Composer "hirak/prestissimo" is installed.'
+#fi
 
 if ! test -f ./vendor/autoload.php; then
   log_info 'Composer dependencies are not installed.'
