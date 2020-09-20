@@ -42,10 +42,22 @@ RUN set -e \
 ### Installation base container
 ###
 
-FROM php:7.4-fpm-alpine AS build
+FROM php:7.4-fpm-alpine
 
-RUN set -eu \
+ENV COMPOSER_HOME="/composer"
+ENV COMPOSER_MEMORY_LIMIT="-1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
+
+ENV PATH="${PATH}:/app/bin"
+ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
+
+RUN set -e \
     && apk add --update --no-cache $PHPIZE_DEPS \
+        bash \
+        git \
+        zip \
+        unzip \
+        curl \
         libzip-dev \
         postgresql-dev \
     && docker-php-ext-install \
@@ -71,7 +83,7 @@ RUN set -eu \
 ###
 
 # Use the default production configuration
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+# RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 COPY ./docker/php/php.ini /usr/local/etc/php/conf.d/php.override.ini
 COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
@@ -82,7 +94,10 @@ COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 WORKDIR /app
 COPY . /app
+
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 COPY --from=composer /app/vendor /app/vendor
+COPY --from=composer /composer /composer
 
 ###
 ### Entrypoint
@@ -98,36 +113,3 @@ ENTRYPOINT ["docker-entrypoint"]
 
 EXPOSE 9000
 CMD ["php-fpm", "--nodaemonize"]
-
-###
-### Installation building a development image from build.
-###
-
-FROM build AS dev
-
-ENV COMPOSER_HOME="/composer"
-ENV COMPOSER_MEMORY_LIMIT="-1"
-ENV COMPOSER_ALLOW_SUPERUSER="1"
-
-ENV PATH="${PATH}:/app/bin"
-ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
-
-## Install dependencies
-RUN set -eu \
-    && apk add --update --no-cache \
-        bash \
-        git \
-        zip \
-        unzip
-
-COPY --from=composer /usr/bin/composer /usr/local/bin/composer
-COPY --from=composer /composer /composer
-
-###
-### Installation building a production image from build.
-###
-
-FROM build AS prod
-
-ENV APP_ENV="prod"
-ENV APP_DEBUG="${APP_DEBUG:-0}"
