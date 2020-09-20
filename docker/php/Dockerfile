@@ -43,7 +43,7 @@ RUN set -e \
 ### Installation base container
 ###
 
-FROM php:7.4-fpm-alpine AS builder
+FROM php:7.4-fpm-alpine AS build
 
 RUN set -eu \
     && apk add --update --no-cache $PHPIZE_DEPS \
@@ -105,7 +105,7 @@ CMD ["php-fpm", "--nodaemonize"]
 ### Installation building a development image from build.
 ###
 
-FROM builder AS development
+FROM build AS dev
 
 ENV COMPOSER_HOME="/composer"
 ENV COMPOSER_MEMORY_LIMIT="-1"
@@ -129,6 +129,7 @@ COPY --from=composer /composer /composer
 ### Installation building a production image from build.
 ###
 
-#FROM build AS production
-#ENV APP_ENV="prod"
-#ENV APP_DEBUG="${APP_DEBUG:-0}"
+FROM build AS prod
+
+ENV APP_ENV="prod"
+ENV APP_DEBUG="${APP_DEBUG:-0}"

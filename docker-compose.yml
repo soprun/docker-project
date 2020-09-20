@@ -2,39 +2,43 @@ version: "3.4"
 
 services:
   nginx:
-    build:
-      dockerfile: ./docker/nginx/Dockerfile
-      context: .
+    image: soprun/sandbox-nginx:latest
+    # build:
+    #   dockerfile: ./docker/nginx/Dockerfile
+    #   context: .
+    container_name: nginx
     depends_on:
       - php
     ports: [ 80:80, 443:443 ]
     logging:
-      driver: "$LOGGING_DRIVER"
+      driver: $LOGGING_DRIVER
       options:
-        max-size: "$LOGGING_OPTIONS_MAX_SIZE"
-        max-file: "$LOGGING_OPTIONS_MAX_FILE"
+        max-size: $LOGGING_OPTIONS_MAX_SIZE
+        max-file: $LOGGING_OPTIONS_MAX_FILE
 
   php:
-    build:
-      dockerfile: ./docker/php/Dockerfile
-      context: .
-      target: development
+    image: soprun/sandbox-php-cli:dev
+    # build:
+    #   dockerfile: ./docker/php/Dockerfile
+    #   context: .
+    #   target: dev
+    container_name: php
     privileged: true
     volumes:
       - ./:/app:rw,consistent
       - ~/.composer/cache:/composer/cache:rw,cached
     depends_on:
-      - database
+      - postgres
       - redis
     logging:
-      driver: "$LOGGING_DRIVER"
+      driver: $LOGGING_DRIVER
       options:
-        max-size: "$LOGGING_OPTIONS_MAX_SIZE"
-        max-file: "$LOGGING_OPTIONS_MAX_FILE"
+        max-size: $LOGGING_OPTIONS_MAX_SIZE
+        max-file: $LOGGING_OPTIONS_MAX_FILE
 
-  database:
+  postgres:
     image: postgres:13-alpine
-    restart: always
+    container_name: postgres
     environment:
       - POSTGRES_DB
       - POSTGRES_USERNAME
@@ -43,9 +47,5 @@ services:
 
   redis:
     image: redis:6-alpine
-    restart: always
+    container_name: redis
     ports: [ 6379 ]
-
-
-# https://hub.docker.com/r/phpunit/phpunit/
-# https://stfalcon.com/ru/blog/post/phpstorm-docker-code-coverage
