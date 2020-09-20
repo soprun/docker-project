@@ -52,20 +52,12 @@ jobs:
 
           docker build \
           --file "${{ env.IMAGE_PHP_FILE }}" \
-          --target "composer" \
-          --tag "${{ env.IMAGE_PHP_NAME }}:composer" \
-          "."
-
-          docker build \
-          --cache-from "${{ env.IMAGE_PHP_NAME }}:composer" \
-          --file "${{ env.IMAGE_PHP_FILE }}" \
           --target "build" \
           --tag "${{ env.IMAGE_PHP_NAME }}:latest" \
           --tag "${{ env.IMAGE_PHP_NAME }}:build" \
           "."
 
           docker build \
-          --cache-from "${{ env.IMAGE_PHP_NAME }}:composer" \
           --cache-from "${{ env.IMAGE_PHP_NAME }}:build" \
           --file "${{ env.IMAGE_PHP_FILE }}" \
           --target "dev" \
