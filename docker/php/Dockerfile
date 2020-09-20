@@ -44,8 +44,8 @@ RUN set -e \
 
 FROM php:7.4-fpm-alpine AS build
 
-RUN apk update \
-    && apk add --no-cache $PHPIZE_DEPS \
+RUN set -eu \
+    && apk add --update --no-cache $PHPIZE_DEPS \
         libzip-dev \
         postgresql-dev \
     && docker-php-ext-install \
