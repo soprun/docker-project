@@ -113,12 +113,12 @@ ENV PATH="${PATH}:/app/bin"
 ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
 
 ## Install dependencies
-RUN apk update \
- && apk add --no-cache \
-    bash \
-    git \
-    zip \
-    unzip
+RUN set -eu \
+    && apk add --update --no-cache \
+        bash \
+        git \
+        zip \
+        unzip
 
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 COPY --from=composer /composer /composer
