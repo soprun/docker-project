@@ -19,7 +19,6 @@ RUN set -e \
         --no-interaction \
         --ignore-platform-reqs \
         --ansi \
-        --profile \
     ## Install application dependencies
     && composer install \
         --no-progress \
@@ -28,7 +27,7 @@ RUN set -e \
         --no-autoloader \
         --ignore-platform-reqs \
         --ansi \
-        --profile;
+        --profile
 
 COPY . /app
 
@@ -37,7 +36,7 @@ RUN set -e \
         --optimize \
         --classmap-authoritative \
         --ansi \
-        --profile;
+        --profile
 
 ###
 ### Installation base container
@@ -63,7 +62,6 @@ RUN apk update \
         redis \
         xdebug \
     && docker-php-source delete \
-    && apk cache clean \
     && rm -rf \
         /var/cache/apk/* \
         /var/lib/apt/lists/*
