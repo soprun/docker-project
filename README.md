@@ -1,5 +1,4 @@
 # PHP project using docker containers - sandbox
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsoprun%2Fdocker-project?ref=badge_shield)
 
 ---
 
@@ -175,6 +174,9 @@ docker logs -f <container_name>
 ## Restarting proxy container
 
 ```bash
+docker exec -it ${NGINX_WEB} nginx -s reload
+
+```
 docker exec -it <container_name> nginx -s reload
 ```
 

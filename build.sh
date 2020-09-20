@@ -69,6 +69,14 @@ if ! docker-compose --version >/dev/null 2>/dev/null; then
   error 'Command "docker-compose" is not installed.'
 fi
 
+if ! git --version >/dev/null 2>/dev/null; then
+  error 'Command "git-flow" is not installed.'
+fi
+
+if ! git-flow version >/dev/null 2>/dev/null; then
+  error 'Command "git-flow" is not installed.'
+fi
+
 if ! mkcert --version >/dev/null 2>/dev/null; then
   error 'Command "mkcert" is not installed.'
 fi
