@@ -2,18 +2,14 @@
 /.idea
 /.git
 /.github
-/var
-/vendor
+/app/var
+/app/vendor
 
 # Files
 README.md
 Makefile
-docker-compose.yml
 
 .DS_Store
 .gitignore
 .dockerignore
-
-build.sh
-deploy.sh
-phpinsights.php
+.editorconfig

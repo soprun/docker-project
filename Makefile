@@ -1,59 +1,58 @@
--include ./docker/.env
+THIS_FILE := $(lastword $(MAKEFILE_LIST))
 
-# Bash is required as the shell
-SHELL := /bin/bash
+APP_ENV := dev
+TAG := latest
+IMAGE := inanzzz/hello_php
+COMPOSE_FILE := --file ./docker/docker-compose.yml
 
-GIT_TAG := $(shell git describe --tags --abbrev=0)
-GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
-GIT_COMMIT_ID := $(shell git rev-parse --short HEAD)
+ifndef TAG
+$(error The TAG variable is missing.)
+endif
 
-SOURCE_DIR="$(PWD)"
-#DOCKER_DIR="${PROJECT_DIR}/docker"
-#SOURCE_DIR="${PROJECT_DIR}/src"
-# PROJECT_NAME=$(shell basename "$(PWD)")
-# RELEASE_TAG := v$(shell date +%Y%m%d-%H%M%S-%3N)
+ifndef APP_ENV
+$(error The ENV variable is missing.)
+endif
 
-SERVICE_PHP := php
-SERVICE_NGINX := nginx
+ifeq ($(filter $(APP_ENV),test dev stag prod),)
+$(error The ENV variable is invalid.)
+endif
 
-all: up
+ifeq (,$(filter $(APP_ENV),test dev))
+COMPOSE_FILE := --file ./docker/docker-compose.yml
+endif
 
-print:
-	@echo "GIT_TAG: ${GIT_TAG}"
-	@echo "GIT_BRANCH: ${GIT_BRANCH}"
-	@echo "GIT_COMMIT_ID: ${GIT_COMMIT_ID}"
+# .DEFAULT_GOAL := help
+.PHONY: help up up-force down lint-dotenv start
 
-	@echo "PROJECT_NAME: ${PROJECT_NAME}"
-	@echo "SOURCE_DIR: ${SOURCE_DIR}"
-	@#echo "PROJECT_DIR: ${PROJECT_DIR}"
-	@#echo "DOCKER_DIR: ${DOCKER_DIR}"
-	@#echo "SOURCE_DIR: ${SOURCE_DIR}"
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
-up:
-	@docker-compose up \
-		--detach \
-		--force-recreate \
-		--remove-orphans \
-		--renew-anon-volumes
+up: ## Build and start services
+	$(info Make: Starting "$(APP_ENV)" environment containers.)
+	docker-compose $(COMPOSE_FILE) up --build --detach
 
-#up:
-#	@docker-compose \
-#		--project-name "${PROJECT_NAME}" \
-#		--project-directory "${PROJECT_DIR}" \
-#		--file "${PROJECT_DIR}/docker/docker-compose.yml" \
-#		up --detach
+build: ## Build services.
+	$(info Make: Building "$(APP_ENV)" environment images.)
+	docker-compose $(COMPOSE_FILE) build --no-cache
+
+rebuild: ## Rebuild services.
+	$(info Make: Rebuilding "$(APP_ENV)" environment images.)
+	docker-compose $(COMPOSE_FILE) up --build --detach --force-recreate --remove-orphans --renew-anon-volumes
 
 
-lint-dotenv-docker:
-	@dotenv-linter ./docker
+stop: ## Stopping containers.
+	$(info Make: Stopping "$(APP_ENV)" environment containers.)
+	@docker-compose stop
 
-lint-dotenv-source:
-	@dotenv-linter ./src
+down: ## tops containers and removes containers, networks, volumes, and images
+	docker-compose --file ./docker/docker-compose.yml down --volumes --remove-orphans --rmi local
+	@make -s clean
 
-lint-dockerfile:
-	@hadolint ./src
+lint-dotenv: ## It checks .env files for problems that may cause the application to malfunction
+	@-dotenv-linter --show-checks ./docker
+	@-dotenv-linter --show-checks ./app
 
-down:
-	@docker-compose down \
-	--volumes \
-	--remove-orphans
+clean: ## Docker system clear
+	@docker system prune --volumes --force
+
+

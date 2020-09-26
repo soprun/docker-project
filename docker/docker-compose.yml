@@ -21,7 +21,7 @@ x-logging:
 x-php:
   &default_php
   volumes:
-    - ./src:/app:rw,consistent
+    - ../app:/app:rw,consistent
   networks: [ backend_tier ]
   depends_on:
     - postgres
@@ -31,7 +31,7 @@ services:
   nginx:
     build:
       dockerfile: ./docker/nginx/Dockerfile
-      context: .
+      context: ..
     container_name: nginx
     <<: *default_logging
     ports: [ 80:80, 443:443 ]
@@ -42,7 +42,7 @@ services:
   php:
     build:
       dockerfile: ./docker/php/Dockerfile
-      context: .
+      context: ..
     container_name: app
     privileged: true
     <<: *default_logging
@@ -55,9 +55,9 @@ services:
     image: postgres:13-alpine
     container_name: postgres
     environment:
-      - POSTGRES_DB=default
-      - POSTGRES_USERNAME=postgres
-      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB
+      - POSTGRES_USERNAME
+      - POSTGRES_PASSWORD
     ports: [ 5432 ]
     networks:
       - backend_tier
