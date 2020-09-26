@@ -20,10 +20,8 @@ x-logging:
 
 x-php:
   &default_php
-  env_file:
-    - ./src/.env
   volumes:
-    - ./src:/app:rw,consistent
+    - ../src:/app:rw,consistent
   networks: [ backend_tier ]
   depends_on:
     - postgres
@@ -33,17 +31,18 @@ services:
   nginx:
     build:
       dockerfile: ./docker/nginx/Dockerfile
-      context: .
+      context: ..
     container_name: nginx
     <<: *default_logging
     ports: [ 80:80, 443:443 ]
     networks: [ frontend_tier, backend_tier ]
-    depends_on: [ php ]
+    depends_on:
+      - php
 
-  app:
+  php:
     build:
       dockerfile: ./docker/php/Dockerfile
-      context: .
+      context: ..
     container_name: app
     privileged: true
     <<: *default_logging
