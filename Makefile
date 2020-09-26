@@ -63,8 +63,8 @@ clean: ## Docker system clear
 	@docker system prune --volumes --force
 
 check-dotenv: ## It checks .env files for problems that may cause the application to malfunction
-	@-dotenv-linter --show-checks ./docker
-	@-dotenv-linter --show-checks ./app
+	@-dotenv-linter ./docker
+	@-dotenv-linter ./app
 
 check-security: ## PHP Security Checker
 	@docker pull symfonycorp/cli:latest

@@ -42,25 +42,12 @@ services:
     depends_on:
       - php
 
-  php:
+  php: # php_worker
     build:
       dockerfile: ./docker/php/Dockerfile
       context: ..
     container_name: php
     privileged: true
-    <<: *default_logging
-    <<: *default_php
-    healthcheck:
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 30s
-
-  php_worker:
-    build:
-      dockerfile: ./docker/php/Dockerfile
-      context: ..
-    container_name: php_worker
     <<: *default_logging
     <<: *default_php
     healthcheck:
