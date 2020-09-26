@@ -62,9 +62,14 @@ down: ## tops containers and removes containers, networks, volumes, and images
 clean: ## Docker system clear
 	@docker system prune --volumes --force
 
-lint-dotenv: ## It checks .env files for problems that may cause the application to malfunction
+check-dotenv: ## It checks .env files for problems that may cause the application to malfunction
 	@-dotenv-linter --show-checks ./docker
 	@-dotenv-linter --show-checks ./app
 
-symfony-check-security:
-	@docker run --rm -v $(pwd):$(pwd) -w $(pwd) symfonycorp/cli check:security
+check-security: ## PHP Security Checker
+	@docker pull symfonycorp/cli:latest
+	@docker run --rm --volume "$(PWD)/app:/app" --workdir "/app" symfonycorp/cli check:security
+
+symfony-cli: ## PHP Security Checker
+	@docker pull symfonycorp/cli:latest
+	@docker run --interactive --tty --volume "$(PWD)/app:/app" --workdir "/app" symfonycorp/cli help
