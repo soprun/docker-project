@@ -51,7 +51,7 @@ check_connection $REDIS_HOST $REDIS_PORT
 ### Linting PHP
 ###
 
-printf "=>\033[0;32m %-6s\033[0m\n" 'Linting PHP files 🗂.'
+printf "\033[0;32m %-6s\033[0m\n" 'Linting PHP files 🗂.'
 
 if ! composer --version >/dev/null 2>/dev/null; then
   error 'Composer is not installed.'
@@ -69,12 +69,12 @@ fi
 ### Startup
 ###
 
-log_info "Starting $(php-fpm -v 2>&1 | head -1)"
-log_info "Environment: ${APP_ENV}"
-log_info "Debug: ${APP_DEBUG}"
-log_info "Debug level: ${APP_DEBUG_LEVEL}"
+#log_info "Starting $(php-fpm -v 2>&1 | head -1)"
+#log_info "Environment: ${APP_ENV}"
+#log_info "Debug: ${APP_DEBUG}"
+#log_info "Debug level: ${APP_DEBUG_LEVEL}"
 
 # Check that platform requirements are satisfied.
-composer check-platform-reqs
+#composer check-platform-reqs
 
 exec docker-php-entrypoint "$@"
