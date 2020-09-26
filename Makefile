@@ -43,3 +43,13 @@ up:
 #		--project-directory "${PROJECT_DIR}" \
 #		--file "${PROJECT_DIR}/docker/docker-compose.yml" \
 #		up --detach
+
+
+lint-dotenv-docker:
+	@dotenv-linter ./docker
+
+lint-dotenv-source:
+	@dotenv-linter ./src
+
+lint-dockerfile:
+	@hadolint ./src
