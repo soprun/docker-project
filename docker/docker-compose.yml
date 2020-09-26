@@ -22,7 +22,8 @@ x-php:
   &default_php
   volumes:
     - ../app:/app:rw,consistent
-  networks: [ backend_tier ]
+  networks:
+    - backend_tier
   depends_on:
     - postgres
     - redis
@@ -35,10 +36,13 @@ services:
     container_name: nginx
     <<: *default_logging
     ports: [ 80:80, 443:443 ]
-    networks: [ frontend_tier, backend_tier ]
+    networks:
+      - frontend_tier
+      - backend_tier
     depends_on:
       - php
 
+  # php-worker:
   php:
     build:
       dockerfile: ./docker/php/Dockerfile
@@ -48,8 +52,13 @@ services:
     <<: *default_logging
     <<: *default_php
 
-  # php-workspace:
-  # php-worker:
+  php-workspace:
+    build:
+      dockerfile: ./docker/php-cli/Dockerfile
+      context: ..
+    container_name: php-workspace
+    <<: *default_logging
+    <<: *default_php
 
   postgres:
     image: postgres:13-alpine
