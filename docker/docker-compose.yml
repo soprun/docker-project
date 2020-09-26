@@ -52,13 +52,13 @@ services:
     <<: *default_logging
     <<: *default_php
 
-  php-workspace:
-    build:
-      dockerfile: ./docker/php-cli/Dockerfile
-      context: ..
-    container_name: php-workspace
-    <<: *default_logging
-    <<: *default_php
+  # php-workspace:
+  #   build:
+  #     dockerfile: ./docker/php-cli/Dockerfile
+  #     context: ..
+  #   container_name: php-workspace
+  #   <<: *default_logging
+  #   <<: *default_php
 
   postgres:
     image: postgres:13-alpine
