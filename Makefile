@@ -70,6 +70,6 @@ check-security: ## PHP Security Checker
 	@docker pull symfonycorp/cli:latest
 	@docker run --rm --volume "$(PWD)/app:/app" --workdir "/app" symfonycorp/cli check:security
 
-symfony-cli: ## PHP Security Checker
+symfony-cli: ## Symfony CLI
 	@docker pull symfonycorp/cli:latest
-	@docker run --interactive --tty --volume "$(PWD)/app:/app" --workdir "/app" symfonycorp/cli help
+	@docker run --interactive --detach --tty --volume "$(PWD)/app:/app" --workdir "/app" symfonycorp/cli help
