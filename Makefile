@@ -30,10 +30,7 @@ print:
 	@#echo "SOURCE_DIR: ${SOURCE_DIR}"
 
 up:
-	@docker-compose \
-	  --project-directory "${SOURCE_DIR}/docker" \
-	  --file "${SOURCE_DIR}/docker/docker-compose.yml" \
-		up \
+	@docker-compose up \
 		--detach \
 		--force-recreate \
 		--remove-orphans \
@@ -57,9 +54,6 @@ lint-dockerfile:
 	@hadolint ./src
 
 down:
-	@docker-compose \
-	--project-directory "${SOURCE_DIR}/docker" \
-	--file "${SOURCE_DIR}/docker/docker-compose.yml" \
-	down \
+	@docker-compose down \
 	--volumes \
 	--remove-orphans
