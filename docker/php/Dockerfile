@@ -16,19 +16,15 @@ COPY ./app/symfony.lock /app/
 RUN set -e \
     ## Install composer plugin
     && composer global require hirak/prestissimo \
-        --no-progress \
         --no-scripts \
         --no-interaction \
         --ignore-platform-reqs \
-        --ansi \
     ## Install application dependencies
     && composer install \
-        --no-progress \
         --no-scripts \
         --no-interaction \
         --no-autoloader \
         --ignore-platform-reqs \
-        --ansi \
         --profile
 
 COPY ./app/ /app
@@ -37,7 +33,6 @@ RUN set -e \
     && composer dump-autoload \
         --optimize \
         --classmap-authoritative \
-        --ansi \
         --profile
 
 FROM php:${PHP_VERSION}-fpm-alpine AS builder
