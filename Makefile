@@ -66,3 +66,5 @@ lint-dotenv: ## It checks .env files for problems that may cause the application
 	@-dotenv-linter --show-checks ./docker
 	@-dotenv-linter --show-checks ./app
 
+symfony-check-security:
+	@docker run --rm -v $(pwd):$(pwd) -w $(pwd) symfonycorp/cli check:security

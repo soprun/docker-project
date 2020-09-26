@@ -34,6 +34,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
+      - uses: actions/cache@v2
+        id: cache-db
+        with:
+          path: ~/.symfony/cache
+          key: db
+
+      # see: https://symfony.com/blog/the-php-security-checker-as-a-docker-image
+      - name: PHP Security Checker
+        uses: symfonycorp/security-checker-action@v2
+        with:
+          lock: ./app/composer.lock
+
       - name: Build the Docker image
         run: |
           # Strip git ref prefix from version
@@ -61,3 +73,5 @@ jobs:
           # docker-compose build --paralle
           # docker tag docker-project_nginx ${{ env.IMAGE_NGINX_NAME }}:$VERSION
           # docker tag pdocker-project_php ${{ env.IMAGE_PHP_NAME }}:$VERSION
+
+
