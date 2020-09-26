@@ -1,0 +1,49 @@
+version: "3.4"
+
+#volumes:
+#  default:
+#    driver: local
+
+networks:
+  default:
+    driver: bridge
+#  frontend_tier:
+#    driver: bridge
+#  backend_tier:
+#    driver: bridge
+
+services:
+  nginx:
+    build:
+      dockerfile: ./docker/nginx/Dockerfile
+      context: .
+    container_name: nginx
+    depends_on: [ php ]
+    ports: [ 80:80, 443:443 ]
+
+  php:
+    build:
+      dockerfile: ./docker/php/Dockerfile
+      context: .
+    container_name: php
+    privileged: true
+    volumes:
+      - ./src:/app:rw,consistent
+    env_file:
+      - ./src/.env
+    depends_on: [ postgres, redis ]
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: postgres
+    hostname: "${POSTGRES_HOST}"
+    environment:
+      - POSTGRES_DB="${POSTGRES_DATABASE}"
+      - POSTGRES_USERNAME="${POSTGRES_USERNAME}"
+      - POSTGRES_PASSWORD
+    ports: [ "${POSTGRES_PORT}" ]
+
+  redis:
+    image: redis:6-alpine
+    container_name: redis
+    ports: [ 6379 ]
