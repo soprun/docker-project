@@ -5,13 +5,13 @@ TAG := latest
 
 ACCOUNT := soprun
 
-SERVICE_PHP := sandbox-php
-SERVICE_PHP_CLI := sandbox-php-cli
-SERVICE_NGINX := sandbox-nginx
+SERVICE_NGINX := nginx
+SERVICE_PHP := php
+SERVICE_PHP_WORKSPACE := php_workspace
 
-IMAGE_PHP := $(ACCOUNT)/$(SERVICE_PHP)
-IMAGE_PHP_CLI := $(ACCOUNT)/$(SERVICE_PHP_CLI)
-IMAGE_NGINX := $(ACCOUNT)/$(SERVICE_NGINX)
+# IMAGE_PHP := $(ACCOUNT)/$(SERVICE_PHP)
+#IMAGE_PHP_CLI := $(ACCOUNT)/$(SERVICE_PHP_CLI)
+#IMAGE_NGINX := $(ACCOUNT)/$(SERVICE_NGINX)
 
 COMPOSE_FILE := --file ./docker/docker-compose.yml
 
@@ -41,7 +41,7 @@ help:
 
 up: ## Build and start services
 	$(info Make: Starting "$(APP_ENV)" environment containers.)
-	docker-compose $(COMPOSE_FILE) up --build --detach
+	docker-compose $(COMPOSE_FILE) up --quiet-pull --build --detach
 
 build: ## Build services.
 	$(info Make: Building "$(APP_ENV)" environment images.)
@@ -49,7 +49,7 @@ build: ## Build services.
 
 rebuild: ## Rebuild services.
 	$(info Make: Rebuilding "$(APP_ENV)" environment images.)
-	docker-compose $(COMPOSE_FILE) up --build --detach --force-recreate --remove-orphans --renew-anon-volumes
+	docker-compose $(COMPOSE_FILE) up --quiet-pull --build --detach --force-recreate --remove-orphans --renew-anon-volumes
 
 stop: ## Stopping containers.
 	$(info Make: Stopping "$(APP_ENV)" environment containers.)
@@ -73,3 +73,12 @@ check-security: ## PHP Security Checker
 symfony-cli: ## Symfony CLI
 	@docker pull symfonycorp/cli:latest
 	@docker run --rm --volume "$(PWD)/app:/app" --workdir "/app" symfonycorp/cli $(ARGS)
+
+console-about: ## Displays information about project
+	@docker-compose $(COMPOSE_FILE) exec $(SERVICE_PHP) php bin/console about
+
+console-env-vars: ## Symfony Container Environment Variables
+	@docker-compose $(COMPOSE_FILE) exec $(SERVICE_PHP) php bin/console debug:container --env-vars --show-hidden
+
+exec: ## Run a command in a running container
+	@docker exec --interactive --tty $(SERVICE_PHP) sh

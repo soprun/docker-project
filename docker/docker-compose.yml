@@ -42,23 +42,40 @@ services:
     depends_on:
       - php
 
-  # php-worker:
   php:
     build:
       dockerfile: ./docker/php/Dockerfile
       context: ..
-    container_name: app
+    container_name: php
     privileged: true
     <<: *default_logging
     <<: *default_php
+    healthcheck:
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
 
-  # php-workspace:
-  #   build:
-  #     dockerfile: ./docker/php-cli/Dockerfile
-  #     context: ..
-  #   container_name: php-workspace
-  #   <<: *default_logging
-  #   <<: *default_php
+  php_worker:
+    build:
+      dockerfile: ./docker/php/Dockerfile
+      context: ..
+    container_name: php_worker
+    <<: *default_logging
+    <<: *default_php
+    healthcheck:
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+
+  php_workspace:
+    build:
+      dockerfile: ./docker/php-cli/Dockerfile
+      context: ..
+    container_name: php_workspace
+    <<: *default_logging
+    <<: *default_php
 
   postgres:
     image: postgres:13-alpine
