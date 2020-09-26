@@ -13,6 +13,24 @@ error() {
   exit 1
 }
 
+echo "Checking DB connection ..."
+
+i=0
+until [ $i -ge 10 ]; do
+  nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" && break
+
+  i=$((i + 1))
+
+  echo "$i: Waiting for DB 1 second ..."
+  sleep 1
+done
+
+if [ $i -eq 10 ]; then
+  error "DB connection refused, terminating ..."
+fi
+
+echo "DB is up ..."
+
 ###
 ### Linting PHP
 ###

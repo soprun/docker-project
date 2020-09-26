@@ -20,8 +20,12 @@ x-logging:
 
 x-php:
   &default_php
+  restart: on-failure
+  env_file:
+    - .env
   volumes:
     - ../app:/app:rw,consistent
+    - ${COMPOSER_CACHE_DIR}:/composer/cache:rw,cached
   networks:
     - backend_tier
   depends_on:
@@ -56,13 +60,13 @@ services:
       retries: 3
       start_period: 30s
 
-  php_workspace:
-    build:
-      dockerfile: ./docker/php-cli/Dockerfile
-      context: ..
-    container_name: php_workspace
-    <<: *default_logging
-    <<: *default_php
+  # php_workspace:
+  #   build:
+  #     dockerfile: ./docker/php-cli/Dockerfile
+  #     context: ..
+  #   container_name: php_workspace
+  #   <<: *default_logging
+  #   <<: *default_php
 
   postgres:
     image: postgres:13-alpine
