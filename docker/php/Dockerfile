@@ -1,40 +1,5 @@
 ARG PHP_VERSION=7.4
 
-###
-### Installation dependencies container
-###
-
-FROM composer:latest as composer
-
-ENV COMPOSER_HOME="/composer"
-ENV COMPOSER_MEMORY_LIMIT="-1"
-ENV COMPOSER_ALLOW_SUPERUSER="1"
-
-COPY ./app/composer.* /app/
-COPY ./app/symfony.lock /app/
-
-RUN set -e \
-    ## Install composer plugin
-    && composer global require hirak/prestissimo \
-        --no-scripts \
-        --no-interaction \
-        --ignore-platform-reqs \
-    ## Install application dependencies
-    && composer install \
-        --no-scripts \
-        --no-interaction \
-        --no-autoloader \
-        --ignore-platform-reqs \
-        --profile
-
-COPY ./app/ /app
-
-RUN set -e \
-    && composer dump-autoload \
-        --optimize \
-        --classmap-authoritative \
-        --profile
-
 FROM php:${PHP_VERSION}-fpm-alpine AS builder
 
 ###
@@ -56,6 +21,8 @@ ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
 COPY ./docker/php/php.ini /usr/local/etc/php/conf.d/php.override.ini
 COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
 ###
 ### Copy source files to workdir
 ###
@@ -63,17 +30,13 @@ COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 WORKDIR /app
 COPY ./app /app
 
-COPY --from=composer /usr/bin/composer /usr/local/bin/composer
-COPY --from=composer /app/vendor /app/vendor
-COPY --from=composer /composer /composer
-
 ###
 ### Docker healthcheck
 ###
 
-COPY ./docker/php/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
-RUN chmod +x /usr/local/bin/docker-healthcheck
-HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
+#COPY ./docker/php/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
+#RUN chmod +x /usr/local/bin/docker-healthcheck
+#HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
 
 ###
 ### Docker entrypoint

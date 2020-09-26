@@ -58,7 +58,7 @@ if ! composer --version >/dev/null 2>/dev/null; then
 fi
 
 if ! composer global show hirak/prestissimo >/dev/null 2>/dev/null; then
-  error 'Composer "hirak/prestissimo" is not installed.'
+  log_info 'Composer "hirak/prestissimo" is not installed.'
 fi
 
 if ! test -f ./vendor/autoload.php; then
