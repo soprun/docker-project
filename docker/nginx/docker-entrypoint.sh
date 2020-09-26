@@ -2,33 +2,27 @@
 
 set -e
 
-log_info() {
-  printf "=>\033[0;34m log.info: \033[0m%-6s\n" "$@"
-  logger -p user.info -t "$SHELL_SCRIPT_NAME" "$@"
+check_connection() {
+  printf "\nChecking connection ...\n"
+  local i=0
+
+  until [ $i -ge 20 ]; do
+    nc -z "$1" "$2" && break
+
+    i=$((i + 1))
+
+    printf "=> \033[0;31m%u\033[0m: Waiting for \033[0;34m%s:%u\033[0m 1 second ...\n" "$i" "$1" "$2"
+    sleep 1
+  done
+
+  if [ $i -eq 20 ]; then
+    printf "\033[0;31m%s\033[0m\n" "Connection refused, terminating ..."
+    exit 1
+  fi
+
+  printf "\033[0;32m%s:%u\033[0m is up ...\n" "$1" "$2"
 }
 
-error() {
-  printf "=>\033[0;31m log.error: \033[0m%-6s\n" "$@" >&2
-  logger -p user.error -t "$SHELL_SCRIPT_NAME" "$@"
-  exit 1
-}
-
-log_info "Checking PHP connection ..."
-
-i=0
-until [ $i -ge 10 ]; do
-  nc -z php 9000 && break
-
-  i=$((i + 1))
-
-  log_info "$i: Waiting for PHP 2 second ..."
-  sleep 2
-done
-
-if [ $i -eq 10 ]; then
-  error "PHP connection refused, terminating ..."
-fi
-
-log_info "PHP is up ..."
+check_connection php 9000
 
 exec "$@"

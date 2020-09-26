@@ -23,23 +23,29 @@ error() {
   exit 1
 }
 
-echo "Checking DB connection ..."
+check_connection() {
+  printf "\nChecking connection ...\n"
+  local i=0
 
-i=0
-until [ $i -ge 10 ]; do
-  nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" && break
+  until [ $i -ge 20 ]; do
+    nc -z "$1" "$2" && break
 
-  i=$((i + 1))
+    i=$((i + 1))
 
-  echo "$i: Waiting for DB 2 second ..."
-  sleep 2
-done
+    printf "=> \033[0;31m%u\033[0m: Waiting for \033[0;34m%s:%u\033[0m 1 second ...\n" "$i" "$1" "$2"
+    sleep 1
+  done
 
-if [ $i -eq 10 ]; then
-  error "DB connection refused, terminating ..."
-fi
+  if [ $i -eq 20 ]; then
+    printf "\033[0;31m%s\033[0m\n" "Connection refused, terminating ..."
+    exit 1
+  fi
 
-echo "DB is up ..."
+  printf "\033[0;32m%s:%u\033[0m is up ...\n" "$1" "$2"
+}
+
+check_connection $POSTGRES_HOST $POSTGRES_PORT
+check_connection $REDIS_HOST $REDIS_PORT
 
 ###
 ### Linting PHP
@@ -72,4 +78,3 @@ log_info "Debug level: ${APP_DEBUG_LEVEL}"
 composer check-platform-reqs
 
 exec docker-php-entrypoint "$@"
-
