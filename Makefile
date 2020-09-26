@@ -1,6 +1,9 @@
-include ./docker/.env
-include ./app/.env
-#-include ./app/.env.local
+-include ./docker/.env
+-include ./app/.env
+-include ./app/.env.local
+
+export $(shell sed 's/=.*//' ./docker/.env)
+export $(shell sed 's/=.*//' ./app/.env)
 
 SHELL := /bin/bash
 TAG := latest
@@ -38,22 +41,23 @@ DOCKER_COMPOSE := docker-compose --file ./docker/docker-compose.yml
 
 help: ## Display this help message
 	@printf "\nPlease use \033[33m\'make <target>'\033[0m where \033[33m<target>\033[0m is one of\n\n"
-	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[34m  %-25s\033[0m %s\n", $$1, $$2}'
+	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | \
+	awk 'BEGIN {FS = ":.*?## "}; {printf "\033[34m  %-25s\033[0m %s\n", $$1, $$2}'
 
 up: ## Build and start services
 	$(info Make: Starting "$(APP_ENV)" environment containers.)
-	$(DOCKER_COMPOSE) up --quiet-pull --build --detach
+	$(DOCKER_COMPOSE) up --detach
 
 build: ## Build services.
 	$(info Make: Building "$(APP_ENV)" environment images.)
-	$(DOCKER_COMPOSE) build --no-cache
+	$(DOCKER_COMPOSE) build --parallel
 
 build-php: ## Build services.
 	$(DOCKER_COMPOSE) build --compress --parallel --force-rm $(SERVICE_PHP)
 
 rebuild: ## Rebuild services.
 	$(info Make: Rebuilding "$(APP_ENV)" environment images.)
-	$(DOCKER_COMPOSE) up --quiet-pull --build --detach --force-recreate --remove-orphans --renew-anon-volumes
+	$(DOCKER_COMPOSE) up --build --detach --force-recreate --remove-orphans --renew-anon-volumes
 
 stop: ## Stopping containers.
 	$(info Make: Stopping "$(APP_ENV)" environment containers.)

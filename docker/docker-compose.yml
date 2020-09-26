@@ -20,7 +20,6 @@ x-logging:
 
 x-php:
   &default_php
-  restart: on-failure
   env_file:
     - .env
   volumes:
@@ -39,7 +38,9 @@ services:
       context: ..
     container_name: nginx
     <<: *default_logging
-    ports: [ 80:80, 443:443 ]
+    ports:
+      - 80:80
+      - 443:443
     networks:
       - frontend_tier
       - backend_tier

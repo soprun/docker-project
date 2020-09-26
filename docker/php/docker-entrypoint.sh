@@ -1,7 +1,5 @@
 #!/bin/sh
 
-clear
-
 set -e
 
 # first arg is `-f` or `--some-option`
@@ -33,8 +31,8 @@ until [ $i -ge 10 ]; do
 
   i=$((i + 1))
 
-  echo "$i: Waiting for DB 1 second ..."
-  sleep 1
+  echo "$i: Waiting for DB 2 second ..."
+  sleep 2
 done
 
 if [ $i -eq 10 ]; then
