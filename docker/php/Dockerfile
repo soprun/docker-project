@@ -1,33 +1,8 @@
-ARG PHP_VERSION=7.4
-
-FROM composer:latest as composer
-
-ENV COMPOSER_HOME="/composer"
-ENV COMPOSER_MEMORY_LIMIT="-1"
-ENV COMPOSER_ALLOW_SUPERUSER="1"
-
-WORKDIR /app
-COPY ./app/composer.* /app/
-COPY ./app/symfony.lock /app/
-
-RUN set -e \
-    ## Install composer plugin
-    && composer global require hirak/prestissimo \
-        --no-progress \
-        --no-scripts \
-        --no-interaction \
-    ## Install application dependencies
-    && composer install \
-        --no-progress \
-        --no-scripts \
-        --no-interaction \
-        --optimize-autoloader \
-        --classmap-authoritative \
-        --profile
-
 ###
 ### Installation base container
 ###
+
+ARG PHP_VERSION=7.4
 
 FROM php:${PHP_VERSION}-fpm-alpine AS builder
 
@@ -43,16 +18,14 @@ ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
 COPY ./docker/php/php.ini /usr/local/etc/php/conf.d/php.override.ini
 COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 ###
 ### Copy source files to workdir
 ###
 
 WORKDIR /app
 COPY ./app /app
-
-COPY --from=composer /usr/bin/composer /usr/local/bin/composer
-COPY --from=composer /app/vendor /app/vendor
-COPY --from=composer /composer /composer
 
 ###
 ### Docker entrypoint

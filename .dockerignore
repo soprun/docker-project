@@ -1,14 +1,12 @@
 /.idea
 /.git
 /.github
-#/app/var
-#/app/vendor
 
 # Files
-README.md
-Makefile
-
 .DS_Store
 .gitignore
 .dockerignore
 .editorconfig
+
+README.md
+Makefile

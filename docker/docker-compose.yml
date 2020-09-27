@@ -50,11 +50,6 @@ services:
     privileged: true
     <<: *default_logging
     <<: *default_php
-    healthcheck:
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 30s
 
   # php_workspace:
   #   build:
