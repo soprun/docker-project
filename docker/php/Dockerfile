@@ -38,13 +38,6 @@ RUN set -eux; \
   docker-php-source delete; \
   apk del .build-deps
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-### Copy configuration files
-COPY ./docker/php/php.ini /usr/local/etc/php/conf.d/php.override.ini
-COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
-COPY ./docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
-
 ### Environment variables
 ENV COMPOSER_HOME="/composer"
 ENV COMPOSER_MEMORY_LIMIT="-1"
@@ -52,11 +45,20 @@ ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
 
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+### Copy configuration files
+COPY ./docker/php/php.ini /usr/local/etc/php/conf.d/php.override.ini
+COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+COPY ./docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+
 ### Copy source files to workdir
 WORKDIR /app
 COPY ./app /app
 
 RUN set -eux; \
+  chown -R www-data:www-data /app; \
+  chmod -R 755 /app/var; \
   chmod +x /usr/local/bin/docker-entrypoint;
 
 ### Startup
