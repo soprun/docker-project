@@ -77,4 +77,7 @@ fi
 # Check that platform requirements are satisfied.
 #composer check-platform-reqs
 
+chown -R www-data:www-data /app
+chgrp www-data /app
+
 exec "$@"

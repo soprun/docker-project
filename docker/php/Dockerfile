@@ -56,7 +56,6 @@ WORKDIR /app
 COPY ./app /app
 
 RUN set -eux; \
-  chown -R www-data:www-data /app; \
   chmod +x /usr/local/bin/docker-entrypoint; \
   ## Install composer plugin
   composer global require hirak/prestissimo --no-progress --no-scripts --no-interaction;
