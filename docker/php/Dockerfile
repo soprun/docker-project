@@ -6,8 +6,6 @@ RUN set -eux; \
   apk add --no-cache \
     bash \
     git \
-    zip \
-    curl \
   ; \
   # Install extensions and utilities
 	apk add --no-cache --virtual .build-deps \
