@@ -54,7 +54,7 @@ check_connection $REDIS_HOST $REDIS_PORT
 printf "\033[0;32m %-6s\033[0m\n" 'Linting PHP files 🗂.'
 
 if ! composer --version >/dev/null 2>/dev/null; then
-  error 'Composer is not installed.'
+  log_info 'Composer is not installed.'
 fi
 
 if ! composer global show hirak/prestissimo >/dev/null 2>/dev/null; then
