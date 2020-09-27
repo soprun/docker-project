@@ -9,8 +9,9 @@ FROM nginx:${NGINX_VERSION}-alpine AS builder
 WORKDIR /app
 
 COPY ./app/public/ /app/public/
-COPY ./docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY ./docker/nginx/snippets/ /etc/nginx/snippets/
 COPY ./docker/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./docker/nginx/default.conf /etc/nginx/sites-available/default.conf
 
 ###
 ### Docker entrypoint

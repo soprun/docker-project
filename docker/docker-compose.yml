@@ -4,11 +4,11 @@ version: "3.4"
 #  default:
 #    driver: local
 
-networks:
-  frontend_tier:
-    driver: bridge
-  backend_tier:
-    driver: bridge
+#networks:
+#  frontend_tier:
+#    driver: bridge
+#  backend_tier:
+#    driver: bridge
 
 x-logging:
   &default_logging
@@ -25,8 +25,6 @@ x-php:
   volumes:
     - ../app:/app:rw,consistent
     - ${COMPOSER_CACHE_DIR}:/composer/cache:rw,cached
-  networks:
-    - backend_tier
   depends_on:
     - postgres
     - redis
@@ -41,9 +39,6 @@ services:
     ports:
       - 80:80
       - 443:443
-    networks:
-      - frontend_tier
-      - backend_tier
     depends_on:
       - php
 
@@ -77,12 +72,8 @@ services:
       - POSTGRES_USERNAME
       - POSTGRES_PASSWORD
     ports: [ 5432 ]
-    networks:
-      - backend_tier
 
   redis:
     image: redis:6-alpine
     container_name: redis
     ports: [ 6379 ]
-    networks:
-      - backend_tier
