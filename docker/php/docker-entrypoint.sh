@@ -69,15 +69,11 @@ fi
 ### Startup
 ###
 
-#log_info "Starting $(php-fpm -v 2>&1 | head -1)"
-#log_info "Environment: ${APP_ENV}"
-#log_info "Debug: ${APP_DEBUG}"
-#log_info "Debug level: ${APP_DEBUG_LEVEL}"
-
 # Check that platform requirements are satisfied.
 #composer check-platform-reqs
 
-chown -R www-data:www-data /app
-chgrp www-data /app
+#mkdir -p /app/var
+#chown -R www-data:www-data /app
+#chgrp www-data /app
 
 exec "$@"

@@ -2,11 +2,16 @@
 FROM php:7.4-fpm-alpine
 
 RUN set -eux; \
+  # Create user www-data with id 1000
+  usermod -u 1000 www-data; \
   # Persistent / Runtime deps
   apk add --no-cache \
+    curl \
     bash \
     vim \
     git \
+    make \
+    zip \
   ; \
   # Install extensions and utilities
 	apk add --no-cache --update --virtual .build-deps \
