@@ -1,9 +1,8 @@
 ### Installation base container
 FROM php:7.4-fpm-alpine
+#  adduser -S www-data -u 1000; \
 
 RUN set -eux; \
-  # Create user www-data with id 1000
-  usermod -u 1000 www-data; \
   # Persistent / Runtime deps
   apk add --no-cache \
     curl \
