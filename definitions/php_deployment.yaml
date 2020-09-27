@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php
+  labels:
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: php
+        tier: backend
+    spec:
+      volumes:
+        - name: code
+          persistentVolumeClaim:
+            claimName: code
+      containers:
+        - name: php
+          image: php:7-fpm
+          volumeMounts:
+            - name: code
+              mountPath: /code
+      initContainers:
+        - name: install
+          image: busybox
+          volumeMounts:
+            - name: code
+              mountPath: /code
+          command:
+            - wget
+            - "-O"
+            - "/code/index.php"
+            - https://raw.githubusercontent.com/do-community/php-kubernetes/master/index.php
