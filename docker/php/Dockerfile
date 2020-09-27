@@ -5,6 +5,7 @@ RUN set -eux; \
   # Persistent / Runtime deps
   apk add --no-cache \
     bash \
+    vim \
     git \
   ; \
   # Install extensions and utilities
@@ -15,8 +16,7 @@ RUN set -eux; \
     zlib-dev \
     postgresql-dev \
 	; \
-	docker-php-ext-configure zip; \
-  docker-php-ext-install -j$(nproc) \
+  docker-php-ext-install \
     pdo \
     pdo_pgsql \
     pgsql \
@@ -35,6 +35,7 @@ RUN set -eux; \
     xdebug \
     opcache \
   ; \
+  docker-php-source delete; \
   apk del .build-deps
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

@@ -77,4 +77,4 @@ fi
 # Check that platform requirements are satisfied.
 #composer check-platform-reqs
 
-exec docker-php-entrypoint "$@"
+exec "$@"

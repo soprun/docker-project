@@ -2,7 +2,7 @@
 /.git
 /.github
 /app/var
-/app/vendor
+# /app/vendor
 
 # Files
 .DS_Store
