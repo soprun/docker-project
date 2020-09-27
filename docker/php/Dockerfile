@@ -9,7 +9,7 @@ RUN set -eux; \
     git \
   ; \
   # Install extensions and utilities
-	apk add --no-cache --virtual .build-deps \
+	apk add --no-cache --update --virtual .build-deps \
     $PHPIZE_DEPS \
     icu-dev \
     libzip-dev \
@@ -19,7 +19,6 @@ RUN set -eux; \
   docker-php-ext-install \
     pdo \
     pdo_pgsql \
-    pgsql \
     intl \
     zip \
   ; \
@@ -58,8 +57,9 @@ COPY ./app /app
 
 RUN set -eux; \
   chown -R www-data:www-data /app; \
-  chmod -R 755 /app/var; \
-  chmod +x /usr/local/bin/docker-entrypoint;
+  chmod +x /usr/local/bin/docker-entrypoint; \
+  ## Install composer plugin
+  composer global require hirak/prestissimo --no-progress --no-scripts --no-interaction;
 
 ### Startup
 ENTRYPOINT ["docker-entrypoint"]

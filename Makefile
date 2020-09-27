@@ -91,3 +91,16 @@ console-env-vars: ## Symfony Container Environment Variables
 
 exec: ## Run a command in a running container
 	@docker exec --interactive --tty $(SERVICE_PHP) bash
+
+composer-install: ## Installs the project dependencies
+	docker run --rm --interactive --tty \
+    --volume $(PWD)/app:/app \
+    --volume $(COMPOSER_HOME):/tmp \
+    composer install \
+    --ignore-platform-reqs \
+    --no-scripts
+
+asea:
+	mkdir -p /app/var
+	chown -R www-data:www-data /app/var
+	chmod -R 777 /app/var

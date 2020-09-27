@@ -23,7 +23,7 @@ x-php:
   env_file:
     - .env
   volumes:
-    - ../app:/app:rw,cached
+    # - ../app:/app:rw,cached
     - ${COMPOSER_CACHE_DIR}:/composer/cache:rw,cached
   depends_on:
     - postgres
