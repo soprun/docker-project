@@ -28,7 +28,7 @@ check_connection() {
   local i=0
 
   until [ $i -ge 20 ]; do
-    nc -z "$1" "$2" && break
+    nc -zv "$1" "$2" && break
 
     i=$((i + 1))
 
