@@ -42,7 +42,6 @@ RUN set -eux \
     pdo_pgsql \
     opcache \
     mbstring \
-    mcrypt \
     zip \
     intl \
   && docker-php-source delete \

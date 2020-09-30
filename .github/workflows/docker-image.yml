@@ -41,10 +41,10 @@ jobs:
           key: db
 
       # see: https://symfony.com/blog/the-php-security-checker-as-a-docker-image
-      - name: PHP Security Checker
-        uses: symfonycorp/security-checker-action@v2
-        with:
-          lock: ./app/composer.lock
+      # - name: PHP Security Checker
+      #   uses: symfonycorp/security-checker-action@v2
+      #   with:
+      #     lock: ./app/composer.lock
 
       - name: Build the Docker image
         run: |
