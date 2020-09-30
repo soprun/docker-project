@@ -1,23 +1,19 @@
-name: Docker Image CI
+name: Docker build image
 
 on:
   push:
-    # Publish `master` as Docker `latest` image.
     branches:
       - master
-
-    # Publish `v1.2.3` tags as releases.
     tags:
       - v*
-
-  # Run tests for any PRs.
   pull_request:
 
 env:
-  IMAGE_NGINX_NAME: soprun/sandbox-nginx
-  IMAGE_NGINX_FILE: ./docker/nginx/Dockerfile
-
   IMAGE_PHP_NAME: soprun/sandbox-php
+  IMAGE_PHP_TAG_DEV: soprun/sandbox-php:dev
+  IMAGE_PHP_TAG_PROD: soprun/sandbox-php:prod
+  IMAGE_PHP_TAG_LATEST: soprun/sandbox-php:latest
+
   IMAGE_PHP_FILE: ./docker/php/Dockerfile
 
 jobs:
@@ -64,8 +60,15 @@ jobs:
 
           docker build \
           --file "${{ env.IMAGE_PHP_FILE }}" \
-          --tag "${{ env.IMAGE_PHP_NAME }}:$VERSION" \
-          "."
+          --target prod \
+          --tag "${{ env.IMAGE_PHP_NAME }}:prod" \
+          .
+
+          docker build \
+          --file "${{ env.IMAGE_PHP_FILE }}" \
+          --target dev \
+          --tag "${{ env.IMAGE_PHP_NAME }}:dev" \
+          .
 
           docker push "${{ env.IMAGE_NGINX_NAME }}"
           docker push "${{ env.IMAGE_PHP_NAME }}"
@@ -73,5 +76,3 @@ jobs:
           # docker-compose build --paralle
           # docker tag docker-project_nginx ${{ env.IMAGE_NGINX_NAME }}:$VERSION
           # docker tag pdocker-project_php ${{ env.IMAGE_PHP_NAME }}:$VERSION
-
-
