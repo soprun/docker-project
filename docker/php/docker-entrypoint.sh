@@ -65,6 +65,11 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'bin/console' ]; then
     log_info 'Composer dependencies are not installed.'
   fi
 
+  # if [ "$APP_ENV" != 'prod' ]; then
+  #   # Always try to reinstall deps when not in prod
+  #   composer install --prefer-dist --no-progress --no-suggest --no-interaction
+  # fi
+
   # Check that platform requirements are satisfied.
   #composer check-platform-reqs
 
@@ -78,7 +83,6 @@ fi
 exec docker-php-entrypoint "$@"
 
 # https://github.com/dunglas/symfony-docker
-
 
 # sudo chmod -R +rw wordpress
 # https://vsupalov.com/docker-wordpress-start/

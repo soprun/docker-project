@@ -45,9 +45,11 @@ services:
       - php
 
   php: # php_worker
+    image: soprun/sandbox-php:dev
     build:
       dockerfile: ./docker/php/Dockerfile
       context: ..
+      target: dev
     container_name: php
     privileged: true
     <<: *default_logging
