@@ -30,8 +30,7 @@ ENV COMPOSER_MEMORY_LIMIT="-1"
 ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ### install dependencies
-RUN apk update \
-   # Install extensions and utilities
+RUN set -eux; \
   && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     postgresql-dev \
   # Persistent dependencies
@@ -39,7 +38,6 @@ RUN apk update \
     bash \
   # Install required PHP extensions
   && docker-php-ext-install \
-    pgsql \
     pdo \
     pdo_pgsql \
     opcache \
