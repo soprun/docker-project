@@ -27,9 +27,9 @@ SERVICE_NGINX := nginx
 SERVICE_PHP := php
 SERVICE_PHP_WORKSPACE := php_workspace
 
-IMAGE_PHP := $(ACCOUNT)/$(SERVICE_PHP)/$(TAG_LATEST)
-IMAGE_PHP_DEV := $(ACCOUNT)/$(SERVICE_PHP)/$(TAG_DEV)
-IMAGE_PHP_PROD := $(ACCOUNT)/$(SERVICE_PHP)/$(TAG_DEV)
+IMAGE_PHP := $(ACCOUNT)/$(SERVICE_PHP)
+IMAGE_PHP_DEV := $(ACCOUNT)/$(SERVICE_PHP):$(TAG_DEV)
+IMAGE_PHP_PROD := $(ACCOUNT)/$(SERVICE_PHP):$(TAG_PROD)
 
 #IMAGE_PHP_CLI := $(ACCOUNT)/$(SERVICE_PHP_CLI)
 #IMAGE_NGINX := $(ACCOUNT)/$(SERVICE_NGINX)
@@ -116,9 +116,31 @@ PHP_TAG := sandbox-php-cli
 #docker-build:
 #	docker build --tag sandbox-php-cli . && docker run --name sandbox-php-cli sandbox-php-cli
 
-docker-builder-php:
-	docker builder build \
+docker-builder-php-dev:
+	@docker builder build \
     --file "./docker/php/Dockerfile" \
-    --target "${tag_production}" \
-    --tag "${name}:${tag_production}" \
+    --target $(TAG_DEV) \
+    --tag $(IMAGE_PHP_DEV) \
     .
+
+	echo docker run \
+    --name $(IMAGE_PHP_DEV) \
+    --detach \
+    --rm \
+    $(IMAGE_PHP_DEV)
+
+
+
+
+######
+
+log-analyzer: ## real-time report:
+	@cat access.log | docker run --rm -i -e LANG=$LANG allinurl/goaccess -a -o html --log-format COMBINED - > report.html
+
+log-analyzer-real-time: ## real-time report:
+	@cat access.log | docker run -p 7890:7890 --rm -i -e LANG=$LANG allinurl/goaccess -a -o html --log-format COMBINED --real-time-html - > report.html
+
+
+# goaccess /var/log/nginx/access.log --log-format=COMBINED
+# или чтобы посмотреть статистику за все время
+# zcat /var/log/nginx/access.log.*.gz | goaccess /var/log/nginx/access.log --log-format=COMBINED

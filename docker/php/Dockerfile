@@ -28,36 +28,58 @@ ENV COMPOSER_MEMORY_LIMIT="-1"
 ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ### install dependencies
-RUN set -eux \
-  # Persistent / Runtime dependencies
-	&& apk add --no-cache \
-    git \
-    tree \
-    vim \
-    zip \
-    curl \
-    bash \
-    bash-completion \
-    make \
-    gnupg \
-    ca-certificates \
-  ;
+#RUN set -eux \
+#  # Persistent / Runtime dependencies
+#	&& apk add --no-cache \
+#    git \
+#    tree \
+#    vim \
+#    zip \
+#    curl \
+#    bash \
+#    bash-completion \
+#    make \
+#    gnupg \
+#    ca-certificates \
+#    openssl \
+#    gcc \
+#    autoconf \
+#    gettext \
+#    autopoint \
+#  ;
 
 RUN set -eux \
   # Install extensions and utilities
-	&& apk add --no-cache \
-    $PHPIZE_DEPS \
-    libssl-dev \
-    libzip-dev \
-    libpq-dev \
-    libmcrypt-dev \
-    libmemcached-dev \
-    libicu-dev \
-	; \
-	&& docker-php-ext-configure zip --with-libzip \
-	&& docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
+  && apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS \
+  && apk add --no-cache --virtual .build-deps \
+    postgresql-dev \
+    make \
+    g++ \
+    autoconf \
+  # # Persistent dependencies
+  && apk add --no-cache \
+    openssl \
+    curl \
+    bash \
+    bash-completion \
+    vim \
+    git \
+    make \
+    gnupg \
+    ca-certificates \
 
-RUN set -eux \
+    libbz2 \
+    libzip-dev \
+    zlib-dev \
+    bzip2-dev \
+    libxslt-dev \
+    libmcrypt-dev \
+    libxml2-dev \
+    yaml-dev \
+    libaio-dev \
+    libsodium-dev \
+	&& docker-php-ext-configure zip \
+	&& docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
   && docker-php-ext-install -j$(nproc) \
   && docker-php-ext-install pgsql \
   && docker-php-ext-install pdo \
@@ -70,7 +92,23 @@ RUN set -eux \
   && docker-php-ext-install gettext \
   && docker-php-ext-install pcntl \
   && docker-php-ext-install mbstring \
-  && docker-php-source delete
+  && docker-php-ext-install json \
+  && docker-php-ext-install simplexml \
+  && docker-php-ext-install xsl \
+  && docker-php-source delete \
+  && pecl install \
+    apcu-$APCU_VERSION \
+    redis-$REDIS_VERSION \
+    xdebug-$XDEBUG_VERSION \
+  && docker-php-ext-enable \
+    apcu \
+    redis \
+    xdebug \
+    opcache \
+    sodium \
+  # Remove unnecessary stuff
+  && pecl clear-cache \
+  && apk del .phpize-deps .build-deps
 
 RUN usermod -u 33 www-data
 
@@ -78,7 +116,10 @@ RUN usermod -u 33 www-data
 WORKDIR /usr/src/app
 
 ### Copy configuration files
-COPY ./docker/php/php.ini /usr/local/etc/php/conf.d/php.override.ini
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY ./docker/php/php.ini "$PHP_INI_DIR/conf.d/php_settings.ini"
+COPY ./docker/php/config/zz-nolog.conf "$PHP_INI_DIR/../php-fpm.d/zz-nolog.conf"
+
 COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -106,4 +147,16 @@ CMD ["php-fpm", "--nodaemonize"]
 # Copy the rest of your app's source code from your host to your image filesystem.
 ### Copy source files to workdir
 COPY ./app /usr/src/app
-RUN chown -R 1000:1000 /usr/src/app
+
+RUN set -eux \
+  && mkdir -p /usr/src/app \
+  && chown -R 1000:1000 /usr/src/app
+
+### Installation building a production image from build.
+FROM builder AS prod
+
+ENV APP_ENV="prod"
+ENV APP_DEBUG="0"
+
+### Installation building a development image from build.
+FROM builder AS dev
