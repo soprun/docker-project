@@ -48,15 +48,11 @@ ENV COMPOSER_ALLOW_SUPERUSER="1"
 #    autopoint \
 #  ;
 
-RUN set -eux \
-  # Install extensions and utilities
-  && apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS \
-  && apk add --no-cache --virtual .build-deps \
+RUN apk update \
+   # Install extensions and utilities
+  && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     postgresql-dev \
-    make \
-    g++ \
-    autoconf \
-  # # Persistent dependencies
+  # Persistent dependencies
   && apk add --no-cache \
     openssl \
     curl \
@@ -64,38 +60,15 @@ RUN set -eux \
     bash-completion \
     vim \
     git \
-    make \
     gnupg \
     ca-certificates \
-
-    libbz2 \
-    libzip-dev \
-    zlib-dev \
-    bzip2-dev \
-    libxslt-dev \
-    libmcrypt-dev \
-    libxml2-dev \
-    yaml-dev \
-    libaio-dev \
-    libsodium-dev \
-	&& docker-php-ext-configure zip \
-	&& docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-  && docker-php-ext-install -j$(nproc) \
+  # PHP extensions
   && docker-php-ext-install pgsql \
   && docker-php-ext-install pdo \
   && docker-php-ext-install pdo_pgsql \
-  && docker-php-ext-install intl \
-  && docker-php-ext-install zip \
-  && docker-php-ext-install exif \
-  && docker-php-ext-install bcmath \
   && docker-php-ext-install opcache \
-  && docker-php-ext-install gettext \
-  && docker-php-ext-install pcntl \
-  && docker-php-ext-install mbstring \
-  && docker-php-ext-install json \
-  && docker-php-ext-install simplexml \
-  && docker-php-ext-install xsl \
   && docker-php-source delete \
+  # PECL extensions
   && pecl install \
     apcu-$APCU_VERSION \
     redis-$REDIS_VERSION \
@@ -105,38 +78,36 @@ RUN set -eux \
     redis \
     xdebug \
     opcache \
-    sodium \
   # Remove unnecessary stuff
   && pecl clear-cache \
-  && apk del .phpize-deps .build-deps
-
-RUN usermod -u 33 www-data
+  && apk del .build-deps
 
 # Set the working directory.
-WORKDIR /usr/src/app
+WORKDIR /app
+
+### Use the default production configuration
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 ### Copy configuration files
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-COPY ./docker/php/php.ini "$PHP_INI_DIR/conf.d/php_settings.ini"
-COPY ./docker/php/config/zz-nolog.conf "$PHP_INI_DIR/../php-fpm.d/zz-nolog.conf"
-
+COPY ./docker/php/conf.d/ "$PHP_INI_DIR/conf.d/"
+COPY ./docker/php/php.ini "$PHP_INI_DIR/conf.d/php.ini"
 COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Run the command inside your image filesystem.
 # Install application dependencies
-RUN set -eux; \
-  composer install \
-    --prefer-dist \
-    --no-progress \
-    --no-scripts \
-    --no-interaction \
-    --optimize-autoloader \
-    --classmap-authoritative \
-    --profile \
-  ;\
-  composer clear-cache
+#RUN set -eux; \
+#  composer install \
+#    --prefer-dist \
+#    --no-progress \
+#    --no-scripts \
+#    --no-interaction \
+#    --optimize-autoloader \
+#    --classmap-authoritative \
+#    --profile \
+#  ;\
+#  composer clear-cache
 
 # Add metadata to the image to describe which port the container is listening on at runtime.
 EXPOSE 9000
@@ -146,11 +117,11 @@ CMD ["php-fpm", "--nodaemonize"]
 
 # Copy the rest of your app's source code from your host to your image filesystem.
 ### Copy source files to workdir
-COPY ./app /usr/src/app
+COPY ./app /app
 
 RUN set -eux \
-  && mkdir -p /usr/src/app \
-  && chown -R 1000:1000 /usr/src/app
+  && mkdir -p /app \
+  && chown -R 1000:1000 /app
 
 ### Installation building a production image from build.
 FROM builder AS prod
