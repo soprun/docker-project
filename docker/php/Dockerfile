@@ -52,7 +52,6 @@ RUN set -eux \
     curl \
     vim \
     supervisor \
-    locales \
   # Install required PHP extensions
   && docker-php-ext-install \
     pdo \
