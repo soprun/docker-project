@@ -72,7 +72,3 @@ jobs:
 
           docker push "${{ env.IMAGE_NGINX_NAME }}"
           docker push "${{ env.IMAGE_PHP_NAME }}"
-
-          # docker-compose build --paralle
-          # docker tag docker-project_nginx ${{ env.IMAGE_NGINX_NAME }}:$VERSION
-          # docker tag pdocker-project_php ${{ env.IMAGE_PHP_NAME }}:$VERSION
