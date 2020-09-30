@@ -1,5 +1,4 @@
 #!/bin/sh
-
 set -e
 
 # first arg is `-f` or `--some-option`
@@ -44,36 +43,42 @@ check_connection() {
   printf "\033[0;32m%s:%u\033[0m is up ...\n" "$1" "$2"
 }
 
-check_connection $POSTGRES_HOST $POSTGRES_PORT
-check_connection $REDIS_HOST $REDIS_PORT
+if [ "$1" = 'php-fpm' ] || [ "$1" = 'bin/console' ]; then
+  check_connection $POSTGRES_HOST $POSTGRES_PORT
+  check_connection $REDIS_HOST $REDIS_PORT
 
-###
-### Linting PHP
-###
+  ###
+  ### Linting PHP
+  ###
 
-printf "\033[0;32m %-6s\033[0m\n" 'Linting PHP files 🗂.'
+  log_info 'Linting PHP files 🗂.'
 
-if ! composer --version >/dev/null 2>/dev/null; then
-  log_info 'Composer is not installed.'
+  if ! composer --version >/dev/null 2>/dev/null; then
+    log_info 'Composer is not installed.'
+  fi
+
+  if ! composer global show hirak/prestissimo >/dev/null 2>/dev/null; then
+    log_info 'Composer "hirak/prestissimo" is not installed.'
+  fi
+
+  if ! test -f ./vendor/autoload.php; then
+    log_info 'Composer dependencies are not installed.'
+  fi
+
+  # Check that platform requirements are satisfied.
+  #composer check-platform-reqs
+
+  #mkdir -p /app/var
+  #chown -R www-data:www-data /app
+  #chgrp www-data /app
+
+  chown -R www-data:www-data /app
 fi
 
-if ! composer global show hirak/prestissimo >/dev/null 2>/dev/null; then
-  log_info 'Composer "hirak/prestissimo" is not installed.'
-fi
+exec docker-php-entrypoint "$@"
 
-if ! test -f ./vendor/autoload.php; then
-  log_info 'Composer dependencies are not installed.'
-fi
+# https://github.com/dunglas/symfony-docker
 
-###
-### Startup
-###
 
-# Check that platform requirements are satisfied.
-#composer check-platform-reqs
-
-#mkdir -p /app/var
-#chown -R www-data:www-data /app
-#chgrp www-data /app
-
-exec "$@"
+# sudo chmod -R +rw wordpress
+# https://vsupalov.com/docker-wordpress-start/

@@ -52,17 +52,16 @@ up: ## Run application in the docker-compose
 down: ## Stops containers and removes containers, networks, volumes, and images
 	$(DOCKER_COMPOSE) down --volumes --remove-orphans --rmi local
 
+build: ## Build services.
+	$(info Make: Building "$(APP_ENV)" environment images.)
+	$(DOCKER_COMPOSE) up --build --detach
+
 rebuild: ## Rebuild services.
 	@make -s down
 	$(DOCKER_COMPOSE) up --build --detach --force-recreate --remove-orphans --renew-anon-volumes
 
 logs: ## View logs from docker containers
 	$(DOCKER_COMPOSE) logs --follow
-
-
-#build: ## Build services.
-#	$(info Make: Building "$(APP_ENV)" environment images.)
-#	$(DOCKER_COMPOSE) build --parallel
 
 #build-php: ## Build services.
 #	$(DOCKER_COMPOSE) build --compress --parallel --force-rm $(SERVICE_PHP)
@@ -104,3 +103,10 @@ asea:
 	mkdir -p /app/var
 	chown -R www-data:www-data /app/var
 	chmod -R 777 /app/var
+
+
+PHP_SERVICE := php
+PHP_TAG := sandbox-php-cli
+
+docker-build:
+	docker build --tag sandbox-php-cli . && docker run --name sandbox-php-cli sandbox-php-cli
