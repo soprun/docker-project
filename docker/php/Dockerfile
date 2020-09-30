@@ -30,7 +30,7 @@ ENV COMPOSER_MEMORY_LIMIT="-1"
 ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ### install dependencies
-RUN set -eux; \
+RUN set -eux \
   && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     postgresql-dev \
   # Persistent dependencies
