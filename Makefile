@@ -6,8 +6,10 @@ export $(shell sed 's/=.*//' ./docker/.env)
 export $(shell sed 's/=.*//' ./app/.env)
 
 SHELL := /bin/bash
-#TAG := latest
-#ACCOUNT := soprun
+ACCOUNT := soprun
+TAG_LATEST := latest
+TAG_PROD := prod
+TAG_DEV := dev
 
 #ifndef TAG
 #$(error The TAG variable is missing.)
@@ -25,7 +27,10 @@ SERVICE_NGINX := nginx
 SERVICE_PHP := php
 SERVICE_PHP_WORKSPACE := php_workspace
 
-#IMAGE_PHP := $(ACCOUNT)/$(SERVICE_PHP)
+IMAGE_PHP := $(ACCOUNT)/$(SERVICE_PHP)/$(TAG_LATEST)
+IMAGE_PHP_DEV := $(ACCOUNT)/$(SERVICE_PHP)/$(TAG_DEV)
+IMAGE_PHP_PROD := $(ACCOUNT)/$(SERVICE_PHP)/$(TAG_DEV)
+
 #IMAGE_PHP_CLI := $(ACCOUNT)/$(SERVICE_PHP_CLI)
 #IMAGE_NGINX := $(ACCOUNT)/$(SERVICE_NGINX)
 
@@ -108,5 +113,12 @@ asea:
 PHP_SERVICE := php
 PHP_TAG := sandbox-php-cli
 
-docker-build:
-	docker build --tag sandbox-php-cli . && docker run --name sandbox-php-cli sandbox-php-cli
+#docker-build:
+#	docker build --tag sandbox-php-cli . && docker run --name sandbox-php-cli sandbox-php-cli
+
+docker-builder-php:
+	docker builder build \
+    --file "./docker/php/Dockerfile" \
+    --target "${tag_production}" \
+    --tag "${name}:${tag_production}" \
+    .
