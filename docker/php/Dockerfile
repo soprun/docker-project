@@ -55,15 +55,11 @@ RUN set -eux \
     bash \
     curl \
     vim \
-    supervisor \
   # Install required PHP extensions
   && docker-php-ext-install \
     pdo \
     pdo_pgsql \
     opcache \
-    mbstring \
-    zip \
-    intl \
   && docker-php-source delete \
   # PECL extensions
   && pecl install \
