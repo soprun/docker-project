@@ -10,10 +10,6 @@ on:
 
 env:
   IMAGE_PHP_NAME: soprun/sandbox-php
-  IMAGE_PHP_TAG_DEV: soprun/sandbox-php:dev
-  IMAGE_PHP_TAG_PROD: soprun/sandbox-php:prod
-  IMAGE_PHP_TAG_LATEST: soprun/sandbox-php:latest
-
   IMAGE_PHP_FILE: ./docker/php/Dockerfile
 
 jobs:
@@ -53,22 +49,22 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
 
-          docker build \
-          --file "${{ env.IMAGE_NGINX_FILE }}" \
-          --tag "${{ env.IMAGE_NGINX_NAME }}:$VERSION" \
-          "."
+          # docker build \
+          # --file "${{ env.IMAGE_NGINX_FILE }}" \
+          # --tag "${{ env.IMAGE_NGINX_NAME }}:$VERSION" \
+          # "."
 
-          docker build \
+          docker builder build \
           --file "${{ env.IMAGE_PHP_FILE }}" \
-          --target prod \
+          --target "prod" \
           --tag "${{ env.IMAGE_PHP_NAME }}:prod" \
           .
 
-          docker build \
-          --file "${{ env.IMAGE_PHP_FILE }}" \
-          --target dev \
-          --tag "${{ env.IMAGE_PHP_NAME }}:dev" \
-          .
+          # docker build \
+          # --file "${{ env.IMAGE_PHP_FILE }}" \
+          # --target dev \
+          # --tag "${{ env.IMAGE_PHP_NAME }}:dev" \
+          # .
 
-          docker push "${{ env.IMAGE_NGINX_NAME }}"
+          # docker push "${{ env.IMAGE_NGINX_NAME }}"
           docker push "${{ env.IMAGE_PHP_NAME }}"
