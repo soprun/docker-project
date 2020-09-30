@@ -1,3 +1,5 @@
+# https://github.com/devilbox/docker-php-fpm-7.4
+
 ARG APP_ENV="dev"
 ARG APP_DEBUG="1"
 
@@ -28,45 +30,23 @@ ENV COMPOSER_MEMORY_LIMIT="-1"
 ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ### install dependencies
-#RUN set -eux \
-#  # Persistent / Runtime dependencies
-#	&& apk add --no-cache \
-#    git \
-#    tree \
-#    vim \
-#    zip \
-#    curl \
-#    bash \
-#    bash-completion \
-#    make \
-#    gnupg \
-#    ca-certificates \
-#    openssl \
-#    gcc \
-#    autoconf \
-#    gettext \
-#    autopoint \
-#  ;
-
 RUN apk update \
    # Install extensions and utilities
   && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     postgresql-dev \
   # Persistent dependencies
   && apk add --no-cache \
-    openssl \
-    curl \
     bash \
-    bash-completion \
-    vim \
-    git \
-    gnupg \
-    ca-certificates \
-  # PHP extensions
-  && docker-php-ext-install pgsql \
-  && docker-php-ext-install pdo \
-  && docker-php-ext-install pdo_pgsql \
-  && docker-php-ext-install opcache \
+  # Install required PHP extensions
+  && docker-php-ext-install \
+    pgsql \
+    pdo \
+    pdo_pgsql \
+    opcache \
+    mbstring \
+    mcrypt \
+    zip \
+    intl \
   && docker-php-source delete \
   # PECL extensions
   && pecl install \
