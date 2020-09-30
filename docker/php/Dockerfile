@@ -65,11 +65,9 @@ RUN set -eux \
   && pecl install \
     apcu-$APCU_VERSION \
     redis-$REDIS_VERSION \
-    xdebug-$XDEBUG_VERSION \
   && docker-php-ext-enable \
     apcu \
     redis \
-    xdebug \
     opcache \
   # Remove unnecessary stuff
   && pecl clear-cache \
