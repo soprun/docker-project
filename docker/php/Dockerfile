@@ -3,13 +3,13 @@
 ARG APP_ENV="dev"
 ARG APP_DEBUG="1"
 
+### Installation base container
+FROM php:${PHP_VERSION}-fpm-alpine AS builder
+
 ARG PHP_VERSION=7.4
 ARG APCU_VERSION=5.1.18
 ARG REDIS_VERSION=5.1.1
 ARG XDEBUG_VERSION=2.8.1
-
-### Installation base container
-FROM php:${PHP_VERSION}-fpm-alpine AS builder
 
 LABEL \
   maintainer="Vladislav Soprun <develop@soprun.com>" \

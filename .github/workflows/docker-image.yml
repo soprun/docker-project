@@ -8,6 +8,11 @@ on:
       - v*
   pull_request:
 
+# docker pull soprun/sandbox-php:latest
+# docker pull soprun/sandbox-php:prod
+# docker pull soprun/sandbox-php:1.0.7
+# release-
+
 env:
   IMAGE_PHP_NAME: soprun/sandbox-php
   IMAGE_PHP_FILE: ./docker/php/Dockerfile

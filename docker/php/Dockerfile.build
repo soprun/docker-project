@@ -1,0 +1,50 @@
+# https://github.com/devilbox/docker-php-fpm-7.4
+
+ARG APP_ENV="dev"
+ARG APP_DEBUG="1"
+
+### Installation base container
+FROM php:7.4-fpm-alpine AS builder
+
+LABEL \
+  org.label-schema.stage="dev"
+
+ARG PHP_VERSION=7.4
+ARG APCU_VERSION=5.1.18
+ARG REDIS_VERSION=5.1.1
+ARG XDEBUG_VERSION=2.8.1
+
+### install dependencies
+RUN set -eux \
+  && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+    postgresql-dev \
+  # Persistent dependencies
+  && apk add --no-cache \
+    bash \
+    curl \
+    vim \
+  # Install required PHP extensions
+  && docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    opcache \
+  && docker-php-source delete \
+  # PECL extensions
+  && pecl install \
+    apcu-$APCU_VERSION \
+    redis-$REDIS_VERSION \
+  && docker-php-ext-enable \
+    apcu \
+    redis \
+    opcache \
+  # Remove unnecessary stuff
+  && pecl clear-cache \
+  && apk del .build-deps
+
+### Use the default production configuration
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+### Copy configuration files
+COPY ./docker/php/conf.d/ "$PHP_INI_DIR/conf.d/"
+COPY ./docker/php/php.ini "$PHP_INI_DIR/conf.d/zz-php.ini"
+COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
