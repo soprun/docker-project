@@ -49,11 +49,15 @@ services:
     build:
       dockerfile: ./docker/php/Dockerfile
       context: ..
-      target: dev
     container_name: php
     privileged: true
     <<: *default_logging
     <<: *default_php
+
+  data:
+    image: busybox:latest
+    volumes:
+      - ./source:/var/www/html
 
   # php_workspace:
   #   build:
