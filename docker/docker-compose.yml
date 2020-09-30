@@ -41,33 +41,28 @@ services:
     container_name: nginx
     <<: *default_logging
     ports:
-      - 80:80
-      - 443:443
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
     depends_on:
       - php
 
   php: # php_worker
     image: soprun/sandbox-php:dev
-    build:
-      dockerfile: ./docker/php/Dockerfile
-      context: ..
-    container_name: php
+    container_name: php_worker
     privileged: true
     <<: *default_logging
     <<: *default_php
 
-  data:
+  php_workspace: # php_workspace
+    image: soprun/sandbox-php:dev
+    container_name: php_workspace
+    <<: *default_logging
+    <<: *default_php
+
+  storage: # Persistent files storage
     image: busybox:latest
     volumes:
-      - ./source:/var/www/html
-
-  # php_workspace:
-  #   build:
-  #     dockerfile: ./docker/php-cli/Dockerfile
-  #     context: ..
-  #   container_name: php_workspace
-  #   <<: *default_logging
-  #   <<: *default_php
+      - ./app:/app
 
   postgres:
     image: postgres:13-alpine
@@ -84,4 +79,5 @@ services:
   redis:
     image: redis:6-alpine
     container_name: redis
-    ports: [ 6379 ]
+    ports:
+      - "127.0.0.1:6379:6379"

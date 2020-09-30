@@ -144,3 +144,7 @@ log-analyzer-real-time: ## real-time report:
 # goaccess /var/log/nginx/access.log --log-format=COMBINED
 # или чтобы посмотреть статистику за все время
 # zcat /var/log/nginx/access.log.*.gz | goaccess /var/log/nginx/access.log --log-format=COMBINED
+
+create-dhparam: ## Generation of Diffie-Hellman ciphersuites
+	@$(info Generation of Diffie-Hellman ciphersuites)
+	@openssl dhparam -noout -out "./docker/nginx/ssl/dhparam.pem" $(call args, 512)

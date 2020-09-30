@@ -1,0 +1,28 @@
+#!/usr/bin/env php
+<?php
+
+//declare(strict_types=1);
+
+// toggle this to change the setting
+// define('DEBUG', true);
+// you want all errors to be triggered
+error_reporting(E_ALL & ~E_NOTICE);
+
+//
+//if (DEBUG == true) {
+//    // you're developing, so you want all errors to be shown
+//    display_errors(true);
+//    // logging is usually overkill during dev
+//    log_errors(false);
+//} else {
+//    // you don't want to display errors on a prod environment
+//    display_errors(false);
+//    // you definitely wanna log any occurring
+//    log_errors(true);
+//}
+
+try {
+    echo hex2bin(random_bytes(10)).time();
+} catch (Exception $exception) {
+}
+
