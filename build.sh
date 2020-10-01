@@ -11,18 +11,23 @@
 #
 
 VERSION=$(echo $(git describe --tags --abbrev=0) | sed -e 's,.*/\(.*\),\1,')
-
-
 VERSION=$(echo $VERSION | sed -e 's/^v//')
 
+# Use Docker `latest` tag convention
+if [ "$VERSION" == "master" ]; then
+  VERSION=latest
+fi
+
 echo $VERSION
+
+exit 0
 
 headname=develop
 
 git show-ref --quiet --verify -- "refs/heads/$headname" ||
-		echo "$headname is not a valid branch"
+  echo "$headname is not a valid branch"
 
-exit 1;
+exit 1
 # Return git current tag
 
 # Strip git ref prefix from version
