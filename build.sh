@@ -19,6 +19,8 @@ if [ "$VERSION" == "master" ]; then
 fi
 
 echo $VERSION
+#echo $(git rev-parse HEAD)
+#echo $(git rev-parse --short HEAD)
 
 exit 0
 
