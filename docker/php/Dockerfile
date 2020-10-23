@@ -4,7 +4,7 @@ ARG APP_ENV="dev"
 ARG APP_DEBUG="1"
 
 ### Installation base container
-FROM php:${PHP_VERSION}-fpm-alpine AS builder
+FROM php:7.4-fpm-alpine AS builder
 
 ARG PHP_VERSION=7.4
 ARG APCU_VERSION=5.1.18
