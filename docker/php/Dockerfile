@@ -24,14 +24,6 @@ LABEL \
   org.label-schema.url="https://soprun.com" \
   org.label-schema.vcs-url="https://github.com/soprun/docker-project.git"
 
-ARG APP_ENV
-ARG APP_DEBUG
-
-ARG PHP_VERSION
-ARG APCU_VERSION
-ARG REDIS_VERSION
-ARG XDEBUG_VERSION
-
 ### Environment variables
 ENV TZ=UTC
 ENV LANG=en_US.UTF8
