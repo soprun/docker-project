@@ -46,10 +46,16 @@ services:
     depends_on:
       - php
 
-  php: # php_worker
+  php:
+    image: soprun/sandbox-php:dev
+    container_name: php
+    privileged: true
+    <<: *default_logging
+    <<: *default_php
+
+  php_worker: # php_worker
     image: soprun/sandbox-php:dev
     container_name: php_worker
-    privileged: true
     <<: *default_logging
     <<: *default_php
 
@@ -58,11 +64,6 @@ services:
     container_name: php_workspace
     <<: *default_logging
     <<: *default_php
-
-  storage: # Persistent files storage
-    image: busybox:latest
-    volumes:
-      - ./app:/app
 
   postgres:
     image: postgres:13-alpine
