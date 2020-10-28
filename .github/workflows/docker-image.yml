@@ -12,6 +12,12 @@ env:
   IMAGE_PHP_NAME: soprun/sandbox-crm-php
   IMAGE_PHP_FILE: ./docker/php/Dockerfile
 
+  IMAGE_PHP_WORKER_NAME: soprun/sandbox-crm-php-worker
+  IMAGE_PHP_WORKER_FILE: ./docker/php/Dockerfile
+
+  IMAGE_WEBSERVER_NAME: soprun/sandbox-crm-webserver
+  IMAGE_WEBSERVER_FILE: ./docker/nginx/Dockerfile
+
 jobs:
   build:
     runs-on: ubuntu-latest
