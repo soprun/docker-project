@@ -8,19 +8,13 @@ on:
       - v*
   pull_request:
 
-# docker pull soprun/sandbox-php:latest
-# docker pull soprun/sandbox-php:prod
-# docker pull soprun/sandbox-php:1.0.7
-# release-
-
 env:
-  IMAGE_PHP_NAME: soprun/sandbox-php
+  IMAGE_PHP_NAME: soprun/sandbox-crm-php
   IMAGE_PHP_FILE: ./docker/php/Dockerfile
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
 
     steps:
       - uses: actions/checkout@v2
@@ -30,18 +24,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - uses: actions/cache@v2
-        id: cache-db
-        with:
-          path: ~/.symfony/cache
-          key: db
-
-      # see: https://symfony.com/blog/the-php-security-checker-as-a-docker-image
-      # - name: PHP Security Checker
-      #   uses: symfonycorp/security-checker-action@v2
-      #   with:
-      #     lock: ./app/composer.lock
 
       - name: Build the Docker image
         run: |
@@ -54,22 +36,10 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
 
-          # docker build \
-          # --file "${{ env.IMAGE_NGINX_FILE }}" \
-          # --tag "${{ env.IMAGE_NGINX_NAME }}:$VERSION" \
-          # "."
-
           docker builder build \
           --file "${{ env.IMAGE_PHP_FILE }}" \
-          --target "prod" \
-          --tag "${{ env.IMAGE_PHP_NAME }}:prod" \
+          --target "builder" \
+          --tag "${{ env.IMAGE_PHP_NAME }}:$VERSION" \
           .
 
-          # docker build \
-          # --file "${{ env.IMAGE_PHP_FILE }}" \
-          # --target dev \
-          # --tag "${{ env.IMAGE_PHP_NAME }}:dev" \
-          # .
-
-          # docker push "${{ env.IMAGE_NGINX_NAME }}"
           docker push "${{ env.IMAGE_PHP_NAME }}"
