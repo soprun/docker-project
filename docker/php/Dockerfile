@@ -25,10 +25,14 @@ ENV APP_ENV=$APP_ENV
 ENV APP_DEBUG=$APP_DEBUG
 
 # Set the working directory.
-WORKDIR $APP_WORKDIR
+WORKDIR /app
 
 # Add metadata to the image to describe which port the container is listening on at runtime.
 EXPOSE 9000
 
+#COPY ./docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+#RUN chmod +x /usr/local/bin/docker-entrypoint
+#ENTRYPOINT ["docker-entrypoint"]
+
 # Run the specified command within the container.
-CMD ["php-fpm", "--nodaemonize"]
+# CMD ["php-fpm", "--nodaemonize"]

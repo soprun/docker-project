@@ -10,8 +10,8 @@ x-logging:
 
 x-php:
   &default_php
-  env_file:
-    - .env
+  # env_file:
+  #   - .env
   depends_on:
     - postgres
   networks:
@@ -33,26 +33,39 @@ services:
   php_fpm:
     <<: *default_logging
     <<: *default_php
-    image: ${IMAGE_PHP_FPM}:latest
+    # image: ${IMAGE_PHP_FPM}:latest
+    build:
+      context: ..
+      dockerfile: ./docker/php/Dockerfile
+      target: build
     container_name: php_fpm
     restart: always
     networks:
       - backend_tier
       - frontend_tier
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_HOST
+      - POSTGRES_PASSWORD
+      - POSTGRES_PORT
+      - POSTGRES_USERNAME
+      - REDIS_DB
+      - REDIS_HOST
+      - REDIS_PORT
 
-  php_cli:
-    <<: *default_logging
-    <<: *default_php
-    image: ${IMAGE_PHP_CLI}:latest
-    container_name: php_cli
-    restart: unless-stopped
+  #  php_cli:
+  #    <<: *default_logging
+  #    <<: *default_php
+  #    image: ${IMAGE_PHP_CLI}:latest
+  #    container_name: php_cli
+  #    restart: unless-stopped
 
-  php_workspace:
-    <<: *default_logging
-    <<: *default_php
-    image: ${IMAGE_PHP_WORKSPACE}:latest
-    container_name: php_workspace
-    restart: unless-stopped
+  #  php_workspace:
+  #    <<: *default_logging
+  #    <<: *default_php
+  #    image: ${IMAGE_PHP_WORKSPACE}:latest
+  #    container_name: php_workspace
+  #    restart: unless-stopped
 
   redis:
     image: redis:6-alpine

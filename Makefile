@@ -1,4 +1,6 @@
-DOCKER_COMPOSE_FILES := ./docker/docker-compose.yml
+-include ./docker/.env
+
+# DOCKER_COMPOSE_FILES := ./docker/docker-compose.yml
 DOCKER_COMPOSE := docker-compose --file ./docker/docker-compose.yaml
 
 # .DEFAULT_GOAL := help
@@ -15,19 +17,27 @@ up: ## Run application in the docker-compose
 
 up-force: ## Run application in the docker-compose and recreate containers
 	$(DOCKER_COMPOSE) up --detach \
+	# Build or rebuild services \
+	--build \
 	# Recreate containers even if their configuration and image haven't changed. \
 	--force-recreate \
 	# Recreate anonymous volumes instead of retrieving data from the previous containers. \
 	--renew-anon-volumes \
-	# Remove containers for services not defined in the Compose file.
+	# Remove containers for services not defined in the Compose file. \
 	--remove-orphans
 
 ### Shutdown and cleanup
 down: ## Removes containers, default network, but preserves your PostgreSQL database.
 	$(DOCKER_COMPOSE) down
 
-down-clear: ## Removes containers, default network, and the PostgreSQL database.
-	$(DOCKER_COMPOSE) down --volumes
+down-force: ## Removes containers, default network, and the PostgreSQL database.
+	$(DOCKER_COMPOSE) down --volumes --remove-orphans
 
-docker-config:
+config: ## Validate and view the Compose file
 	$(DOCKER_COMPOSE) config
+
+build: ## Build or rebuild services
+	$(DOCKER_COMPOSE) build --parallel
+
+rebuild: down-force up-force ## dad
+	@echo 'lol'
