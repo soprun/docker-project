@@ -1,8 +1,8 @@
-ARG APP_ENV=dev
-ARG APP_DEBUG=1
+ARG APP_ENV="dev"
+ARG APP_DEBUG="1"
 
 ### Installation building a development image from build.
-FROM builder AS dev
+FROM soprun/sandbox-main-php-fpm:build AS dev
 
 ARG APP_ENV
 ARG APP_DEBUG
@@ -11,12 +11,28 @@ ARG APP_DEBUG
 ENV APP_ENV=$APP_ENV
 ENV APP_DEBUG=$APP_DEBUG
 
-ENV COMPOSER_HOME="${COMPOSER_HOME:-/composer}"
+ENV COMPOSER_HOME="/composer"
 ENV COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
 ENV COMPOSER_MEMORY_LIMIT="-1"
 ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
+
+COPY --from=soprun/sandbox-main-php-fpm:composer /composer /composer
+COPY --from=soprun/sandbox-main-php-fpm:composer /usr/bin/composer /usr/bin/composer
+
+RUN set -eux; \
+    # Use the default development configuration
+    mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" \
+    # Install application dependencies
+    composer install \
+      --no-progress \
+      --no-scripts \
+      --no-interaction \
+      --prefer-dist \
+      --optimize-autoloader \
+      --classmap-authoritative \
+      --profile
 
 #RUN set -eux; \
 #  # Persistent / Runtime deps
@@ -30,9 +46,3 @@ ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
 #    gnupg \
 #    ca-certificates \
 #  ; \
-
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-### Use the default development configuration
-RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
-
