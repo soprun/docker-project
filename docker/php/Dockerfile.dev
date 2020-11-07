@@ -1,2 +1,38 @@
+ARG APP_ENV=dev
+ARG APP_DEBUG=1
+
 ### Installation building a development image from build.
 FROM builder AS dev
+
+ARG APP_ENV
+ARG APP_DEBUG
+
+### Environment variables
+ENV APP_ENV=$APP_ENV
+ENV APP_DEBUG=$APP_DEBUG
+
+ENV COMPOSER_HOME="${COMPOSER_HOME:-/composer}"
+ENV COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
+ENV COMPOSER_MEMORY_LIMIT="-1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
+
+ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
+
+#RUN set -eux; \
+#  # Persistent / Runtime deps
+#  apk add --no-cache \
+#    curl \
+#    bash \
+#    bash-completion \
+#    vim \
+#    git \
+#    make \
+#    gnupg \
+#    ca-certificates \
+#  ; \
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+### Use the default development configuration
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+

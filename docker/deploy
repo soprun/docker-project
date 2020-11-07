@@ -25,7 +25,7 @@ for index in "${repositories[@]}"; do
     service_name="${index%%::*}"
     repository_name="${index##*::}"
 
-    echo "$service_name -> $repository_name"
+    # echo "$service_name -> $repository_name"
 done
 
 declare -a docker_compose_files=(
@@ -33,3 +33,19 @@ declare -a docker_compose_files=(
 )
 
 #docker-compose up --detach
+
+docker builder build \
+    --force-rm \
+    --no-cache \
+    --file "./php/Dockerfile" \
+    --tag "soprun/sandbox-main-php-fpm:build" \
+    --target "build" \
+    .
+
+docker builder build \
+    --force-rm \
+    --no-cache \
+    --file "./php/Dockerfile.dev" \
+    --tag "soprun/sandbox-main-php-fpm:dev" \
+    --target "dev" \
+    .

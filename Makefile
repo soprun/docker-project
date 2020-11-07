@@ -41,3 +41,8 @@ build: ## Build or rebuild services
 
 rebuild: down-force up-force ## dad
 	@echo 'lol'
+
+#remove-images: ## Remove all images.
+#	$(shell docker images --all --quiet)
+#	 @docker remove --force $(shell docker images --all --quiet)
+# docker rmi --force $(docker images --all --quiet) &>/dev/null;
