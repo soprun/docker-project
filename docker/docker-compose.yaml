@@ -1,0 +1,79 @@
+version: "3.4"
+
+x-logging:
+  &default_logging
+  logging:
+    driver: "json-file"
+    options:
+      max-file: "5"
+      max-size: "10m"
+
+x-php:
+  &default_php
+  env_file:
+    - .env
+  depends_on:
+    - postgres
+  networks:
+    - backend_tier
+  volumes:
+    - ../app:/app:rw,cached
+
+volumes:
+  # for persistence between restarts
+  postgres_data: { }
+
+networks:
+  frontend_tier:
+    driver: bridge
+  backend_tier:
+    driver: bridge
+
+services:
+  php_fpm:
+    <<: *default_logging
+    <<: *default_php
+    image: ${IMAGE_PHP_FPM}:latest
+    container_name: php_fpm
+    restart: always
+    networks:
+      - backend_tier
+      - frontend_tier
+
+  php_cli:
+    <<: *default_logging
+    <<: *default_php
+    image: ${IMAGE_PHP_CLI}:latest
+    container_name: php_cli
+    restart: unless-stopped
+
+  php_workspace:
+    <<: *default_logging
+    <<: *default_php
+    image: ${IMAGE_PHP_WORKSPACE}:latest
+    container_name: php_workspace
+    restart: unless-stopped
+
+  redis:
+    image: redis:6-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - backend_tier
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USERNAME
+      - POSTGRES_PASSWORD
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend_tier

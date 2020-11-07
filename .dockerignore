@@ -1,8 +1,6 @@
-/.idea
-/.git
-/.github
-/app/var
-# /app/vendor
+.idea/
+.git/
+.github/
 
 # Files
 .DS_Store

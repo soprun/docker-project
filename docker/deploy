@@ -1,0 +1,35 @@
+#!/bin/bash
+
+source ".env"
+
+# Deploying to GCP
+# todo: https://cloud.google.com
+# docker build -t <yourdockerhubname>/phprest .
+# docker push <yourdockerhubname>/phprest
+
+# Tags
+readonly tag_latest="latest"
+readonly tag_build="build"
+
+readonly tag_dev="dev"
+readonly tag_stage="stage"
+readonly tag_prod="prod"
+
+declare -a repositories=(
+    "php_fpm::${IMAGE_PHP_FPM}"
+    "php_cli::${IMAGE_PHP_CLI}"
+    "php_workspace::${IMAGE_PHP_WORKSPACE}"
+)
+
+for index in "${repositories[@]}"; do
+    service_name="${index%%::*}"
+    repository_name="${index##*::}"
+
+    echo "$service_name -> $repository_name"
+done
+
+declare -a docker_compose_files=(
+    "/docker/docker-compose.yml"
+)
+
+#docker-compose up --detach
