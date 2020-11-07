@@ -148,3 +148,32 @@ log-analyzer-real-time: ## real-time report:
 create-dhparam: ## Generation of Diffie-Hellman ciphersuites
 	@$(info Generation of Diffie-Hellman ciphersuites)
 	@openssl dhparam -noout -out "./docker/nginx/ssl/dhparam.pem" $(call args, 512)
+
+
+# Update channel. Can be release, beta or edge. Uses edge by default.
+CHANNEL ?= edge
+
+# Version properties
+COMMIT=$(shell git rev-parse --short HEAD)
+TAG_NAME=$(shell git describe --abbrev=0)
+RELEASE_VERSION=$(TAG_NAME)
+SNAPSHOT_VERSION=$(RELEASE_VERSION)-SNAPSHOT-$(COMMIT)
+
+# Set proper version
+VERSION=
+ifeq ($(TAG_NAME),$(shell git describe --abbrev=4))
+	ifeq ($(CHANNEL),edge)
+		VERSION=$(SNAPSHOT_VERSION)
+	else
+		VERSION=$(RELEASE_VERSION)
+	endif
+else
+	VERSION=$(SNAPSHOT_VERSION)
+endif
+
+version:
+	@echo $(COMMIT);
+	@echo $(TAG_NAME);
+	@echo $(RELEASE_VERSION);
+	@echo $(SNAPSHOT_VERSION);
+	@echo $(VERSION);
