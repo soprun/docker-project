@@ -23,7 +23,7 @@ COPY --from=soprun/sandbox-main-php-fpm:composer /usr/bin/composer /usr/bin/comp
 
 RUN set -eux; \
     # Use the default development configuration
-    mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" \
+    mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"; \
     # Install application dependencies
     composer install \
       --no-progress \

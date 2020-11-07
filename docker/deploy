@@ -1,18 +1,19 @@
 #!/bin/bash
 
-source ".env"
+set -e
+
+# Current working directory
+CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+
+# shellcheck source=./bin/common.sh
+source "${CWD}/bin/common.sh"
 
 # Deploying to GCP
-# todo: https://cloud.google.com
-# docker build -t <yourdockerhubname>/phprest .
-# docker push <yourdockerhubname>/phprest
 
 # Tags
-readonly tag_latest="latest"
+# readonly tag_latest="latest"
 readonly tag_build="build"
-
 readonly tag_dev="dev"
-readonly tag_stage="stage"
 readonly tag_prod="prod"
 
 declare -a repositories=(
@@ -28,24 +29,45 @@ for index in "${repositories[@]}"; do
     # echo "$service_name -> $repository_name"
 done
 
-declare -a docker_compose_files=(
-    "/docker/docker-compose.yml"
-)
-
-#docker-compose up --detach
+#declare -a docker_compose_files=(
+#    "/docker/docker-compose.yml"
+#)
 
 docker builder build \
+    --rm \
     --force-rm \
-    --no-cache \
-    --file "./php/Dockerfile" \
-    --tag "soprun/sandbox-main-php-fpm:build" \
-    --target "build" \
+    --file "./docker/php/Dockerfile" \
+    --tag "${IMAGE_PHP_FPM}:composer" \
+    --target "composer" \
     .
 
 docker builder build \
+    --rm \
     --force-rm \
-    --no-cache \
-    --file "./php/Dockerfile.dev" \
-    --tag "soprun/sandbox-main-php-fpm:dev" \
+    --file "./docker/php/Dockerfile" \
+    --tag "${IMAGE_PHP_FPM}:build" \
+    --target "build" \
+    --label "project.version=$(git describe --tags --abbrev=0)" \
+    --label "project.branch=$(git rev-parse --abbrev-ref HEAD)" \
+    --label "project.commit=$(git rev-parse HEAD)" \
+    .
+
+docker builder build \
+    --rm \
+    --force-rm \
+    --file "./docker/php/Dockerfile.dev" \
+    --tag "${IMAGE_PHP_FPM}:dev" \
     --target "dev" \
     .
+
+docker builder build \
+    --rm \
+    --force-rm \
+    --file "./docker/php/Dockerfile.prod" \
+    --tag "${IMAGE_PHP_FPM}:prod" \
+    --target "prod" \
+    .
+
+docker push "${IMAGE_PHP_FPM}"
+docker push "${IMAGE_PHP_CLI}"
+docker push "${IMAGE_PHP_WORKSPACE}"

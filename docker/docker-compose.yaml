@@ -33,11 +33,7 @@ services:
   php_fpm:
     <<: *default_logging
     <<: *default_php
-    # image: ${IMAGE_PHP_FPM}:latest
-    build:
-      context: ..
-      dockerfile: ./docker/php/Dockerfile
-      target: build
+    image: soprun/sandbox-main-php-fpm:dev
     container_name: php_fpm
     restart: always
     networks:
@@ -53,19 +49,19 @@ services:
       - REDIS_HOST
       - REDIS_PORT
 
-  #  php_cli:
-  #    <<: *default_logging
-  #    <<: *default_php
-  #    image: ${IMAGE_PHP_CLI}:latest
-  #    container_name: php_cli
-  #    restart: unless-stopped
+  php_cli:
+    <<: *default_logging
+    <<: *default_php
+    image: soprun/sandbox-main-php-fpm:dev
+    container_name: php_cli
+    restart: unless-stopped
 
-  #  php_workspace:
-  #    <<: *default_logging
-  #    <<: *default_php
-  #    image: ${IMAGE_PHP_WORKSPACE}:latest
-  #    container_name: php_workspace
-  #    restart: unless-stopped
+  php_workspace:
+    <<: *default_logging
+    <<: *default_php
+    image: soprun/sandbox-main-php-fpm:dev
+    container_name: php_workspace
+    restart: unless-stopped
 
   redis:
     image: redis:6-alpine
