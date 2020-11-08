@@ -37,7 +37,7 @@ config: ## Validate and view the Compose file
 	$(DOCKER_COMPOSE) config
 
 build: ## Build or rebuild services
-	$(DOCKER_COMPOSE) build --parallel
+	$(DOCKER_COMPOSE) build
 
 rebuild: down-force up-force ## dad
 	@echo 'lol'
@@ -46,3 +46,7 @@ rebuild: down-force up-force ## dad
 #	$(shell docker images --all --quiet)
 #	 @docker remove --force $(shell docker images --all --quiet)
 # docker rmi --force $(docker images --all --quiet) &>/dev/null;
+
+composer-install:
+	@docker run --rm --interactive --tty --volume "$PWD:/app" \
+	composer install --ignore-platform-reqs --no-scripts

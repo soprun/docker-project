@@ -1,12 +1,17 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 # Current working directory
 CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 
-# shellcheck source=./bin/common.sh
-source "${CWD}/bin/common.sh"
+source "${CWD}/.env"
+
+# shellcheck source=./docker/bin/common.sh
+#source "${CWD}/bin/common.sh"
+
+# docker context create sandbox-docker
+# docker buildx create --use --name mybuild node-amd64
 
 # Deploying to GCP
 
@@ -33,20 +38,19 @@ readonly tag_prod="prod"
 #    "/docker/docker-compose.yml"
 #)
 
+# docker build --platform=local -o . git://github.com/docker/buildx
+# UN --mount=target=. --mount=target=/root/.cache,type=cache   --mount=target=/go/pkg/mod,type=cache   --mount=sou
+
 # todo: add--rm & --force-rm
 
-docker builder build \
-    --rm \
-    --force-rm \
+docker build \
     --file "./docker/php/Dockerfile" \
     --tag "${IMAGE_PHP}:composer" \
     --target "composer" \
     .
 
-docker builder build \
-    --rm \
-    --force-rm \
-    --file "./docker/php/Dockerfile" \
+docker build \
+    --file "${CWD}/php/Dockerfile" \
     --tag "${IMAGE_PHP}:build" \
     --target "build" \
     --label "project.version=$(git describe --tags --abbrev=0)" \
@@ -54,27 +58,27 @@ docker builder build \
     --label "project.commit=$(git rev-parse HEAD)" \
     .
 
-docker builder build \
-    --file "./docker/php/Dockerfile.dev" \
+docker build \
+    --file "${CWD}/php/Dockerfile.dev" \
     --tag "${IMAGE_PHP}:dev" \
     --target "dev" \
     .
 
-docker builder build \
+docker build \
     --file "./docker/php/Dockerfile.prod" \
     --tag "${IMAGE_PHP}:prod" \
     --target "prod" \
     .
 
-docker builder build \
+docker build \
     --file "./docker/php/Dockerfile.workspace" \
     --tag "${IMAGE_PHP}:workspace" \
     --target "workspace" \
     .
 
-docker push "${IMAGE_PHP}:dev"
-docker push "${IMAGE_PHP}:prod"
-docker push "${IMAGE_PHP}:workspace"
+#docker push "${IMAGE_PHP}:dev"
+#docker push "${IMAGE_PHP}:prod"
+#docker push "${IMAGE_PHP}:workspace"
 
 #docker push "${IMAGE_PHP_FPM}"
 #docker push "${IMAGE_PHP_CLI}"
