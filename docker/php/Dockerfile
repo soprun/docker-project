@@ -49,7 +49,7 @@ WORKDIR /app
 
 # Copy source files to workdir
 COPY ./app /app
-COPY --from=soprun/sandbox-main-php-fpm:composer /app/vendor /app/vendor
+COPY --from=soprun/sandbox-main-php:composer /app/vendor /app/vendor
 
 # Add metadata to the image to describe which port the container is listening on at runtime.
 EXPOSE 9000

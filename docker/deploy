@@ -16,28 +16,30 @@ readonly tag_build="build"
 readonly tag_dev="dev"
 readonly tag_prod="prod"
 
-declare -a repositories=(
-    "php_fpm::${IMAGE_PHP_FPM}"
-    "php_cli::${IMAGE_PHP_CLI}"
-    "php_workspace::${IMAGE_PHP_WORKSPACE}"
-)
+#declare -a repositories=(
+#    "php_fpm::${IMAGE_PHP_FPM}"
+#    "php_cli::${IMAGE_PHP_CLI}"
+#    "php_workspace::${IMAGE_PHP_WORKSPACE}"
+#)
 
-for index in "${repositories[@]}"; do
-    service_name="${index%%::*}"
-    repository_name="${index##*::}"
-
-    # echo "$service_name -> $repository_name"
-done
+#for index in "${repositories[@]}"; do
+#    service_name="${index%%::*}"
+#    repository_name="${index##*::}"
+#
+#    # echo "$service_name -> $repository_name"
+#done
 
 #declare -a docker_compose_files=(
 #    "/docker/docker-compose.yml"
 #)
 
+# todo: add--rm & --force-rm
+
 docker builder build \
     --rm \
     --force-rm \
     --file "./docker/php/Dockerfile" \
-    --tag "${IMAGE_PHP_FPM}:composer" \
+    --tag "${IMAGE_PHP}:composer" \
     --target "composer" \
     .
 
@@ -45,7 +47,7 @@ docker builder build \
     --rm \
     --force-rm \
     --file "./docker/php/Dockerfile" \
-    --tag "${IMAGE_PHP_FPM}:build" \
+    --tag "${IMAGE_PHP}:build" \
     --target "build" \
     --label "project.version=$(git describe --tags --abbrev=0)" \
     --label "project.branch=$(git rev-parse --abbrev-ref HEAD)" \
@@ -53,21 +55,27 @@ docker builder build \
     .
 
 docker builder build \
-    --rm \
-    --force-rm \
     --file "./docker/php/Dockerfile.dev" \
-    --tag "${IMAGE_PHP_FPM}:dev" \
+    --tag "${IMAGE_PHP}:dev" \
     --target "dev" \
     .
 
 docker builder build \
-    --rm \
-    --force-rm \
     --file "./docker/php/Dockerfile.prod" \
-    --tag "${IMAGE_PHP_FPM}:prod" \
+    --tag "${IMAGE_PHP}:prod" \
     --target "prod" \
     .
 
-docker push "${IMAGE_PHP_FPM}"
-docker push "${IMAGE_PHP_CLI}"
-docker push "${IMAGE_PHP_WORKSPACE}"
+docker builder build \
+    --file "./docker/php/Dockerfile.workspace" \
+    --tag "${IMAGE_PHP}:workspace" \
+    --target "workspace" \
+    .
+
+docker push "${IMAGE_PHP}:dev"
+docker push "${IMAGE_PHP}:prod"
+docker push "${IMAGE_PHP}:workspace"
+
+#docker push "${IMAGE_PHP_FPM}"
+#docker push "${IMAGE_PHP_CLI}"
+#docker push "${IMAGE_PHP_WORKSPACE}"

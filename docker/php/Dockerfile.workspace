@@ -1,0 +1,14 @@
+### Installation building a development image from build.
+FROM soprun/sandbox-main-php:dev AS workspace
+
+RUN set -eux; \
+    # Persistent / Runtime deps
+    apk add --no-cache \
+        curl \
+        bash \
+        bash-completion \
+        vim \
+        git \
+        make \
+        gnupg \
+        ca-certificates

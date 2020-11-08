@@ -2,7 +2,7 @@ ARG APP_ENV="dev"
 ARG APP_DEBUG="1"
 
 ### Installation building a development image from build.
-FROM soprun/sandbox-main-php-fpm:build AS dev
+FROM soprun/sandbox-main-php:build AS dev
 
 ARG APP_ENV
 ARG APP_DEBUG
@@ -18,8 +18,8 @@ ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ENV PATH="${PATH}:${COMPOSER_HOME}/vendor/bin"
 
-COPY --from=soprun/sandbox-main-php-fpm:composer /composer /composer
-COPY --from=soprun/sandbox-main-php-fpm:composer /usr/bin/composer /usr/bin/composer
+COPY --from=soprun/sandbox-main-php:composer /composer /composer
+COPY --from=soprun/sandbox-main-php:composer /usr/bin/composer /usr/bin/composer
 
 RUN set -eux; \
     # Use the default development configuration
@@ -33,16 +33,3 @@ RUN set -eux; \
       --optimize-autoloader \
       --classmap-authoritative \
       --profile
-
-#RUN set -eux; \
-#  # Persistent / Runtime deps
-#  apk add --no-cache \
-#    curl \
-#    bash \
-#    bash-completion \
-#    vim \
-#    git \
-#    make \
-#    gnupg \
-#    ca-certificates \
-#  ; \
