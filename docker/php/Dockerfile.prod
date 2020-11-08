@@ -1,5 +1,5 @@
 ### Installation building a production image from build.
-FROM soprun/sandbox-main-php:build AS prod
+FROM soprun/sandbox-main-php:base AS prod
 
 ENV APP_ENV="${APP_ENV:-prod}"
 ENV APP_DEBUG="${APP_DEBUG:-0}"

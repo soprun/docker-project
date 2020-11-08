@@ -1,0 +1,45 @@
+ARG COMPOSER_HOME="/composer"
+ARG COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
+ARG COMPOSER_MEMORY_LIMIT="-1"
+ARG COMPOSER_ALLOW_SUPERUSER="1"
+
+### Installation base container
+FROM composer:latest as composer_base
+
+ARG COMPOSER_HOME
+ARG COMPOSER_CACHE_DIR
+ARG COMPOSER_MEMORY_LIMIT
+ARG COMPOSER_ALLOW_SUPERUSER
+
+ENV COMPOSER_HOME=$COMPOSER_HOME
+ENV COMPOSER_CACHE_DIR=$COMPOSER_CACHE_DIR
+ENV COMPOSER_MEMORY_LIMIT=$COMPOSER_MEMORY_LIMIT
+ENV COMPOSER_ALLOW_SUPERUSER=$COMPOSER_ALLOW_SUPERUSER
+
+WORKDIR /app
+
+### Install composer plugin
+RUN set -e; \
+    composer global require hirak/prestissimo \
+       --no-progress \
+       --no-scripts \
+       --no-interaction \
+       --ignore-platform-reqs
+
+### Copying 7 nstall application dependencies
+FROM composer_base as composer
+
+COPY ./app/composer.* /app
+COPY ./app/symfony.lock /app
+
+### Install application dependencies
+RUN set -e; \
+    composer install \
+      --no-dev \
+      --no-progress \
+      --no-scripts \
+      --no-interaction \
+      --prefer-dist \
+      --optimize-autoloader \
+      --classmap-authoritative \
+      --profile

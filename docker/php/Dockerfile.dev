@@ -1,16 +1,7 @@
-ARG APP_ENV="dev"
-ARG APP_DEBUG="1"
-
 ### Installation building a development image from build.
-FROM soprun/sandbox-main-php:build AS dev
-
-ARG APP_ENV
-ARG APP_DEBUG
+FROM soprun/sandbox-main-php:base AS dev
 
 ### Environment variables
-ENV APP_ENV=$APP_ENV
-ENV APP_DEBUG=$APP_DEBUG
-
 ENV COMPOSER_HOME="/composer"
 ENV COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
 ENV COMPOSER_MEMORY_LIMIT="-1"

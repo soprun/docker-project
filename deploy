@@ -1,0 +1,90 @@
+#!/bin/bash
+
+#set -e
+
+# Project directory
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+export PROJECT_DIR
+
+### Loading dependency files
+files=(
+    # Shell tools
+    # shellcheck source=./docker/common
+    "${PROJECT_DIR}/docker/common"
+
+    # Project environment variables
+    # shellcheck source=./.env
+    # "${PROJECT_DIR}/.env"
+    # "${PROJECT_DIR}/.env.local"
+
+    # Application environment variables
+    # shellcheck source=./app/.env
+    "${PROJECT_DIR}/app/.env"
+    "${PROJECT_DIR}/app/.env.local"
+)
+
+## Load the shell and .env files
+for file in "${files[@]}"; do
+    # shellcheck source=
+    [ -r "$file" ] && [ -f "$file" ] && source "$file"
+done
+unset file
+
+###
+### Building images
+###
+
+# Be very strict
+set -euox pipefail
+
+docker buildx build \
+    --rm \
+    --force-rm \
+    --file "${PROJECT_DIR}/docker/php/Dockerfile.composer" \
+    --tag "${IMAGE_PHP}:composer" \
+    --target "composer" \
+    .
+
+docker build \
+    --rm \
+    --force-rm \
+    --file "${CWD}/docker/php/Dockerfile" \
+    --tag "${IMAGE_PHP}:base" \
+    --target "base" \
+    --label "project.name=${PROJECT_NAME}" \
+    --label "project.version=$(git describe --tags --abbrev=0)" \
+    --label "project.branch=$(git rev-parse --abbrev-ref HEAD)" \
+    --label "project.commit=$(git rev-parse HEAD)" \
+    .
+
+docker build \
+    --rm \
+    --force-rm \
+    --file "${CWD}/docker/php/Dockerfile.dev" \
+    --tag "${IMAGE_PHP}:dev" \
+    --target "dev" \
+    .
+
+docker build \
+    --rm \
+    --force-rm \
+    --file "${CWD}/docker/php/Dockerfile.prod" \
+    --tag "${IMAGE_PHP}:prod" \
+    --target "prod" \
+    .
+
+docker build \
+    --rm \
+    --force-rm \
+    --file "${CWD}/docker/php/Dockerfile.workspace" \
+    --tag "${IMAGE_PHP}:workspace" \
+    --target "workspace" \
+    .
+
+#docker push "${IMAGE_PHP}:dev"
+#docker push "${IMAGE_PHP}:prod"
+#docker push "${IMAGE_PHP}:workspace"
+
+#docker push "${IMAGE_PHP_FPM}"
+#docker push "${IMAGE_PHP_CLI}"
+#docker push "${IMAGE_PHP_WORKSPACE}"
