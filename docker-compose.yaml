@@ -10,8 +10,6 @@ x-logging:
 
 x-php:
   &default_php
-  # env_file:
-  #   - .env
   environment:
     - POSTGRES_DB
     - POSTGRES_HOST
