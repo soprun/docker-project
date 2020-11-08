@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+### git rev-parse origin/master # to get the latest commit on the remote
+### git rev-parse HEAD          # to get the latest commit on the local
+
+commit_id="$(git rev-parse --short HEAD)"
+commit_sha="$(git rev-parse HEAD)"
+version=$(git describe --tags --abbrev=0)
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+echo "commit_id: $commit_id"
+echo "commit_sha: $commit_sha"
+echo "version: $version"
+echo "branch: $branch"

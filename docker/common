@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 log_info() {
     printf "\033[0;34m[info]\033[0m: %s\\n" "$1"

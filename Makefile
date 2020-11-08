@@ -151,9 +151,6 @@ about:
 	@echo $(REGISTRY_HOST)
 	@echo $(REGISTRY_ACCOUNT)
 
-clean:;
-
-target:;
 
 ## Install application
 install:
@@ -162,11 +159,6 @@ install:
 
 
 ## Build application
-build:
-	@echo "213"
-
-build@demo: export SYMFONY_ENV = prod
-build@demo:
-
-build@prod: export SYMFONY_ENV = prod
-build@prod:
+check-scripts:
+    # Fail if any of these files have warnings
+    shellcheck myscripts/*.sh
