@@ -10,3 +10,6 @@
 
 README.md
 Makefile
+
+app/var/
+app/vendor/

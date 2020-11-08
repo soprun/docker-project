@@ -4,7 +4,7 @@ ARG COMPOSER_MEMORY_LIMIT="-1"
 ARG COMPOSER_ALLOW_SUPERUSER="1"
 
 ### Installation base container
-FROM composer:latest as composer_base
+FROM composer:2.0 as composer_base
 
 ARG COMPOSER_HOME
 ARG COMPOSER_CACHE_DIR
@@ -26,7 +26,7 @@ RUN set -e; \
        --no-interaction \
        --ignore-platform-reqs
 
-### Copying 7 nstall application dependencies
+### Copying & install application dependencies
 FROM composer_base as composer
 
 COPY ./app/composer.* /app

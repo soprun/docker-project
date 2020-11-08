@@ -1,4 +1,4 @@
-version: "3.4"
+version: "3.8"
 
 x-logging:
   &default_logging
@@ -10,6 +10,8 @@ x-logging:
 
 x-php:
   &default_php
+  # user: 1000:1000
+  restart: unless-stopped
   environment:
     - POSTGRES_DB
     - POSTGRES_HOST
@@ -37,30 +39,43 @@ networks:
     driver: bridge
 
 services:
+  nginx:
+    build:
+      dockerfile: ./docker/nginx/Dockerfile
+      context: .
+    container_name: nginx
+    <<: *default_logging
+    ports:
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
+    depends_on:
+      - php
+    networks:
+      - frontend_tier
+      - backend_tier
+
   php_fpm:
     <<: *default_logging
     <<: *default_php
     image: ${IMAGE_PHP}:dev
     container_name: php_fpm
-    restart: always
 
   php_cli:
     <<: *default_logging
     <<: *default_php
     image: ${IMAGE_PHP}:dev
     container_name: php_cli
-    restart: unless-stopped
 
   php_workspace:
     <<: *default_logging
     <<: *default_php
     image: ${IMAGE_PHP}:workspace
     container_name: php_workspace
-    restart: unless-stopped
 
   redis:
     image: redis:6-alpine
     container_name: redis
+    hostname: $REDIS_HOST
     restart: always
     ports:
       - "127.0.0.1:6379:6379"
@@ -70,6 +85,7 @@ services:
   postgres:
     image: postgres:13-alpine
     container_name: postgres
+    hostname: $POSTGRES_HOST
     restart: always
     environment:
       - POSTGRES_DB
