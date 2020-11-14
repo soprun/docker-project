@@ -159,6 +159,9 @@ install:
 
 
 ## Build application
-check-scripts:
-    # Fail if any of these files have warnings
-    shellcheck myscripts/*.sh
+# check-scripts:
+# Fail if any of these files have warnings
+# shellcheck myscripts/*.sh
+
+shellcheck:
+	docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable myscript
