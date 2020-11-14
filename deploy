@@ -38,7 +38,7 @@ unset file
 ###
 
 # Be very strict
-set -euox pipefail
+# set -euox pipefail
 
 docker build \
   --rm \
