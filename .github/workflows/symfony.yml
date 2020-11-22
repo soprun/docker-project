@@ -17,15 +17,11 @@ on:
 
 jobs:
   symfony:
-    name: Symfony (PHP ${{ matrix.php-versions }} on ${{ matrix.operating-system }})
-    runs-on: ${{ matrix.operating-system }}
+    name: Symfony (PHP ${{ matrix.php-versions }})
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        operating-system:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
         php-versions:
           - '7.3'
           - '7.4'
