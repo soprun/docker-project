@@ -1,0 +1,10 @@
+#!/bin/sh
+
+timezone="${1:-UTC}"
+
+if [ ! $timezone ]; then
+  echo "Timezone value is empty!"
+  exit 1
+fi
+
+#ln -snf /usr/share/zoneinfo/$timezone /etc/localtime && echo $timezone >/etc/timezone
