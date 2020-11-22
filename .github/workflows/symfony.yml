@@ -35,13 +35,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/cache@v2
-        id: cache-db
-        with:
-          path: ~/.symfony/cache
-          key: db
-          lock: ./app/composer.lock
-
       - name: PHP Security Checker
         uses: symfonycorp/security-checker-action@v2
 
@@ -67,7 +60,6 @@ jobs:
 
       - name: Install Composer dependencies
         run: |
-          cd ./app
           composer install --no-progress --prefer-dist --optimize-autoloader
 
       #      - name: Run Migration
@@ -79,4 +71,4 @@ jobs:
       #          DATABASE_URL: mysql://root:symfony@127.0.0.1:${{ job.services.mysql.ports['3306'] }}/symfony
 
       - name: Run Tests
-        run: php ./app/bin/phpunit --coverage-text
+        run: php bin/phpunit --coverage-text
