@@ -1,8 +1,0 @@
-### Installation building a production image from build.
-FROM soprun/sandbox-main-php:base AS prod
-
-ENV APP_ENV="${APP_ENV:-prod}"
-ENV APP_DEBUG="${APP_DEBUG:-0}"
-
-### Use the default production configuration
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
