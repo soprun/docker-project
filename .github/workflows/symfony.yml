@@ -66,5 +66,5 @@ jobs:
       #        env:
       #          DATABASE_URL: mysql://root:symfony@127.0.0.1:${{ job.services.mysql.ports['3306'] }}/symfony
 
-      - name: Run Tests
-        run: php bin/phpunit --coverage-text
+      #      - name: Run Tests
+      #        run: php bin/phpunit --coverage-text
