@@ -45,6 +45,6 @@ artisan: ## Run artisan and provide the command via ARGS="command --options"
 composer-install: ## Run composer install
 	$(RUN_IN_DOCKER) composer install
 
-
-
 # https://github.com/paslandau/docker-php-tutorial/blob/part_4_setup-laravel-on-docker/Makefile
+# https://www.pascallandau.com/blog/structuring-the-docker-setup-for-php-projects/#makefile-and-bashrc
+# https://www.digitalocean.com/community/tutorials/how-to-containerize-a-laravel-application-for-development-with-docker-compose-on-ubuntu-18-04-ru
