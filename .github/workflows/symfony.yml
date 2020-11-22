@@ -16,7 +16,7 @@ on:
   #     - main
 
 jobs:
-  symfony:
+  build:
     name: Symfony (PHP ${{ matrix.php-versions }})
     runs-on: ubuntu-latest
     strategy:
@@ -68,3 +68,7 @@ jobs:
 
       #      - name: Run Tests
       #        run: php bin/phpunit --coverage-text
+
+  test:
+    needs:
+      - bild

@@ -55,22 +55,21 @@ services:
       context: .
       dockerfile: ./php-fpm/Dockerfile
 
-#  php-worker:
-#    <<: *default_php
-#    <<: *default_network
-#    image: php-docker-tutorial/php-fpm
-#    container_name: php-worker
-#    build:
-#      context: .
-#      dockerfile: ./php-worker/Dockerfile
-#
-#  workspace:
-#    <<: *default_php
-#    <<: *default_network
-#    image: php-docker-tutorial/workspace
-#    container_name: workspace
-#    build:
-#      context: .
-#      dockerfile: ./workspace/Dockerfile
-#    ports:
-#      - "${WORKSPACE_HOST_SSH_PORT}:22"
+  #  php-worker:
+  #    <<: *default_php
+  #    <<: *default_network
+  #    image: php-docker-tutorial/php-fpm
+  #    container_name: php-worker
+  #    build:
+  #      context: .
+  #      dockerfile: ./php-worker/Dockerfile
+  #
+  workspace:
+    <<: *default_php
+    <<: *default_network
+    image: php-docker-tutorial/workspace
+    container_name: workspace
+    tty: true
+    build:
+      context: .
+      dockerfile: ./workspace/Dockerfile

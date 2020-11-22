@@ -25,13 +25,19 @@ help:
 .PHONY: docker-build
 docker-build: ## Build all docker images. Build a specific image by providing the service name via: make docker-build CONTAINER=<service>
 	$(DOCKER_COMPOSE) build --parallel $(CONTAINER) && \
-	$(DOCKER_COMPOSE) up -d --force-recreate $(CONTAINER)
+	$(DOCKER_COMPOSE) up --detach --force-recreate $(CONTAINER)
 
 .PHONY: docker-down
 docker-down: ## Stop all docker containers. To only stop one container, use CONTAINER=<service>
 	$(DOCKER_COMPOSE) down $(CONTAINER)
 
+.PHONY: docker-exec
+docker-exec: ## Execute a command in a running container
+	$(DOCKER_COMPOSE) exec -T $(DEFAULT_CONTAINER) sh
+
 ##@ [Application]
+
+#RUN_IN_DOCKER := $(DOCKER_COMPOSE) exec -T --user $(RUN_IN_DOCKER_USER) $(RUN_IN_DOCKER_CONTAINER)
 
 .PHONY: composer
 composer: ## Run composer and provide the command via ARGS="command --options"
