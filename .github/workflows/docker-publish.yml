@@ -53,25 +53,24 @@ jobs:
       - name: Build image
         run: |
           # IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
-
           # Change all uppercase to lowercase
           # IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
-          IMAGE_TAG_ID=$(echo "${{ github.sha }}")
-          IMAGE_TAG_BRANCH=$(echo "${{ github.base_ref }}")
-
           # Strip git ref prefix from version
-          IMAGE_TAG_VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && IMAGE_TAG_VERSION=$(echo $IMAGE_TAG_VERSION | sed -e 's/^v//')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
-          [ "$IMAGE_TAG_VERSION" == "master" ] && IMAGE_TAG_VERSION=latest
+          [ "$VERSION" == "master" ] && VERSION=latest
 
-          echo IMAGE_TAG_ID=$IMAGE_TAG_ID
-          echo IMAGE_TAG_BRANCH=$IMAGE_TAG_BRANCH
-          echo IMAGE_TAG_VERSION=$IMAGE_TAG
+          BRANCH=$(echo "${{ github.base_ref }}")
+          COMMIT_SHA=$(echo "${{ github.sha }}")
+
+          echo VERSION=$VERSION
+          echo BRANCH=$BRANCH
+          echo COMMIT_SHA=$COMMIT_SHA
 
           echo IMAGE_NAME=$IMAGE_NAME
           echo DOCKER_FILE=$DOCKER_FILE
@@ -82,9 +81,9 @@ jobs:
           echo docker build . \
           --file $DOCKER_FILE \
           --tag "$IMAGE_NAME:$VERSION" \
-          --label tag.id=$IMAGE_TAG_ID" \
-          --label tag.branch=$IMAGE_TAG_BRANCH \
-          --label tag.version=$IMAGE_TAG_VERSION
+          --label "tag.version=$VERSION" \
+          --label "tag.branch=$BRANCH" \
+          --label "tag.sha=$COMMIT_SHA"
 
       - name: Push image
         run: |
