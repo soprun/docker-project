@@ -61,15 +61,17 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
-      - name: Create build name
-        run: |
-          export RELEASE_NAME="release_$(date +'%Y-%m-%d')"
-          echo "::set-env name=RELEASE_NAME::$RELEASE_NAME"
-
       - name: View current date
         run: |
           echo ${{steps.date.outputs.date}}
-          echo $RELEASE_NAME
+
+      - name: Create build name
+        run: |
+          echo "::set-output name=release_name::release_$(date +'%Y-%m-%d')"
+
+      - name: View build name
+        run: |
+          echo ${{steps.date.outputs.date}}
 
 #      - name: Build Docker image
 #        env:
