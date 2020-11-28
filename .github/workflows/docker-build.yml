@@ -17,10 +17,7 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GITHUB_CONTEXT: ${{ toJson(github) }}
-
-  # PROJECT_NAME: docker-project
-  # DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  # GITHUB_CONTEXT: ${{ toJson(github) }}
 
   PHP_IMAGE_NAME: soprun/docker-project-php
   PHP_IMAGE_FILE: ./docker/php/Dockerfile
@@ -38,7 +35,8 @@ jobs:
           - env: "dev"
           - env: "prod"
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out Git repository
+        uses: actions/checkout@v2
 
       - name: Setup build
         id: release
@@ -61,18 +59,18 @@ jobs:
           echo "::set-output name=RELEASE_TAG::$RELEASE_TAG"
           # latest, develop, v1.1.2
 
-      # - name: Run build script
-      #   run: ./docker/build
-      #   shell: bash
-
       - name: Docker Login
         uses: docker/login-action@v1.3.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build PHP image
-        id: build-php
+      - name: Run builder shell-script
+        run: ./docker/builder
+        shell: bash
+
+      - name: Build image (${{ matrix.env }})
+        id: build
         env:
           RELEASE_ENV: ${{ matrix.env }}
           RELEASE_NAME: ${{ steps.release.outputs.RELEASE_NAME }}
@@ -81,6 +79,13 @@ jobs:
           COMMIT_SHA: $(echo "${{ github.sha }}")
           BUILD_ID: $(echo "${{ github.job }}")
         run: |
+          echo "::debug::RELEASE_ENV: $RELEASE_ENV"
+          echo "::debug::RELEASE_NAME: $RELEASE_NAME"
+          echo "::debug::RELEASE_DATE: $RELEASE_DATE"
+          echo "::debug::RELEASE_TAG: $RELEASE_TAG"
+          echo "::debug::COMMIT_SHA: $COMMIT_SHA"
+          echo "::debug::BUILD_ID: $BUILD_ID"
+
           docker build . \
           --file "$PHP_IMAGE_FILE" \
           --tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
