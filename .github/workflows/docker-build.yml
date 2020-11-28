@@ -66,12 +66,10 @@ jobs:
 #          echo ${{steps.date.outputs.date}}
 
       - name: Create build name
-        run: |
-          "::set-output name=release_name::release_$(date +'%Y-%m-%d')"
+        run: echo "::set-output name=release_name::release_$(date +'%Y-%m-%d')"
 
       - name: View build name
-        run: |
-          echo ${{steps.date.outputs.release_name}}
+        run: echo ${{steps.date.outputs.release_name}}
 
 #      - name: Build Docker image
 #        env:
