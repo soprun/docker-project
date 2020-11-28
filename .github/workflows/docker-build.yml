@@ -19,16 +19,14 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_CONTEXT: ${{ toJson(github) }}
 
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  # PROJECT_NAME: docker-project
+  # DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
   PHP_IMAGE_NAME: soprun/docker-project-php
   PHP_IMAGE_FILE: ./docker/php/Dockerfile
 
   NGINX_IMAGE_NAME: soprun/docker-project-nginx
   NGINX_IMAGE_FILE: ./docker/nginx/Dockerfile
-
-  PROJECT_NAME: docker-project
-  PROJECT_RELEASE: ""
 
 jobs:
   build:
@@ -37,17 +35,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup release
+      - name: Setup build
         id: release
         run: |
           RELEASE_NAME=$(printf "release-%s\n" "$(date +'%Y-%m-%d')")
           echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
 
+          RELEASE_DATE=$(date +'%Y-%m-%d')
+          echo "::set-output name=RELEASE_DATE::$RELEASE_DATE"
+
           # Strip git ref prefix from version
           RELEASE_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && $RELEASE_TAG=$(echo $RELEASE_TAG | sed -e 's/^v//')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && RELEASE_TAG=$(echo $RELEASE_TAG | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
           [ "$RELEASE_TAG" == "master" ] && RELEASE_TAG=latest
@@ -63,6 +64,7 @@ jobs:
         id: build
         run: |
           RELEASE_NAME=${{ steps.release.outputs.RELEASE_NAME }}
+          RELEASE_DATE=${{ steps.release.outputs.RELEASE_DATE }}
           RELEASE_TAG=${{ steps.release.outputs.RELEASE_TAG }}
           COMMIT_SHA=$(echo "${{ github.sha }}")
           BUILD_ID=$(echo "${{ github.job }}")
@@ -72,6 +74,7 @@ jobs:
           --tag "$PHP_IMAGE_NAME:dev-$RELEASE_TAG" \
           --target "dev" \
           --label "project.release=$RELEASE_NAME" \
+          --label "project.release_date=$RELEASE_DATE" \
           --label "project.commit_sha=$COMMIT_SHA" \
           --label "project.build_id=$BUILD_ID" \
           --label "project.tag=$RELEASE_TAG"
@@ -81,6 +84,7 @@ jobs:
           --tag "$PHP_IMAGE_NAME:prod-$RELEASE_TAG" \
           --target "prod" \
           --label "project.release=$RELEASE_NAME" \
+          --label "project.release_date=$RELEASE_DATE" \
           --label "project.commit_sha=$COMMIT_SHA" \
           --label "project.build_id=$BUILD_ID" \
           --label "project.tag=$RELEASE_TAG"
@@ -89,6 +93,7 @@ jobs:
           --file "$NGINX_IMAGE_FILE" \
           --tag "$NGINX_IMAGE_NAME:$RELEASE_TAG" \
           --label "project.release=$RELEASE_NAME" \
+          --label "project.release_date=$RELEASE_DATE" \
           --label "project.commit_sha=$COMMIT_SHA" \
           --label "project.build_id=$BUILD_ID" \
           --label "project.tag=$RELEASE_TAG"
