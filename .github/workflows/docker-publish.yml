@@ -1,4 +1,4 @@
-name: Docker CI
+name: Docker build image
 
 on:
   push:
@@ -38,8 +38,8 @@ jobs:
 
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
-  push:
-    name: Push image
+  build:
+    name: Build image
     # needs:
     #   - test
     runs-on: ubuntu-latest
@@ -71,7 +71,6 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
 
-          BRANCH=$(echo "${{ github.base_ref }}")
           COMMIT_SHA=$(echo "${{ github.sha }}")
 
           echo VERSION=$VERSION
@@ -85,13 +84,8 @@ jobs:
           docker build . \
           --file $DOCKER_FILE \
           --tag "$IMAGE_NAME:$VERSION" \
-          --tag "$IMAGE_NAME:$COMMIT_SHA" \
           --label "project.version=$VERSION" \
           --label "project.commit_sha=$COMMIT_SHA"
 
           # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          echo "Push image: $IMAGE_NAME:$VERSION"
-
           docker push $IMAGE_NAME:$VERSION
-          docker push $IMAGE_NAME:$COMMIT_SHA
-
