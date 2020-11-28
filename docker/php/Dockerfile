@@ -2,15 +2,26 @@
 # Installation base container
 #######################################################################
 
-FROM php:8.0-rc-fpm-alpine AS build
+ARG PHP_VERSION
+ARG APP_ENV="dev"
+ARG APP_DEBUG="1"
+ARG APP_DIR="/app"
+
+# add users
+#ARG APP_USER=www-data
+#ARG APP_USER_ID=1000
+#ARG APP_GROUP=$(APP_USER)
+#ARG APP_GROUP_ID=$(APP_USER_ID)
+
+FROM php:${PHP_VERSION}-fpm-alpine AS build
 
 #######################################################################
 # Default environment variables
 #######################################################################
 
-ARG APP_ENV="dev"
-ARG APP_DEBUG="1"
-ARG APP_DIR="/app"
+ARG APP_ENV
+ARG APP_DEBUG
+ARG APP_DIR
 
 ENV APP_ENV=$APP_ENV
 ENV APP_DEBUG=$APP_DEBUG
@@ -18,15 +29,9 @@ ENV APP_DEBUG=$APP_DEBUG
 ENV PATH="${APP_DIR}/bin:$PATH"
 ENV PATH="${APP_DIR}/vendor/bin:$PATH"
 
-#ENV TZ=UTC
-#ENV LANG=en_US.UTF8
-#ENV LANGUAGE=en
-
-# add users
-ARG APP_USER=www-data
-ARG APP_USER_ID=1000
-ARG APP_GROUP=$(APP_USER)
-ARG APP_GROUP_ID=$(APP_USER_ID)
+ENV TZ=UTC
+ENV LANG=en_US.UTF8
+ENV LANGUAGE=en
 
 #######################################################################
 # Install PHP extensions
@@ -84,11 +89,11 @@ RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 #RUN addgroup -G 1000 www-data
 
 RUN set -ex; \
-	mkdir -p /app; \
-	chown -R www-data:www-data /app
+	mkdir -p "$APP_DIR"; \
+	chown -R www-data:www-data "$APP_DIR"
 
 # Set the working directory.
-WORKDIR /app
+WORKDIR "$APP_DIR"
 
 #######################################################################
 # Copying & install application dependencies
@@ -171,6 +176,9 @@ RUN composer global require hirak/prestissimo \
 #######################################################################
 
 FROM build AS prod
+
+ARG APP_ENV
+ARG APP_DEBUG
 
 ENV APP_ENV="${APP_ENV:-prod}"
 ENV APP_DEBUG="${APP_DEBUG:-0}"

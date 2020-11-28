@@ -18,8 +18,11 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_CONTEXT: ${{ toJson(github) }}
 
-  IMAGE_NAME: soprun/docker-project
-  IMAGE_FILE: ./docker/php/Dockerfile
+  PHP_IMAGE_NAME: soprun/docker-project-php
+  PHP_IMAGE_FILE: ./docker/php/Dockerfile
+
+  NGINX_IMAGE_NAME: soprun/docker-project-nginx
+  NGINX_IMAGE_FILE: ./docker/nginx/Dockerfile
 
 jobs:
   # Run tests.
@@ -78,34 +81,46 @@ jobs:
           echo VERSION=$VERSION
           echo COMMIT_SHA=$COMMIT_SHA
           echo IMAGE_ID=$IMAGE_ID
-          echo IMAGE_NAME=$IMAGE_NAME
-          echo IMAGE_FILE=$IMAGE_FILE
+          echo PHP_IMAGE_NAME=$PHP_IMAGE_NAME
+          echo PHP_IMAGE_FILE=$PHP_IMAGE_FILE
+          echo NGINX_IMAGE_NAME=$NGINX_IMAGE_NAME
+          echo NGINX_IMAGE_FILE=$NGINX_IMAGE_FILE
 
           echo "======================================="
           echo "$GITHUB_CONTEXT"
           # echo ${{ github.event.pull_request.title }}
 
           docker build . \
-          --file "$IMAGE_FILE" \
-          --tag "$IMAGE_NAME:dev-$VERSION" \
+          --file "$PHP_IMAGE_FILE" \
+          --env-file ".env" \
+          --tag "$PHP_IMAGE_NAME:dev-$VERSION" \
           --target "dev" \
           --label "project.env=dev" \
           --label "project.version=$VERSION" \
           --label "project.commit_sha=$COMMIT_SHA"
 
           docker build . \
-          --file "$IMAGE_FILE" \
-          --tag "$IMAGE_NAME:$VERSION" \
-          --tag "$IMAGE_NAME:prod-$VERSION" \
+          --file "$PHP_IMAGE_FILE" \
+          --env-file ".env" \
+          --tag "$PHP_IMAGE_NAME:$VERSION" \
+          --tag "$PHP_IMAGE_NAME:prod-$VERSION" \
           --target "prod" \
           --label "project.env=prod" \
           --label "project.version=$VERSION" \
           --label "project.commit_sha=$COMMIT_SHA"
 
-          # docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker build . \
+          --file "$NGINX_IMAGE_FILE" \
+          --env-file ".env" \
+          --tag "$NGINX_IMAGE_NAME:$VERSION" \
+          --label "project.version=$VERSION" \
+          --label "project.commit_sha=$COMMIT_SHA"
 
-          docker push $IMAGE_NAME
+          # docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]
+          # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+
+          docker push $PHP_IMAGE_NAME
+          docker push $NGINX_IMAGE_NAME
           # docker push $IMAGE_NAME:$VERSION
           # docker push $IMAGE_NAME:dev-$VERSION
           # docker push $IMAGE_NAME:prod-$VERSION

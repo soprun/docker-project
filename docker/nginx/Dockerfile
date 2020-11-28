@@ -1,11 +1,12 @@
 FROM nginx:alpine
 
 # nginx config
-COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./app/public/* /app/public
 
 # workdir
 WORKDIR /app
 
-CMD ["nginx"]
+CMD ["nginx", "-g", "daemon off;"]
 
 EXPOSE 80 443

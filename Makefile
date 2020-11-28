@@ -3,7 +3,10 @@
 
 DOCKER_COMPOSE_DIR=.
 DOCKER_COMPOSE_FILE=$(DOCKER_COMPOSE_DIR)/docker-compose.yml
-DOCKER_COMPOSE=docker-compose -f $(DOCKER_COMPOSE_FILE) --project-directory $(DOCKER_COMPOSE_DIR)
+DOCKER_COMPOSE := docker-compose \
+	--file $(DOCKER_COMPOSE_FILE) \
+	--project-directory $(DOCKER_COMPOSE_DIR) \
+	--env-file "$(DOCKER_COMPOSE_DIR)/.env"
 
 DEFAULT_CONTAINER=php
 
