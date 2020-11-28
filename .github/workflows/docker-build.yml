@@ -45,7 +45,7 @@ jobs:
           echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
 
       - name: View release name
-        run: echo "${{ steps.release-name.outputs.SELECTED_COLOR }}"
+        run: echo "${{ steps.release-name.outputs.RELEASE_NAME }}"
 
   #  build:
   #    name: Build image (${{ matrix.env }})
