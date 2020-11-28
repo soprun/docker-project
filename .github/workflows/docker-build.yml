@@ -55,7 +55,7 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
 
-          echo "::set-output name=RELEASE_VERSION::$RELEASE_VERSION"
+          echo "::set-output name=RELEASE_VERSION::$VERSION"
 
       - name: View release date
         run: |
