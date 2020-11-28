@@ -18,8 +18,6 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_CONTEXT: ${{ toJson(github) }}
 
-  SERVER: production
-
   PHP_IMAGE_NAME: soprun/docker-project-php
   PHP_IMAGE_FILE: ./docker/php/Dockerfile
 
@@ -27,21 +25,10 @@ env:
   NGINX_IMAGE_FILE: ./docker/nginx/Dockerfile
 
 jobs:
-#  setup:
-  #    name: Setup
-  #    runs-on: ubuntu-latest
-
   build:
-    name: Build image (ENV ${{ matrix.env }})
+    name: Build image
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
-    #    strategy:
-    #      matrix:
-    #        include:
-    #          - env: "dev"
-    #            debug: true
-    #          - env: "prod"
-    #            debug: false
     steps:
       - uses: actions/checkout@v2
 
@@ -55,9 +42,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Build image
-        env:
-          APP_ENV: ${{ matrix.env }}
-          APP_DEBUG: ${{ matrix.debug }}
         run: |
           IMAGE_ID=hub.docker.com/repository/docker/$IMAGE_NAME
           # Change all uppercase to lowercase
@@ -117,22 +101,3 @@ jobs:
           # docker push $IMAGE_NAME:$VERSION
           # docker push $IMAGE_NAME:dev-$VERSION
           # docker push $IMAGE_NAME:prod-$VERSION
-
-  # Run tests.
-  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-  #  test:
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - uses: actions/checkout@v2
-  #
-  #      - name: Run tests
-  #        run: |
-  #          if [ -f docker-compose.test.yml ]; then
-  #            docker-compose --file docker-compose.test.yml build
-  #            docker-compose --file docker-compose.test.yml run sut
-  #          else
-  #            docker build . --file $IMAGE_FILE
-  #          fi
-
-  # Push image to GitHub Packages.
-  # See also https://docs.docker.com/docker-hub/builds/
