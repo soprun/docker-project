@@ -44,22 +44,16 @@ jobs:
           echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
 
           # Strip git ref prefix from version
-          RELEASE_VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          RELEASE_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && $RELEASE_VERSION=$(echo $RELEASE_VERSION | sed -e 's/^v//')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && $RELEASE_TAG=$(echo $RELEASE_TAG | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
-          [ "$RELEASE_VERSION" == "master" ] && RELEASE_VERSION=latest
+          [ "$RELEASE_TAG" == "master" ] && RELEASE_TAG=latest
 
-          echo "::set-output name=RELEASE_VERSION::$RELEASE_VERSION"
-          echo "::set-output name=RELEASE_TAG::$RELEASE_VERSION"
+          echo "::set-output name=RELEASE_TAG::$RELEASE_TAG"
           # latest, develop, v1.1.2
-
-      - name: View release date
-        run: |
-          echo "RELEASE_NAME: ${{ steps.release.outputs.RELEASE_NAME }}"
-          echo "RELEASE_TAG: ${{ steps.release.outputs.RELEASE_TAG }}"
 
       # - name: Run build script
       #   run: ./docker/build
@@ -68,8 +62,19 @@ jobs:
       - name: Build Docker image
         id: build
         run: |
-          echo "The build stage..."
-          echo "RELEASE_TAG: ${{ steps.release.outputs.RELEASE_TAG }}"
+          RELEASE_NAME=${{ steps.release.outputs.RELEASE_NAME }}
+          TAG=${{ steps.release.outputs.RELEASE_TAG }}"
+
+          echo "RELEASE_NAME: $RELEASE_NAME"
+          echo "RELEASE_TAG: $TAG"
+
+          # docker build . \
+          # --file "$PHP_IMAGE_FILE" \
+          # --tag "$PHP_IMAGE_NAME:dev-$VERSION" \
+          # --target "$APP_ENV" \
+          # --label "project.env=$APP_ENV" \
+          # --label "project.version=$VERSION" \
+          # --label "project.commit_sha=$COMMIT_SHA"
 
   test:
     needs: build
