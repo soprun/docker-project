@@ -85,12 +85,13 @@ jobs:
           docker build . \
           --file $DOCKER_FILE \
           --tag "$IMAGE_NAME:$VERSION" \
+          --tag "$IMAGE_NAME:$COMMIT_SHA" \
           --label "project.version=$VERSION" \
           --label "project.commit_sha=$COMMIT_SHA"
 
-      - name: Push image
-        run: |
           # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           echo "Push image: $IMAGE_NAME:$VERSION"
+
           docker push $IMAGE_NAME:$VERSION
+          docker push $IMAGE_NAME:$COMMIT_SHA
 
