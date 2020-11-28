@@ -54,7 +54,7 @@ RUN set -eux \
     xdebug \
   && docker-php-ext-enable \
     # apcu \
-    redis \
+    # redis \
     xdebug \
     opcache \
   # Remove unnecessary stuff
