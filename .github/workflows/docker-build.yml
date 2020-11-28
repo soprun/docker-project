@@ -61,11 +61,12 @@ jobs:
           echo VERSION=$VERSION
           echo COMMIT_SHA=$COMMIT_SHA
           echo IMAGE_ID=$IMAGE_ID
+          echo "======================================="
           echo PHP_IMAGE_NAME=$PHP_IMAGE_NAME
           echo PHP_IMAGE_FILE=$PHP_IMAGE_FILE
+          echo "======================================="
           echo NGINX_IMAGE_NAME=$NGINX_IMAGE_NAME
           echo NGINX_IMAGE_FILE=$NGINX_IMAGE_FILE
-
           echo "======================================="
           echo "$GITHUB_CONTEXT"
           # echo ${{ github.event.pull_request.title }}
@@ -98,6 +99,3 @@ jobs:
 
           docker push $PHP_IMAGE_NAME
           docker push $NGINX_IMAGE_NAME
-          # docker push $IMAGE_NAME:$VERSION
-          # docker push $IMAGE_NAME:dev-$VERSION
-          # docker push $IMAGE_NAME:prod-$VERSION
