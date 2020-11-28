@@ -27,12 +27,11 @@ env:
   NGINX_IMAGE_FILE: ./docker/nginx/Dockerfile
 
 jobs:
-  setup:
-    name: Setup
-    runs-on: ubuntu-latest
+#  setup:
+  #    name: Setup
+  #    runs-on: ubuntu-latest
 
   build:
-    needs: setup
     name: Build image (ENV ${{ matrix.env }})
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
