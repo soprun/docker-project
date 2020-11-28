@@ -27,7 +27,7 @@ env:
 
 jobs:
   build:
-    name: Building ${{ matrix.name }} image
+    name: Build image (${{ matrix.name }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -67,7 +67,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Run building shell-script ${{ matrix.name }} image
+      - name: Build image (${{ matrix.name }})
         id: builder-shell
         run: ./docker/builder
         shell: bash
@@ -79,7 +79,7 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
           BUILD_ID: ${{ github.job }}
 
-      - name: Building ${{ matrix.name }} image
+      - name: Build image (${{ matrix.name }})
         id: builder
         env:
           RELEASE_ENV: ${{ matrix.env }}
