@@ -3,9 +3,6 @@
 #######################################################################
 
 ARG PHP_VERSION="8.0-rc"
-ARG APP_ENV="dev"
-ARG APP_DEBUG="1"
-ARG APP_DIR="/app"
 
 # add users
 #ARG APP_USER=www-data
@@ -19,9 +16,9 @@ FROM php:${PHP_VERSION}-fpm-alpine AS build
 # Default environment variables
 #######################################################################
 
-ARG APP_ENV
-ARG APP_DEBUG
-ARG APP_DIR
+ARG APP_ENV="dev"
+ARG APP_DEBUG="1"
+ARG APP_DIR="/app"
 
 ENV APP_ENV=$APP_ENV
 ENV APP_DEBUG=$APP_DEBUG
@@ -185,4 +182,3 @@ ENV APP_DEBUG="${APP_DEBUG:-0}"
 
 ### Use the default production configuration
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-
