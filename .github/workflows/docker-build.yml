@@ -27,13 +27,15 @@ env:
 
 jobs:
   build:
-    name: Build image (${{ matrix.env }})
+    name: Building ${{ matrix.name }} image
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
           - env: "dev"
+            name: development
           - env: "prod"
+            name: production
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
@@ -65,7 +67,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Run builder shell-script
+      - name: Run building shell-script ${{ matrix.name }} image
+        id: builder-shell
         run: ./docker/builder
         shell: bash
         env:
@@ -76,8 +79,8 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
           BUILD_ID: ${{ github.job }}
 
-      - name: Build image (${{ matrix.env }})
-        id: build
+      - name: Building ${{ matrix.name }} image
+        id: builder
         env:
           RELEASE_ENV: ${{ matrix.env }}
           RELEASE_NAME: ${{ steps.release.outputs.RELEASE_NAME }}
@@ -86,12 +89,12 @@ jobs:
           COMMIT_SHA: $(echo "${{ github.sha }}")
           BUILD_ID: $(echo "${{ github.job }}")
         run: |
-          echo "::debug::RELEASE_ENV: $RELEASE_ENV"
-          echo "::debug::RELEASE_NAME: $RELEASE_NAME"
-          echo "::debug::RELEASE_DATE: $RELEASE_DATE"
-          echo "::debug::RELEASE_TAG: $RELEASE_TAG"
-          echo "::debug::COMMIT_SHA: $COMMIT_SHA"
-          echo "::debug::BUILD_ID: $BUILD_ID"
+          # echo "::debug::RELEASE_ENV: $RELEASE_ENV"
+          # echo "::debug::RELEASE_NAME: $RELEASE_NAME"
+          # echo "::debug::RELEASE_DATE: $RELEASE_DATE"
+          # echo "::debug::RELEASE_TAG: $RELEASE_TAG"
+          # echo "::debug::COMMIT_SHA: $COMMIT_SHA"
+          # echo "::debug::BUILD_ID: $BUILD_ID"
 
           docker build . \
           --file "$PHP_IMAGE_FILE" \
