@@ -2,7 +2,7 @@
 # Installation base container
 #######################################################################
 
-FROM php:8.0-rc-fpm-alpine
+FROM php:8.0-rc-fpm-alpine AS dev
 
 #######################################################################
 # Default environment variables
@@ -105,9 +105,6 @@ RUN set -ex; \
 # Set the working directory.
 WORKDIR /app
 
-# Copying source files to workdir
-#COPY ../app /app
-
 #######################################################################
 # Copying & install application dependencies
 #######################################################################
@@ -125,6 +122,9 @@ WORKDIR /app
 #  --optimize-autoloader \
 #  --classmap-authoritative \
 #  --profile
+
+# Copying source files to workdir
+# COPY ./app /app
 
 CMD php-fpm
 

@@ -35,13 +35,14 @@ services:
 
   php:
     <<: *default_logging
-    image: soprun/docker-project
+    image: soprun/docker-project:latest
     container_name: php
     restart: unless-stopped
     privileged: true
     build:
       context: .
       dockerfile: ./docker/php/Dockerfile
+      target: dev
     volumes:
       - ./app:/app:rw,cached
       - cache:/app/var/cache:rw,cached
