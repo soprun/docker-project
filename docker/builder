@@ -2,7 +2,8 @@
 
 set -e
 
-exit 0
+printenv | sort
+exit 1
 
 function output
 {
