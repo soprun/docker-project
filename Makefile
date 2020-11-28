@@ -1,7 +1,7 @@
 -include .env
 -include ./docker/.env.local
 
-DOCKER_COMPOSE_DIR=./
+DOCKER_COMPOSE_DIR=.
 DOCKER_COMPOSE_FILE=$(DOCKER_COMPOSE_DIR)/docker-compose.yml
 DOCKER_COMPOSE=docker-compose -f $(DOCKER_COMPOSE_FILE) --project-directory $(DOCKER_COMPOSE_DIR)
 
@@ -21,8 +21,8 @@ help:
 
 .PHONY: docker-build
 docker-build: ## Build all docker images. Build a specific image by providing the service name via: make docker-build CONTAINER=<service>
-	@$(DOCKER_COMPOSE) build --parallel $(CONTAINER) && \
-	@$(DOCKER_COMPOSE) up --detach --force-recreate $(CONTAINER)
+	$(DOCKER_COMPOSE) build --parallel $(CONTAINER) && \
+	$(DOCKER_COMPOSE) up --detach --force-recreate $(CONTAINER)
 
 .PHONY: docker-down
 docker-down: ## Stop all docker containers. To only stop one container, use CONTAINER=<service>
