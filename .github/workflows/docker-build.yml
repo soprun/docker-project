@@ -26,9 +26,9 @@ env:
   NGINX_IMAGE_FILE: ./docker/nginx/Dockerfile
 
 jobs:
-  #  setup:
-  #    name: Setup
-  #    runs-on: ubuntu-latest
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
 
   build:
     name: Build image (ENV ${{ matrix.env }})
@@ -53,7 +53,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build image
+      - name: Build PHP image
         env:
           APP_ENV: ${{ matrix.env }}
           APP_DEBUG: ${{ matrix.debug }}
@@ -88,29 +88,52 @@ jobs:
 
           docker build . \
           --file "$PHP_IMAGE_FILE" \
-          --tag "$PHP_IMAGE_NAME:dev-$VERSION" \
-          --target "dev" \
-          --label "project.env=dev" \
+          --tag "$PHP_IMAGE_NAME:$APP_ENV-$VERSION" \
+          --target "$APP_ENV" \
+          --label "project.env=$APP_ENV" \
           --label "project.version=$VERSION" \
           --label "project.commit_sha=$COMMIT_SHA"
 
-          docker build . \
-          --file "$PHP_IMAGE_FILE" \
-          --tag "$PHP_IMAGE_NAME:$VERSION" \
-          --tag "$PHP_IMAGE_NAME:prod-$VERSION" \
-          --target "prod" \
-          --label "project.env=prod" \
-          --label "project.version=$VERSION" \
-          --label "project.commit_sha=$COMMIT_SHA"
+          docker push $PHP_IMAGE_NAME
+
+      - name: Build Nginx image
+        env:
+          APP_ENV: ${{ matrix.env }}
+          APP_DEBUG: ${{ matrix.debug }}
+        run: |
+          IMAGE_ID=hub.docker.com/repository/docker/$IMAGE_NAME
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          COMMIT_SHA=$(echo "${{ github.sha }}")
+
+          echo VERSION=$VERSION
+          echo COMMIT_SHA=$COMMIT_SHA
+          echo IMAGE_ID=$IMAGE_ID
+          echo "======================================="
+          echo PHP_IMAGE_NAME=$PHP_IMAGE_NAME
+          echo PHP_IMAGE_FILE=$PHP_IMAGE_FILE
+          echo "======================================="
+          echo NGINX_IMAGE_NAME=$NGINX_IMAGE_NAME
+          echo NGINX_IMAGE_FILE=$NGINX_IMAGE_FILE
+          echo "======================================="
+          echo "$GITHUB_CONTEXT"
+          # echo ${{ github.event.pull_request.title }}
 
           docker build . \
           --file "$NGINX_IMAGE_FILE" \
           --tag "$NGINX_IMAGE_NAME:$VERSION" \
+          --label "project.env=$APP_ENV" \
           --label "project.version=$VERSION" \
           --label "project.commit_sha=$COMMIT_SHA"
 
-          # docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]
-          # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-
-          docker push $PHP_IMAGE_NAME
           docker push $NGINX_IMAGE_NAME
