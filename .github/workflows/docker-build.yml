@@ -28,6 +28,7 @@ env:
   NGINX_IMAGE_FILE: ./docker/nginx/Dockerfile
 
   PROJECT_NAME: docker-project
+  PROJECT_RELEASE: ""
 
 jobs:
   #  setup:
