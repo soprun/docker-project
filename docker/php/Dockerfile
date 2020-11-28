@@ -2,7 +2,7 @@
 # Installation base container
 #######################################################################
 
-FROM php:8.0-rc-fpm-alpine AS dev
+FROM php:8.0-rc-fpm-alpine AS build
 
 #######################################################################
 # Default environment variables
@@ -36,15 +36,6 @@ RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 # Install extensions and utilities
 #######################################################################
 
-# persistent dependencies
-RUN set -eux \
-  && apk add --no-cache \
-    curl \
-    bash \
-    git \
-    vim \
-    make
-
 #RUN set -eux \
 #  # Permission fix
 #  # && usermod -u 1000 www-data \
@@ -71,29 +62,6 @@ RUN set -eux \
 #  && docker-php-source delete \
 #  && pecl clear-cache \
 #  && apk del .build-deps
-
-#######################################################################
-# Install composer & composer plugins
-#######################################################################
-
-ENV COMPOSER_HOME="/composer"
-ENV COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
-ENV COMPOSER_MEMORY_LIMIT="-1"
-ENV COMPOSER_ALLOW_SUPERUSER="1"
-
-ENV PATH="${COMPOSER_HOME}/vendor/bin:$PATH"
-
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Install composer plugin
-RUN composer global require hirak/prestissimo \
-  --no-progress \
-  --no-scripts \
-  --no-interaction \
-  --ignore-platform-reqs \
-  --optimize-autoloader \
-  --classmap-authoritative \
-  --profile
 
 # Permission fix
 #RUN addgroup -G 1000 www-data
@@ -129,3 +97,58 @@ WORKDIR /app
 CMD php-fpm
 
 EXPOSE 9000
+
+#######################################################################
+# Installation building a development image from build.
+#######################################################################
+
+FROM build AS dev
+
+#######################################################################
+# Install extensions and utilities
+#######################################################################
+
+# persistent dependencies
+RUN set -eux \
+  && apk add --no-cache \
+    curl \
+    bash \
+    git \
+    vim \
+    make
+
+#######################################################################
+# Install composer & composer plugins
+#######################################################################
+
+ENV COMPOSER_HOME="/composer"
+ENV COMPOSER_CACHE_DIR="${COMPOSER_HOME}/cache"
+ENV COMPOSER_MEMORY_LIMIT="-1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
+
+ENV PATH="${COMPOSER_HOME}/vendor/bin:$PATH"
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Install composer plugin
+RUN composer global require hirak/prestissimo \
+  --no-progress \
+  --no-scripts \
+  --no-interaction \
+  --ignore-platform-reqs \
+  --optimize-autoloader \
+  --classmap-authoritative \
+  --profile
+
+#######################################################################
+# Installation building a production image from build.
+#######################################################################
+
+FROM build AS prod
+
+ENV APP_ENV="${APP_ENV:-prod}"
+ENV APP_DEBUG="${APP_DEBUG:-0}"
+
+### Use the default production configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+

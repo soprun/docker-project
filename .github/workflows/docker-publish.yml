@@ -60,9 +60,9 @@ jobs:
 
       - name: Build image
         run: |
-          # IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=hub.docker.com/repository/docker/$IMAGE_NAME
           # Change all uppercase to lowercase
-          # IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -77,6 +77,7 @@ jobs:
 
           echo VERSION=$VERSION
           echo COMMIT_SHA=$COMMIT_SHA
+          echo IMAGE_ID=$IMAGE_ID
           echo IMAGE_NAME=$IMAGE_NAME
           echo IMAGE_FILE=$IMAGE_FILE
 
@@ -86,9 +87,25 @@ jobs:
 
           docker build . \
           --file "$IMAGE_FILE" \
-          --tag "$IMAGE_NAME:$VERSION" \
+          --tag "$IMAGE_NAME:dev-$VERSION" \
+          --target "dev" \
+          --label "project.env=dev" \
           --label "project.version=$VERSION" \
           --label "project.commit_sha=$COMMIT_SHA"
 
+          docker build . \
+          --file "$IMAGE_FILE" \
+          --tag "$IMAGE_NAME:$VERSION" \
+          --tag "$IMAGE_NAME:prod-$VERSION" \
+          --target "prod" \
+          --label "project.env=prod" \
+          --label "project.version=$VERSION" \
+          --label "project.commit_sha=$COMMIT_SHA"
+
+          # docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]
           # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_NAME:$VERSION
+
+          docker push $IMAGE_NAME
+          # docker push $IMAGE_NAME:$VERSION
+          # docker push $IMAGE_NAME:dev-$VERSION
+          # docker push $IMAGE_NAME:prod-$VERSION

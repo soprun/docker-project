@@ -13,11 +13,11 @@ volumes:
     name: cache
     driver: local
 
-#networks:
-#  frontend_tier:
-#    driver: bridge
-#  backend_tier:
-#    driver: bridge
+networks:
+  frontend_tier:
+    driver: bridge
+  backend_tier:
+    driver: bridge
 
 services:
   nginx:
@@ -32,6 +32,9 @@ services:
     ports:
       - "127.0.0.1:${NGINX_HOST_HTTP_PORT}:80"
       - "127.0.0.1:${NGINX_HOST_HTTPS_PORT}:443"
+    networks:
+      - frontend_tier
+      - backend_tier
 
   php:
     <<: *default_logging
@@ -47,6 +50,8 @@ services:
       - ./app:/app:rw,cached
       - cache:/app/var/cache:rw,cached
       - logs:/app/var/log:rw,cached
+    networks:
+      - backend_tier
 
 #  postgres:
 #    <<: *default_logging
