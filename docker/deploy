@@ -1,12 +1,14 @@
 #!/bin/bash
 
-DOCKER_USER="soprun"
-DOCKER_REPOSITORY="docker-project"
-tag=""
+log_info() {
+  printf "\033[0;34m[info]\033[0m: %s\\n" "$1"
+}
 
 # Project directory
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-PROJECT_NAME="..."
+
+# shellcheck source=./.env
+source "${PROJECT_DIR}/.env"
 
 IMAGE="${DOCKER_USER}/${DOCKER_REPOSITORY}"
 
@@ -15,18 +17,18 @@ GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 GIT_COMMIT_SHA=$(git rev-parse HEAD)
 GIT_COMMIT_ID=$(git rev-parse --short=7 HEAD)
 
-#echo $IMAGE
-#echo $PROJECT_NAME
-#echo $GIT_VERSION
-#echo $GIT_BRANCH
-#echo $GIT_COMMIT_ID
-#echo $GIT_COMMIT_SHA
+log_info $IMAGE
+log_info $PROJECT_NAME
+log_info $GIT_VERSION
+log_info $GIT_BRANCH
+log_info $GIT_COMMIT_ID
+log_info $GIT_COMMIT_SHA
+
+exit 0
 
 docker build \
-  --rm \
-  --force-rm \
   --file "${PROJECT_DIR}/php/Dockerfile.base" \
-  --tag "${IMAGE_PHP}:base" \
+  --tag "${IMAGE}:base" \
   --target "base" \
   --label "project.name=$PROJECT_NAME" \
   --label "project.version=$GIT_VERSION" \
@@ -35,10 +37,8 @@ docker build \
   --label "project.commit_sha=$COMMIT_SHA" \
   ${PROJECT_DIR}
 
-docker build \
-  --rm \
-  --force-rm \
-  --file "${PROJECT_DIR}/php/Dockerfile" \
-  --tag "${IMAGE_PHP}:dev" \
-  --target "dev" \
-  ${PROJECT_DIR}
+#docker build \
+#  --file "${PROJECT_DIR}/php/Dockerfile" \
+#  --tag "${IMAGE}:dev" \
+#  --target "dev" \
+#  ${PROJECT_DIR}

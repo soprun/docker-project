@@ -11,3 +11,13 @@ RUN set -eux \
 
 # Use the default development configuration
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+### Copying source files to workdir
+COPY ./app /app
+
+#######################################################################
+# Install composer
+#######################################################################
+
+COPY --from=soprun/docker-project:composer /composer /composer
+COPY --from=soprun/docker-project:composer /usr/bin/composer /usr/bin/composer
