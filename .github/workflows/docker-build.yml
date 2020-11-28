@@ -66,7 +66,9 @@ jobs:
 #          echo ${{steps.date.outputs.date}}
 
       - name: Create build name
-        run: echo "::set-output name=release_name::release_$(date +'%Y-%m-%d')"
+        run: |
+          RELEASE_NAME=$(printf "release_%s\n" "$(date +'%Y-%m-%d')")
+          echo "::set-output name=release_name::$RELEASE_NAME"
 
       - name: View build name
         run: echo ${{steps.date.outputs.release_name}}
