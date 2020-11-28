@@ -26,9 +26,9 @@ env:
   NGINX_IMAGE_FILE: ./docker/nginx/Dockerfile
 
 jobs:
-  setup:
-    name: Setup
-    runs-on: ubuntu-latest
+#  setup:
+#    name: Setup
+#    runs-on: ubuntu-latest
 
   build:
     name: Build image (ENV ${{ matrix.env }})
