@@ -68,44 +68,54 @@ jobs:
 
       - name: Build Docker image
         id: build
+        env:
+          RELEASE_NAME: ${{ steps.release.outputs.RELEASE_NAME }}
+          RELEASE_DATE: ${{ steps.release.outputs.RELEASE_DATE }}
+          RELEASE_TAG: ${{ steps.release.outputs.RELEASE_TAG }}
+          COMMIT_SHA: $(echo "${{ github.sha }}")
+          BUILD_ID: $(echo "${{ github.job }}")
         run: |
-          RELEASE_NAME=${{ steps.release.outputs.RELEASE_NAME }}
-          RELEASE_DATE=${{ steps.release.outputs.RELEASE_DATE }}
-          RELEASE_TAG=${{ steps.release.outputs.RELEASE_TAG }}
-          COMMIT_SHA=$(echo "${{ github.sha }}")
-          BUILD_ID=$(echo "${{ github.job }}")
+          echo $RELEASE_NAME
+          echo $RELEASE_DATE
+          echo $RELEASE_TAG
 
-          docker build . \
-          --file "$PHP_IMAGE_FILE" \
-          --tag "$PHP_IMAGE_NAME:dev-$RELEASE_TAG" \
-          --target "dev" \
-          --label "project.release=$RELEASE_NAME" \
-          --label "project.release_date=$RELEASE_DATE" \
-          --label "project.commit_sha=$COMMIT_SHA" \
-          --label "project.build_id=$BUILD_ID" \
-          --label "project.tag=$RELEASE_TAG"
-
-          docker build . \
-          --file "$PHP_IMAGE_FILE" \
-          --tag "$PHP_IMAGE_NAME:prod-$RELEASE_TAG" \
-          --target "prod" \
-          --label "project.release=$RELEASE_NAME" \
-          --label "project.release_date=$RELEASE_DATE" \
-          --label "project.commit_sha=$COMMIT_SHA" \
-          --label "project.build_id=$BUILD_ID" \
-          --label "project.tag=$RELEASE_TAG"
-
-          docker build . \
-          --file "$NGINX_IMAGE_FILE" \
-          --tag "$NGINX_IMAGE_NAME:$RELEASE_TAG" \
-          --label "project.release=$RELEASE_NAME" \
-          --label "project.release_date=$RELEASE_DATE" \
-          --label "project.commit_sha=$COMMIT_SHA" \
-          --label "project.build_id=$BUILD_ID" \
-          --label "project.tag=$RELEASE_TAG"
-
-          docker push $PHP_IMAGE_NAME
-          docker push $NGINX_IMAGE_NAME
+#          RELEASE_NAME=${{ steps.release.outputs.RELEASE_NAME }}
+#          RELEASE_DATE=${{ steps.release.outputs.RELEASE_DATE }}
+#          RELEASE_TAG=${{ steps.release.outputs.RELEASE_TAG }}
+#          COMMIT_SHA=$(echo "${{ github.sha }}")
+#          BUILD_ID=$(echo "${{ github.job }}")
+#
+#          docker build . \
+#          --file "$PHP_IMAGE_FILE" \
+#          --tag "$PHP_IMAGE_NAME:dev-$RELEASE_TAG" \
+#          --target "dev" \
+#          --label "project.release=$RELEASE_NAME" \
+#          --label "project.release_date=$RELEASE_DATE" \
+#          --label "project.commit_sha=$COMMIT_SHA" \
+#          --label "project.build_id=$BUILD_ID" \
+#          --label "project.tag=$RELEASE_TAG"
+#
+#          docker build . \
+#          --file "$PHP_IMAGE_FILE" \
+#          --tag "$PHP_IMAGE_NAME:prod-$RELEASE_TAG" \
+#          --target "prod" \
+#          --label "project.release=$RELEASE_NAME" \
+#          --label "project.release_date=$RELEASE_DATE" \
+#          --label "project.commit_sha=$COMMIT_SHA" \
+#          --label "project.build_id=$BUILD_ID" \
+#          --label "project.tag=$RELEASE_TAG"
+#
+#          docker build . \
+#          --file "$NGINX_IMAGE_FILE" \
+#          --tag "$NGINX_IMAGE_NAME:$RELEASE_TAG" \
+#          --label "project.release=$RELEASE_NAME" \
+#          --label "project.release_date=$RELEASE_DATE" \
+#          --label "project.commit_sha=$COMMIT_SHA" \
+#          --label "project.build_id=$BUILD_ID" \
+#          --label "project.tag=$RELEASE_TAG"
+#
+#          docker push $PHP_IMAGE_NAME
+#          docker push $NGINX_IMAGE_NAME
 
   test:
     needs: build
