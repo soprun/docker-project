@@ -57,21 +57,21 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Get current date
-        id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-
-      - name: View current date
-        run: |
-          echo ${{steps.date.outputs.date}}
+#      - name: Get current date
+#        id: date
+#        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+#
+#      - name: View current date
+#        run: |
+#          echo ${{steps.date.outputs.date}}
 
       - name: Create build name
         run: |
-          echo "::set-output name=release_name::release_$(date +'%Y-%m-%d')"
+          "::set-output name=release_name::release_$(date +'%Y-%m-%d')"
 
       - name: View build name
         run: |
-          echo ${{steps.date.outputs.date}}
+          echo ${{steps.date.outputs.release_name}}
 
 #      - name: Build Docker image
 #        env:
