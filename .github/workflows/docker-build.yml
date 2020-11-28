@@ -92,7 +92,6 @@ jobs:
 
           docker build . \
           --file "$PHP_IMAGE_FILE" \
-          --env-file ".env" \
           --tag "$PHP_IMAGE_NAME:dev-$VERSION" \
           --target "dev" \
           --label "project.env=dev" \
@@ -101,7 +100,6 @@ jobs:
 
           docker build . \
           --file "$PHP_IMAGE_FILE" \
-          --env-file ".env" \
           --tag "$PHP_IMAGE_NAME:$VERSION" \
           --tag "$PHP_IMAGE_NAME:prod-$VERSION" \
           --target "prod" \
@@ -111,7 +109,6 @@ jobs:
 
           docker build . \
           --file "$NGINX_IMAGE_FILE" \
-          --env-file ".env" \
           --tag "$NGINX_IMAGE_NAME:$VERSION" \
           --label "project.version=$VERSION" \
           --label "project.commit_sha=$COMMIT_SHA"
