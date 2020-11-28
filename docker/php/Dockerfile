@@ -49,11 +49,11 @@ RUN set -eux \
     intl \
   # PECL extensions
   && pecl install \
-    apcu-5.1 \
+    # apcu-5.1 \
     redis-5.1 \
     xdebug \
   && docker-php-ext-enable \
-    apcu \
+    # apcu \
     redis \
     xdebug \
     opcache \
