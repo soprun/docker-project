@@ -78,12 +78,12 @@ jobs:
 
       - name: Build image
         run: |
-          docker build . \
+          echo docker build . \
           --file $DOCKER_FILE \
-          --tag "$IMAGE_NAME:$VERSION"
+          --tag "$IMAGE_NAME:$VERSION" \
           --label project.version=$VERSION \
           --label project.branch="${{ github.base_ref }}" \
-          --label project.commit_sha="${{ github.sha }}" \
+          --label project.commit_sha="${{ github.sha }}"
 
       - name: Push image
         run: |
