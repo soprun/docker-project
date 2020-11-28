@@ -69,23 +69,20 @@ jobs:
           COMMIT_SHA=$(echo "${{ github.sha }}")
 
           echo VERSION=$VERSION
-          echo BRANCH=$BRANCH
           echo COMMIT_SHA=$COMMIT_SHA
-
           echo IMAGE_NAME=$IMAGE_NAME
           echo DOCKER_FILE=$DOCKER_FILE
           echo "======================================="
           echo "$GITHUB_CONTEXT"
           # echo ${{ github.event.pull_request.title }}
 
-          echo docker build . \
+          docker build . \
           --file $DOCKER_FILE \
           --tag "$IMAGE_NAME:$VERSION" \
-          --label "tag.version=$VERSION" \
-          --label "tag.branch=$BRANCH" \
-          --label "tag.sha=$COMMIT_SHA"
+          --label "project.version=$VERSION" \
+          --label "project.commit_sha=$COMMIT_SHA"
 
       - name: Push image
         run: |
           # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          # docker push $IMAGE_ID:$VERSION
+          docker push $IMAGE_NAME:$VERSION
