@@ -48,6 +48,8 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
       - name: Preparing build
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           # IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
 
@@ -69,6 +71,9 @@ jobs:
           echo IMAGE_NAME=$IMAGE_NAME
           echo BASE_BRANCH=$BASE_BRANCH
           echo VERSION=$VERSION
+
+          echo "$GITHUB_CONTEXT"
+          echo ${{ github.event.pull_request.title }}
 
       - name: Build image
         run: |
