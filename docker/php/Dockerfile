@@ -1,0 +1,64 @@
+FROM php:8.0-rc-fpm-alpine
+
+# workdir
+ARG APP_ENV="dev"
+ARG APP_DEBUG="1"
+
+### Environment variables
+ENV TZ=UTC
+ENV LANG=en_US.UTF8
+ENV LANGUAGE=en
+
+ENV APP_ENV=$APP_ENV
+ENV APP_DEBUG=$APP_DEBUG
+
+ENV COMPOSER_MEMORY_LIMIT="-1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
+
+ENV PATH="/root/.symfony/bin:$PATH"
+ENV PATH="/root/.composer/vendor/bin:$PATH"
+
+# persistent dependencies
+RUN apk add --no-cache \
+    bash \
+    git
+
+# Use the default development configuration
+RUN set -ex; \
+    mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+# php config
+COPY ./php/conf.d/*  "${PHP_INI_DIR}/conf.d/"
+
+# php-fpm pool config
+COPY ./php/www.conf /usr/local/etc/php-fpm.d/www.conf
+
+# install Symfony CLI
+RUN set -ex; \
+    curl -sS https://get.symfony.com/cli/installer | bash; \
+    mv /root/.symfony/bin/symfony /usr/local/bin/symfony
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+### Install composer plugin
+RUN set -ex; \
+    composer global require hirak/prestissimo \
+        --no-progress \
+        --no-scripts \
+        --no-interaction \
+        --ignore-platform-reqs \
+        --optimize-autoloader \
+        --classmap-authoritative \
+        --profile
+
+# Set the working directory.
+WORKDIR /app
+
+### Copying source files to workdir
+#COPY ./app "${APP_CODE_PATH}"
+
+VOLUME /app
+
+CMD php-fpm
+
+EXPOSE 9000

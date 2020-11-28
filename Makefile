@@ -1,9 +1,6 @@
 -include ./docker/.env
 -include ./docker/.env.local
 
-# -include ./app/.env
-# -include ./app/.env.local
-
 DOCKER_COMPOSE_DIR=./docker
 DOCKER_COMPOSE_FILE=$(DOCKER_COMPOSE_DIR)/docker-compose.yml
 DOCKER_COMPOSE=docker-compose -f $(DOCKER_COMPOSE_FILE) --project-directory $(DOCKER_COMPOSE_DIR)
@@ -54,3 +51,47 @@ composer-install: ## Run composer install
 # https://github.com/paslandau/docker-php-tutorial/blob/part_4_setup-laravel-on-docker/Makefile
 # https://www.pascallandau.com/blog/structuring-the-docker-setup-for-php-projects/#makefile-and-bashrc
 # https://www.digitalocean.com/community/tutorials/how-to-containerize-a-laravel-application-for-development-with-docker-compose-on-ubuntu-18-04-ru
+
+
+# --------
+
+# https://github.com/sickill/chruby/blob/master/Makefile
+
+#NAME=docker-project
+#VERSION=0.3.9
+#AUTHOR=soprun
+#URL=https://github.com/$(AUTHOR)/$(NAME)
+#
+#PKG_DIR=pkg
+#PKG_NAME=$(NAME)-$(VERSION)
+#PKG=$(PKG_DIR)/$(PKG_NAME).tar.gz
+#SIG=$(PKG).asc
+#
+#pkg:
+#	mkdir $(PKG_DIR)
+#
+#download: pkg
+#	wget -O $(PKG) $(URL)/archive/v$(VERSION).tar.gz
+#
+#build: pkg
+#	git archive --output=$(PKG) --prefix=$(PKG_NAME)/ HEAD
+#
+#sign: $(PKG)
+#	gpg --sign --detach-sign --armor $(PKG)
+#	git add $(PKG).asc
+#	git commit $(PKG).asc -m "Added PGP signature for v$(VERSION)"
+#	git push origin master
+#
+#verify: $(PKG) $(SIG)
+#	gpg --verify $(SIG) $(PKG)
+#
+#clean:
+#	rm -f $(PKG) $(SIG)
+#
+#all: $(PKG) $(SIG)
+
+
+
+# The build stage
+# The release stage
+# The run stage

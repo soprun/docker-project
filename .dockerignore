@@ -1,10 +1,12 @@
+# General
 .idea
+.git
 .backup
-.github
 
-# Files
 
-.dockerignore
+# App
+docker/*
+
+# Fiels
 .gitignore
-
 Makefile

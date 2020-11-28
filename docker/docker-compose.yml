@@ -1,75 +1,27 @@
-version: "3.8"
-
-x-php:
-  &default_php
-  # restart: unless-stopped
-  restart: on-failure
-  volumes:
-    - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}
-#    - cache:${APP_CACHE_PATH_CONTAINER}
-#    - logs:${APP_LOG_PATH_CONTAINER}
-
-x-network:
-  &default_network
-  networks:
-    - backend
-
-networks:
-  backend:
-    driver: ${NETWORKS_DRIVER}
-
-volumes:
-  mysql:
-    name: mysql
-    driver: ${VOLUMES_DRIVER}
-  logs:
-    name: logs
-    driver: ${VOLUMES_DRIVER}
-  cache:
-    name: cache
-    driver: ${VOLUMES_DRIVER}
+version: "3"
 
 services:
   nginx:
-    image: php-docker-tutorial/nginx
+    image: nginx:alpine
     container_name: nginx
-    build:
-      context: .
-      dockerfile: ./nginx/Dockerfile
     volumes:
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../app/public:/app/public:ro
+    depends_on:
+      - php
     ports:
-      - "${NGINX_HOST_HTTP_PORT}:80"
-      - "${NGINX_HOST_HTTPS_PORT}:443"
-    networks:
-      backend:
-        aliases:
-          - ${APP_HOST}
+      - "80:80"
 
-  php-fpm:
-    <<: *default_php
-    <<: *default_network
-    image: php-docker-tutorial/php-fpm
-    container_name: php-fpm
+  php:
+    image: php-docker/php-fpm
+    container_name: php
+    restart: on-failure
     build:
       context: .
-      dockerfile: ./php-fpm/Dockerfile
+      dockerfile: ./php/Dockerfile
+    volumes:
+      - ../app:/app:rw,delegated
+    # Allows to debug php script run inside PHP container
+    environment:
+      PHP_IDE_CONFIG: serverName=es.local
 
-  #  php-worker:
-  #    <<: *default_php
-  #    <<: *default_network
-  #    image: php-docker-tutorial/php-fpm
-  #    container_name: php-worker
-  #    build:
-  #      context: .
-  #      dockerfile: ./php-worker/Dockerfile
-  #
-  workspace:
-    <<: *default_php
-    <<: *default_network
-    image: php-docker-tutorial/workspace
-    container_name: workspace
-    tty: true
-    build:
-      context: .
-      dockerfile: ./workspace/Dockerfile
