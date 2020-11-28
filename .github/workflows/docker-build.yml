@@ -41,7 +41,7 @@ jobs:
         id: release-name
         run: |
           RELEASE_NAME=$(printf "release_%s\n" "$(date +'%Y-%m-%d')")
-          echo $RELEASE_NAME
+          echo "::debug::$RELEASE_NAME"
           echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
 
       - name: View release name
