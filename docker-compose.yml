@@ -45,6 +45,7 @@ services:
     image: soprun/docker-project:dev-latest
     container_name: php
     restart: unless-stopped
+    tty: true
     privileged: true
     build:
       context: .
@@ -63,30 +64,30 @@ services:
     networks:
       - backend_tier
 
-  postgres:
-    <<: *default_logging
-    image: "postgres:${POSTGRES_VERSION}"
-    container_name: postgres
-    hostname: "$POSTGRES_HOST"
-    restart: always
-    environment:
-      - POSTGRES_DB
-      - POSTGRES_USERNAME
-      - POSTGRES_PASSWORD
-    ports:
-      - "127.0.0.1:${POSTGRES_PORT}:5432"
-    volumes:
-      - postgres:/var/lib/postgresql/data
-    networks:
-      - backend_tier
-
-  redis:
-    <<: *default_logging
-    image: "redis:${REDIS_VERSION}"
-    container_name: redis
-    hostname: "$REDIS_HOST"
-    restart: always
-    ports:
-      - "127.0.0.1:${REDIS_PORT}:6379"
-    networks:
-      - backend_tier
+#  postgres:
+#    <<: *default_logging
+#    image: "postgres:${POSTGRES_VERSION}"
+#    container_name: postgres
+#    hostname: "$POSTGRES_HOST"
+#    restart: always
+#    environment:
+#      - POSTGRES_DB
+#      - POSTGRES_USERNAME
+#      - POSTGRES_PASSWORD
+#    ports:
+#      - "127.0.0.1:${POSTGRES_PORT}:5432"
+#    volumes:
+#      - postgres:/var/lib/postgresql/data
+#    networks:
+#      - backend_tier
+#
+#  redis:
+#    <<: *default_logging
+#    image: "redis:${REDIS_VERSION}"
+#    container_name: redis
+#    hostname: "$REDIS_HOST"
+#    restart: always
+#    ports:
+#      - "127.0.0.1:${REDIS_PORT}:6379"
+#    networks:
+#      - backend_tier

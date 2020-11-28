@@ -1,15 +1,15 @@
 # General
 .idea
 .git
+.ddd
 .backup
 
 # App
-app/var/*
-app/vendor/*
+#app/var/*
+#app/vendor/*
 
 # Fiels
-.dockerignore
-.gitignore
-docker-compose.yml
-Makefile
-README.md
+#.gitignore
+#docker-compose.yml
+#Makefile
+#README.md
