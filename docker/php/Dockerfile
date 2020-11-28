@@ -20,10 +20,34 @@ ENV PATH="/root/.composer/vendor/bin:$PATH"
 ENV PATH="/app/bin:$PATH"
 ENV PATH="/app/vendor/bin:$PATH"
 
-# persistent dependencies
-RUN apk add --no-cache \
-    bash \
-    git
+RUN set -eux \
+    # persistent dependencies
+    && apk add --no-cache \
+        bash \
+        git \
+    # Install extensions and utilities
+    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+        postgresql-dev \
+    # Install required PHP extensions
+    && docker-php-ext-install \
+        pdo \
+        pdo_pgsql \
+        opcache \
+        intl \
+    # PECL extensions
+    && pecl install \
+        apcu-5.1 \
+        redis-5.1 \
+        xdebug-2.8.1 \
+    && docker-php-ext-enable \
+        apcu \
+        redis \
+        xdebug \
+        opcache \
+    # Remove unnecessary stuff
+    && docker-php-source delete \
+    && pecl clear-cache \
+    && apk del .build-deps
 
 # Use the default development configuration
 RUN set -ex; \
@@ -34,6 +58,9 @@ COPY ./php/conf.d/*  "${PHP_INI_DIR}/conf.d/"
 
 # php-fpm pool config
 COPY ./php/www.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Permission fix
+RUN usermod -u 1000 www-data
 
 ## install Symfony CLI
 #RUN set -ex; \

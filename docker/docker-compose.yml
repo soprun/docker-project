@@ -1,6 +1,15 @@
 version: "3"
 
+x-logging:
+  &default_logging
+  logging:
+    driver: "json-file"
+
 volumes:
+  # for persistence between restarts
+  postgres:
+    name: postgres
+    driver: local
   logs:
     name: logs
     driver: local
@@ -8,27 +17,60 @@ volumes:
     name: cache
     driver: local
 
+networks:
+  frontend_tier:
+    driver: bridge
+  backend_tier:
+    driver: bridge
+
 services:
   nginx:
+    <<: *default_logging
     image: nginx:alpine
     container_name: nginx
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ../app/public:/app/public:ro
+      - ../app/public:/app/public:ro,cached
     depends_on:
       - php
     ports:
-      - 8000:80
+      - "127.0.0.1:${NGINX_HOST_HTTP_PORT}:80"
+      - "127.0.0.1:${NGINX_HOST_HTTPS_PORT}:443"
 
   php:
+    <<: *default_logging
     image: php-docker/php-fpm
     container_name: php
-    restart: on-failure
+    restart: unless-stopped
+    privileged: true
     build:
       context: .
       dockerfile: ./php/Dockerfile
     volumes:
-      - ../app:/app:rw,delegated
-      - cache:/app/var/cache/
-      - logs:/app/var/log/
+      - ../app:/app:rw,cached
+      - cache:/app/var/cache:rw
+      - logs:/app/var/log:rw
 
+  postgres:
+    <<: *default_logging
+    image: postgres:13-alpine
+    container_name: postgres
+    hostname: "$POSTGRES_HOST"
+    restart: always
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USERNAME
+      - POSTGRES_PASSWORD
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  redis:
+    <<: *default_logging
+    image: redis:6-alpine
+    container_name: redis
+    hostname: "$REDIS_HOST"
+    restart: always
+    ports:
+      - "127.0.0.1:${REDIS_PORT}:6379"
