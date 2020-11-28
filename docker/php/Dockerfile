@@ -35,10 +35,10 @@ COPY ./php/conf.d/*  "${PHP_INI_DIR}/conf.d/"
 # php-fpm pool config
 COPY ./php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
-# install Symfony CLI
-RUN set -ex; \
-    curl -sS https://get.symfony.com/cli/installer | bash; \
-    mv /root/.symfony/bin/symfony /usr/local/bin/symfony
+## install Symfony CLI
+#RUN set -ex; \
+#    curl -sS https://get.symfony.com/cli/installer | bash; \
+#    mv /root/.symfony/bin/symfony /usr/local/bin/symfony
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
