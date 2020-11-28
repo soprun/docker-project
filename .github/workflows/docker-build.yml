@@ -31,9 +31,9 @@ env:
   PROJECT_RELEASE: ""
 
 jobs:
-  setup:
-    name: Setup stage
-    runs-on: ubuntu-18.04
+  build:
+    name: Build stage
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
@@ -64,13 +64,6 @@ jobs:
       # - name: Run build script
       #   run: ./docker/build
       #   shell: bash
-
-  build:
-    needs: setup
-    name: Build stage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
 
       - name: Build Docker image
         id: build
