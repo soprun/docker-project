@@ -28,13 +28,12 @@ log_info $GIT_COMMIT_SHA
 
 #exit 0
 
-docker build \
+docker build . \
   --file "${PROJECT_DIR}/php/Dockerfile.composer" \
   --tag "${IMAGE}:composer" \
-  --target "composer" \
-  ..
+  --target "composer"
 
-docker build \
+docker build . \
   --file "${PROJECT_DIR}/php/Dockerfile.base" \
   --tag "${IMAGE}:base" \
   --target "base" \
@@ -42,8 +41,7 @@ docker build \
   --label "project.version=$GIT_VERSION" \
   --label "project.branch=$GIT_BRANCH" \
   --label "project.commit_id=$COMMIT_ID" \
-  --label "project.commit_sha=$COMMIT_SHA" \
-  ${PROJECT_DIR}
+  --label "project.commit_sha=$COMMIT_SHA"
 
 #docker build \
 #  --file "${PROJECT_DIR}/php/Dockerfile" \
