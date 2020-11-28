@@ -114,3 +114,7 @@ composer-install: ## Run composer install
 .PHONY: lint-container
 lint-container: ## dasd a
 	$(RUN_IN_DOCKER) console lint:container
+
+
+# Super-Linter
+#https://github.com/github/super-linter
