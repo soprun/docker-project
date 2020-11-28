@@ -8,7 +8,7 @@
 app/var/*
 app/vendor/*
 
-docker/*
+#docker/*
 
 # Fiels
 .gitignore

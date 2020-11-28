@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 log_info() {
   printf "\033[0;34m[info]\033[0m: %s\\n" "$1"
 }
@@ -24,7 +26,13 @@ log_info $GIT_BRANCH
 log_info $GIT_COMMIT_ID
 log_info $GIT_COMMIT_SHA
 
-exit 0
+#exit 0
+
+docker build \
+  --file "${PROJECT_DIR}/php/Dockerfile.composer" \
+  --tag "${IMAGE}:composer" \
+  --target "composer" \
+  ..
 
 docker build \
   --file "${PROJECT_DIR}/php/Dockerfile.base" \
