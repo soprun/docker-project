@@ -23,6 +23,16 @@ ENV PATH="${APP_DIR}/vendor/bin:$PATH"
 #ENV LANGUAGE=en
 
 #######################################################################
+# Default configuration
+#######################################################################
+
+COPY ./docker/php/conf.d/* "${PHP_INI_DIR}/conf.d/"
+COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Use the default development configuration
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+#######################################################################
 # Install extensions and utilities
 #######################################################################
 
@@ -84,16 +94,6 @@ RUN composer global require hirak/prestissimo \
   --optimize-autoloader \
   --classmap-authoritative \
   --profile
-
-#######################################################################
-# Default configuration
-#######################################################################
-
-COPY ./docker/php/conf.d/* "${PHP_INI_DIR}/conf.d/"
-COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
-
-# Use the default development configuration
-RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 # Permission fix
 #RUN addgroup -G 1000 www-data
