@@ -63,10 +63,12 @@ jobs:
         id: build
         run: |
           RELEASE_NAME=${{ steps.release.outputs.RELEASE_NAME }}
-          TAG=${{ steps.release.outputs.RELEASE_TAG }}"
+          TAG=${{ steps.release.outputs.RELEASE_TAG }}
+          TAG2=$(echo "${{ steps.release.outputs.RELEASE_TAG }}")
 
           echo "RELEASE_NAME: $RELEASE_NAME"
           echo "RELEASE_TAG: $TAG"
+          echo "RELEASE_TAG: $TAG2"
 
           # docker build . \
           # --file "$PHP_IMAGE_FILE" \
