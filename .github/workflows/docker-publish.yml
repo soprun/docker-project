@@ -36,6 +36,7 @@ jobs:
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
+    name: Push image
     # needs:
     #   - test
     runs-on: ubuntu-latest
@@ -43,16 +44,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build image
-        run: |
-          docker build . \
-          --file $DOCKER_FILE \
-          --tag "$IMAGE_NAME:$(date +%s)"
-
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
-      - name: Push image
+      - name: Preparing build
         run: |
           IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
 
@@ -69,7 +64,16 @@ jobs:
           [ "$VERSION" == "master" ] && VERSION=latest
 
           echo IMAGE_ID=$IMAGE_ID
+          echo IMAGE_NAME=$IMAGE_NAME
           echo VERSION=$VERSION
 
-#          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-#           docker push $IMAGE_ID:$VERSION
+      - name: Build image
+        run: |
+          # docker build . \
+          #   --file $DOCKER_FILE \
+          #   --tag "$IMAGE_NAME:$VERSION"
+
+      - name: Push image
+        run: |
+          # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          # docker push $IMAGE_ID:$VERSION
