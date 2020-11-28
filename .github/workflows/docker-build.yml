@@ -40,25 +40,22 @@ jobs:
       - name: Create release metadate
         id: release
         run: |
-          release_name=$(printf "release-%s\n" "$(date +'%Y-%m-%d')")
-
-          echo "::set-output name=RELEASE_NAME::$release_name"
-          # release-2020-11-28
+          RELEASE_NAME=$(printf "release-%s\n" "$(date +'%Y-%m-%d')")
+          echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
 
           # Strip git ref prefix from version
-          release_version=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          RELEASE_VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && $release_version=$(echo $release_version | sed -e 's/^v//')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && $RELEASE_VERSION=$(echo $RELEASE_VERSION | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
-          [ "$release_version" == "master" ] && $release_version=latest
+          [ "$RELEASE_VERSION" == "master" ] && $RELEASE_VERSION=latest
 
-          echo "::set-output name=RELEASE_VERSION::$release_version"
+          echo "::set-output name=RELEASE_VERSION::$RELEASE_VERSION"
           # latest, develop, v1.1.2
 
           # WORKSPACE
-
           echo $GITHUB_WORKSPACE
 
       - name: View release date
