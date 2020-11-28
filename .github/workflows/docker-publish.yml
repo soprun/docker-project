@@ -13,6 +13,9 @@ on:
   pull_request:
 
 env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_CONTEXT: ${{ toJson(github) }}
+
   IMAGE_NAME: soprun/docker-project
   DOCKER_FILE: ./docker/php/Dockerfile
 
@@ -48,8 +51,6 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
       - name: Preparing build
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           # IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
 
@@ -71,15 +72,18 @@ jobs:
           echo IMAGE_NAME=$IMAGE_NAME
           echo BASE_BRANCH=$BASE_BRANCH
           echo VERSION=$VERSION
-
+          echo "======================================="
           echo "$GITHUB_CONTEXT"
-          echo ${{ github.event.pull_request.title }}
+          # echo ${{ github.event.pull_request.title }}
 
       - name: Build image
         run: |
-          # docker build . \
-          #   --file $DOCKER_FILE \
-          #   --tag "$IMAGE_NAME:$VERSION"
+          docker build . \
+          --file $DOCKER_FILE \
+          --tag "$IMAGE_NAME:$VERSION"
+          --label project.version=$VERSION \
+          --label project.branch="${{ github.base_ref }}" \
+          --label project.commit_sha="${{ github.sha }}" \
 
       - name: Push image
         run: |
