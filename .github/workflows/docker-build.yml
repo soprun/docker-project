@@ -35,13 +35,13 @@ jobs:
     name: Build image (ENV ${{ matrix.env }})
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
-    strategy:
-      matrix:
-        include:
-          - env: "dev"
-            debug: true
-          - env: "prod"
-            debug: false
+    #    strategy:
+    #      matrix:
+    #        include:
+    #          - env: "dev"
+    #            debug: true
+    #          - env: "prod"
+    #            debug: false
     steps:
       - uses: actions/checkout@v2
 
