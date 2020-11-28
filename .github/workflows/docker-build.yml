@@ -103,7 +103,7 @@ jobs:
           --label "project.commit_sha=$COMMIT_SHA"
 
           # docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]
-          # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
 
           docker push $IMAGE_NAME
           # docker push $IMAGE_NAME:$VERSION

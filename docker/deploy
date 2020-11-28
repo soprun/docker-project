@@ -10,7 +10,7 @@ log_info() {
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 # shellcheck source=./.env
-source "${PROJECT_DIR}/.env"
+source "${PROJECT_DIR}/../.env"
 
 IMAGE="${DOCKER_USER}/${DOCKER_REPOSITORY}"
 
@@ -29,19 +29,9 @@ log_info $GIT_COMMIT_SHA
 #exit 0
 
 docker build . \
-  --file "${PROJECT_DIR}/php/Dockerfile.composer" \
-  --tag "${IMAGE}:composer" \
-  --target "composer"
-
-docker build . \
-  --file "${PROJECT_DIR}/php/Dockerfile.base" \
-  --tag "${IMAGE}:base" \
-  --target "base" \
-  --label "project.name=$PROJECT_NAME" \
-  --label "project.version=$GIT_VERSION" \
-  --label "project.branch=$GIT_BRANCH" \
-  --label "project.commit_id=$COMMIT_ID" \
-  --label "project.commit_sha=$COMMIT_SHA"
+  --file "${PROJECT_DIR}/php/Dockerfile" \
+  --tag "${IMAGE}:dev" \
+  --target "dev"
 
 #docker build \
 #  --file "${PROJECT_DIR}/php/Dockerfile" \
