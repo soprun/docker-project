@@ -17,6 +17,8 @@ ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ENV PATH="/root/.symfony/bin:$PATH"
 ENV PATH="/root/.composer/vendor/bin:$PATH"
+ENV PATH="/app/bin:$PATH"
+ENV PATH="/app/vendor/bin:$PATH"
 
 # persistent dependencies
 RUN apk add --no-cache \
@@ -51,14 +53,23 @@ RUN set -ex; \
         --classmap-authoritative \
         --profile
 
+#RUN set -ex; \
+#	mkdir -p /app; \
+#	chown -R www-data:www-data /app
+
 # Set the working directory.
 WORKDIR /app
 
 ### Copying source files to workdir
 #COPY ./app "${APP_CODE_PATH}"
 
-VOLUME /app
+#VOLUME /app
+
+EXPOSE 9000
 
 CMD php-fpm
 
-EXPOSE 9000
+# Copy the rest of your app's source code from your host to your image filesystem.
+# COPY . .
+
+#USER www-data

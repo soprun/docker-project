@@ -1,5 +1,13 @@
 version: "3"
 
+volumes:
+  logs:
+    name: logs
+    driver: local
+  cache:
+    name: cache
+    driver: local
+
 services:
   nginx:
     image: nginx:alpine
@@ -10,7 +18,7 @@ services:
     depends_on:
       - php
     ports:
-      - "80:80"
+      - 8000:80
 
   php:
     image: php-docker/php-fpm
@@ -21,7 +29,6 @@ services:
       dockerfile: ./php/Dockerfile
     volumes:
       - ../app:/app:rw,delegated
-    # Allows to debug php script run inside PHP container
-    environment:
-      PHP_IDE_CONFIG: serverName=es.local
+      - cache:/app/var/cache/
+      - logs:/app/var/log/
 

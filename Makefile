@@ -95,3 +95,6 @@ composer-install: ## Run composer install
 # The build stage
 # The release stage
 # The run stage
+.PHONY: lint-container
+lint-container: ## dasd a
+	docker exec -it php bash /app/bin/console lint:container

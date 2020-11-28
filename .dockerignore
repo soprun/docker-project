@@ -5,7 +5,10 @@
 
 
 # App
-docker/*
+app/var/*
+app/vendor/*
+
+./docker/*
 
 # Fiels
 .gitignore
