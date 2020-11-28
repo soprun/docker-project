@@ -67,7 +67,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build image (${{ matrix.name }})
+      - name: Run builder shell-script (${{ matrix.name }})
         id: builder-shell
         run: ./docker/builder
         shell: bash
