@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  php:
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:6-alpine
+    container_name: redis
+    hostname: "$REDIS_HOST"
+    restart: always
+    ports:
+      - "127.0.0.1:${REDIS_PORT}:6379"

@@ -1,0 +1,15 @@
+# General
+.idea
+.git
+.backup
+
+
+# App
+app/var/*
+app/vendor/*
+
+#docker/*
+
+# Fiels
+.gitignore
+Makefile
