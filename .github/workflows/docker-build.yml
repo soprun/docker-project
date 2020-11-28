@@ -1,4 +1,4 @@
-name: Docker build CI
+name: Docker build image
 
 on:
   push:
@@ -107,13 +107,13 @@ jobs:
           --label "project.env=$RELEASE_ENV" \
           --label "project.tag=$RELEASE_TAG"
 
+          if [ "$RELEASE_ENV" == "prod" ] && [ "$RELEASE_TAG" == "latest"  ]; then
+            docker tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" $PHP_IMAGE_NAME:latest
+            docker tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" $NGINX_IMAGE_NAME:latest
+          fi
+
           docker push $PHP_IMAGE_NAME
           docker push $NGINX_IMAGE_NAME
-
-          if [ "$RELEASE_ENV" == "prod" ]; then
-            docker tag $PHP_IMAGE_NAME $PHP_IMAGE_NAME:latest
-            docker tag $NGINX_IMAGE_NAME $NGINX_IMAGE_NAME:latest
-          fi
 
   test:
     needs: build
