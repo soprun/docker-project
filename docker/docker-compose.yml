@@ -42,6 +42,7 @@ services:
     build:
       context: .
       dockerfile: ./php/Dockerfile
+      target: dev
     volumes:
       - ../app:/app:rw,cached
       - cache:/app/var/cache:rw

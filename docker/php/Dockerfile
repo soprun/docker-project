@@ -1,30 +1,9 @@
-FROM php:8.0-rc-fpm-alpine
+ARG PHP_VERSION=8.0-rc
 
-# workdir
-ARG APP_ENV="dev"
-ARG APP_DEBUG="1"
-
-### Environment variables
-ENV TZ=UTC
-ENV LANG=en_US.UTF8
-ENV LANGUAGE=en
-
-ENV APP_ENV=$APP_ENV
-ENV APP_DEBUG=$APP_DEBUG
-
-ENV COMPOSER_MEMORY_LIMIT="-1"
-ENV COMPOSER_ALLOW_SUPERUSER="1"
-
-ENV PATH="/root/.symfony/bin:$PATH"
-ENV PATH="/root/.composer/vendor/bin:$PATH"
-ENV PATH="/app/bin:$PATH"
-ENV PATH="/app/vendor/bin:$PATH"
+### Installation base container
+FROM php:${PHP_VERSION}-fpm-alpine AS base
 
 RUN set -eux \
-    # persistent dependencies
-    && apk add --no-cache \
-        bash \
-        git \
     # Install extensions and utilities
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
         postgresql-dev \
@@ -38,7 +17,7 @@ RUN set -eux \
     && pecl install \
         apcu-5.1 \
         redis-5.1 \
-        xdebug-2.8.1 \
+        xdebug-3.0 \
     && docker-php-ext-enable \
         apcu \
         redis \
@@ -49,36 +28,42 @@ RUN set -eux \
     && pecl clear-cache \
     && apk del .build-deps
 
-# Use the default development configuration
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+### Install composer plugin
 RUN set -ex; \
-    mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+  composer global require hirak/prestissimo \
+    --no-progress \
+    --no-scripts \
+    --no-interaction \
+    --ignore-platform-reqs \
+    --optimize-autoloader \
+    --classmap-authoritative \
+    --profile
+
+### Installation base container
+FROM base AS build
+
+# workdir
+ARG APP_ENV="dev"
+ARG APP_DEBUG="1"
+
+### Environment variables
+ENV TZ=UTC
+ENV LANG=en_US.UTF8
+ENV LANGUAGE=en
+
+ENV APP_ENV=$APP_ENV
+ENV APP_DEBUG=$APP_DEBUG
+
+# Permission fix
+RUN usermod -u 1000 www-data
 
 # php config
 COPY ./php/conf.d/*  "${PHP_INI_DIR}/conf.d/"
 
 # php-fpm pool config
 COPY ./php/www.conf /usr/local/etc/php-fpm.d/www.conf
-
-# Permission fix
-RUN usermod -u 1000 www-data
-
-## install Symfony CLI
-#RUN set -ex; \
-#    curl -sS https://get.symfony.com/cli/installer | bash; \
-#    mv /root/.symfony/bin/symfony /usr/local/bin/symfony
-
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-### Install composer plugin
-RUN set -ex; \
-    composer global require hirak/prestissimo \
-        --no-progress \
-        --no-scripts \
-        --no-interaction \
-        --ignore-platform-reqs \
-        --optimize-autoloader \
-        --classmap-authoritative \
-        --profile
 
 #RUN set -ex; \
 #	mkdir -p /app; \
@@ -89,6 +74,8 @@ WORKDIR /app
 
 ### Copying source files to workdir
 #COPY ./app "${APP_CODE_PATH}"
+# Copy the rest of your app's source code from your host to your image filesystem.
+# COPY . .
 
 #VOLUME /app
 
@@ -96,7 +83,36 @@ EXPOSE 9000
 
 CMD php-fpm
 
-# Copy the rest of your app's source code from your host to your image filesystem.
-# COPY . .
+FROM build AS dev
 
-#USER www-data
+ENV COMPOSER_MEMORY_LIMIT="-1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
+
+ENV PATH="/root/.symfony/bin:$PATH"
+ENV PATH="/root/.composer/vendor/bin:$PATH"
+ENV PATH="/app/bin:$PATH"
+ENV PATH="/app/vendor/bin:$PATH"
+
+  # persistent dependencies
+RUN set -eux \
+  && apk add --no-cache \
+    curl \
+    bash \
+    git \
+    vim \
+    make
+
+# Use the default development configuration
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+### Installation building a production image from build.
+
+FROM build AS prod
+
+ENV APP_ENV=${APP_ENV:-prod}
+ENV APP_DEBUG=${APP_DEBUG:-0}
+
+### Use the default production configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"

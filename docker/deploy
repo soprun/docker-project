@@ -3,3 +3,17 @@
 docker_id=""
 repository_name=""
 tag=""
+
+# Project directory
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+echo $PROJECT_DIR
+exit 0
+
+docker build \
+  --rm \
+  --force-rm \
+  --file "${PROJECT_DIR}/docker/php/Dockerfile.composer" \
+  --tag "${IMAGE_PHP}:composer" \
+  --target "composer" \
+  .
