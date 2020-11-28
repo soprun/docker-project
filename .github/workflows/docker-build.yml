@@ -53,12 +53,13 @@ jobs:
           [ "$RELEASE_VERSION" == "master" ] && RELEASE_VERSION=latest
 
           echo "::set-output name=RELEASE_VERSION::$RELEASE_VERSION"
+          echo "::set-output name=RELEASE_TAG::$RELEASE_VERSION"
           # latest, develop, v1.1.2
 
       - name: View release date
         run: |
           echo "RELEASE_NAME: ${{ steps.release.outputs.RELEASE_NAME }}"
-          echo "RELEASE_VERSION: ${{ steps.release.outputs.RELEASE_VERSION }}"
+          echo "RELEASE_TAG: ${{ steps.release.outputs.RELEASE_TAG }}"
 
       # - name: Run build script
       #   run: ./docker/build
@@ -69,7 +70,13 @@ jobs:
     name: Build stage
     runs-on: ubuntu-latest
     steps:
-      - run: echo "The build stage..."
+      - uses: actions/checkout@v2
+
+      - name: Build Docker image
+        id: build
+        run: |
+          echo "The build stage..."
+          echo "RELEASE_TAG: ${{ steps.release.outputs.RELEASE_TAG }}"
 
   test:
     needs: build
