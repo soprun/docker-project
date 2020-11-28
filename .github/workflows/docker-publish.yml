@@ -49,10 +49,10 @@ jobs:
 
       - name: Preparing build
         run: |
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+          # IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
 
           # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -63,8 +63,11 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
 
-          echo IMAGE_ID=$IMAGE_ID
+          BASE_BRANCH=$(echo "${{ github.base_ref }}")
+
+          # echo IMAGE_ID=$IMAGE_ID
           echo IMAGE_NAME=$IMAGE_NAME
+          echo BASE_BRANCH=$BASE_BRANCH
           echo VERSION=$VERSION
 
       - name: Build image
