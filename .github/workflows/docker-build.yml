@@ -63,30 +63,30 @@ jobs:
         id: build
         run: |
           RELEASE_NAME=${{ steps.release.outputs.RELEASE_NAME }}
-          TAG=${{ steps.release.outputs.RELEASE_TAG }}
+          RELEASE_TAG=${{ steps.release.outputs.RELEASE_TAG }}
 
           # echo "RELEASE_NAME: $RELEASE_NAME"
-          # echo "RELEASE_TAG: $TAG"
+          # echo "RELEASE_TAG: $RELEASE_TAG"
 
           docker build . \
           --file "$PHP_IMAGE_FILE" \
-          --tag "$PHP_IMAGE_NAME:dev-$VERSION" \
+          --tag "$PHP_IMAGE_NAME:dev-$RELEASE_TAG" \
           --target "dev" \
           --label "project.release=$RELEASE_NAME" \
-          --label "project.tag=$TAG"
+          --label "project.tag=$RELEASE_TAG"
 
           docker build . \
           --file "$PHP_IMAGE_FILE" \
-          --tag "$PHP_IMAGE_NAME:dev-$VERSION" \
+          --tag "$PHP_IMAGE_NAME:prod-$RELEASE_TAG" \
           --target "prod" \
           --label "project.release=$RELEASE_NAME" \
-          --label "project.tag=$TAG"
+          --label "project.tag=$RELEASE_TAG"
 
           docker build . \
           --file "$NGINX_IMAGE_FILE" \
-          --tag "$NGINX_IMAGE_NAME:$VERSION" \
+          --tag "$NGINX_IMAGE_NAME:$RELEASE_TAG" \
           --label "project.release=$RELEASE_NAME" \
-          --label "project.tag=$TAG"
+          --label "project.tag=$RELEASE_TAG"
 
           docker push $PHP_IMAGE_NAME
           docker push $NGINX_IMAGE_NAME
