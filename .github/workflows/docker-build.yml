@@ -110,6 +110,11 @@ jobs:
           docker push $PHP_IMAGE_NAME
           docker push $NGINX_IMAGE_NAME
 
+          if [ "$RELEASE_ENV" == "prod" ]; then
+            docker tag $PHP_IMAGE_NAME $PHP_IMAGE_NAME:latest
+            docker tag $NGINX_IMAGE_NAME $NGINX_IMAGE_NAME:latest
+          fi
+
   test:
     needs: build
     name: Test stage

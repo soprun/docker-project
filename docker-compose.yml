@@ -48,7 +48,7 @@ services:
     privileged: true
     build:
       context: .
-      dockerfile: ./docker/php/Dockerfile.test
+      dockerfile: ./docker/php/Dockerfile
       target: dev
       args:
         PHP_VERSION: $PHP_VERSION
