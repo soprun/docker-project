@@ -37,30 +37,34 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Create release name
-        id: release-name
+      - name: Create release metadate
+        id: release
         run: |
-          RELEASE_NAME=$(printf "release_%s\n" "$(date +'%Y-%m-%d')")
-          echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
+          release_name=$(printf "release-%s\n" "$(date +'%Y-%m-%d')")
 
-      - name: Create release version
-        id: release-version
-        run: |
+          echo "::set-output name=RELEASE_NAME::$release_name"
+          # release-2020-11-28
+
           # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          release_version=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && $release_version=$(echo $release_version | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          [ "$release_version" == "master" ] && $release_version=latest
 
-          echo "::set-output name=RELEASE_VERSION::$VERSION"
+          echo "::set-output name=RELEASE_VERSION::$release_version"
+          # latest, develop, v1.1.2
+
+          # WORKSPACE
+
+          echo $GITHUB_WORKSPACE
 
       - name: View release date
         run: |
-          echo "RELEASE_NAME: ${{ steps.release-name.outputs.RELEASE_NAME }}"
-          echo "RELEASE_VERSION: ${{ steps.release-version.outputs.RELEASE_VERSION }}"
+          echo "RELEASE_NAME: ${{ steps.release.outputs.RELEASE_NAME }}"
+          echo "RELEASE_VERSION: ${{ steps.release.outputs.RELEASE_VERSION }}"
 
   #  build:
   #    name: Build image (${{ matrix.env }})
