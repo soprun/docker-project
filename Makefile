@@ -1,5 +1,5 @@
 -include .env
--include ./docker/.env.local
+-include .env.local
 
 DOCKER_COMPOSE_DIR=.
 DOCKER_COMPOSE_FILE=$(DOCKER_COMPOSE_DIR)/docker-compose.yml
@@ -39,7 +39,7 @@ docker-down: ## Stop all docker containers. To only stop one container, use CONT
 ##@ [Application]
 
 #RUN_IN_DOCKER := $(DOCKER_COMPOSE) exec -T --user $(RUN_IN_DOCKER_USER) $(RUN_IN_DOCKER_CONTAINER)
-RUN_IN_DOCKER := $(DOCKER_COMPOSE) exec -T php
+RUN_IN_DOCKER := $(DOCKER_COMPOSE) exec -T $(DEFAULT_CONTAINER)
 
 .PHONY: exec
 exec: ## Execute a command in a running container

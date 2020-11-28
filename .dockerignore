@@ -3,13 +3,13 @@
 .git
 .backup
 
-
 # App
 app/var/*
 app/vendor/*
 
-#docker/*
-
 # Fiels
+.dockerignore
 .gitignore
+docker-compose.yml
 Makefile
+README.md

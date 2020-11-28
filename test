@@ -1,7 +1,0 @@
-#!/bin/sh
-
-#echo $(release_$(date +'%Y-%m-%d'))
-
-
-
-
