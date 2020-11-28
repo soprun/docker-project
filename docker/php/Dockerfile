@@ -45,32 +45,32 @@ RUN set -eux \
     vim \
     make
 
-RUN set -eux \
-  # Permission fix
-  # && usermod -u 1000 www-data \
-  # Install extensions and utilities
-  && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-    postgresql-dev \
-  # Install required PHP extensions
-  && docker-php-ext-install \
-    pdo \
-    pdo_pgsql \
-    opcache \
-    intl \
-  # PECL extensions
-  && pecl install \
-    # apcu-5.1 \
-    redis-5.1 \
-    xdebug \
-  && docker-php-ext-enable \
-    # apcu \
-    # redis \
-    xdebug \
-    opcache \
-  # Remove unnecessary stuff
-  && docker-php-source delete \
-  && pecl clear-cache \
-  && apk del .build-deps
+#RUN set -eux \
+#  # Permission fix
+#  # && usermod -u 1000 www-data \
+#  # Install extensions and utilities
+#  && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+#    postgresql-dev \
+#  # Install required PHP extensions
+#  && docker-php-ext-install \
+#    pdo \
+#    pdo_pgsql \
+#    opcache \
+#    intl \
+#  # PECL extensions
+#  && pecl install \
+#    # apcu-5.1 \
+#    redis-5.1 \
+#    xdebug \
+#  && docker-php-ext-enable \
+#    # apcu \
+#    # redis \
+#    xdebug \
+#    opcache \
+#  # Remove unnecessary stuff
+#  && docker-php-source delete \
+#  && pecl clear-cache \
+#  && apk del .build-deps
 
 #######################################################################
 # Install composer & composer plugins

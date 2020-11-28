@@ -24,6 +24,11 @@ docker-build: ## Build all docker images. Build a specific image by providing th
 	$(DOCKER_COMPOSE) build --parallel $(CONTAINER) && \
 	$(DOCKER_COMPOSE) up --detach --force-recreate $(CONTAINER)
 
+.PHONY: docker-pull
+docker-pull: ## Pull service images
+	$(DOCKER_COMPOSE) pull && \
+	$(DOCKER_COMPOSE) up --detach --force-recreate $(CONTAINER)
+
 .PHONY: docker-down
 docker-down: ## Stop all docker containers. To only stop one container, use CONTAINER=<service>
 	@$(DOCKER_COMPOSE) down $(CONTAINER)
