@@ -57,21 +57,24 @@ jobs:
           # Change all uppercase to lowercase
           # IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
+          IMAGE_TAG_ID=$(echo "${{ github.sha }}")
+          IMAGE_TAG_BRANCH=$(echo "${{ github.base_ref }}")
+
           # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          IMAGE_TAG_VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && IMAGE_TAG_VERSION=$(echo $IMAGE_TAG_VERSION | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          [ "$IMAGE_TAG_VERSION" == "master" ] && IMAGE_TAG_VERSION=latest
 
-          BASE_BRANCH=$(echo "${{ github.base_ref }}")
+          echo IMAGE_TAG_ID=$IMAGE_TAG_ID
+          echo IMAGE_TAG_BRANCH=$IMAGE_TAG_BRANCH
+          echo IMAGE_TAG_VERSION=$IMAGE_TAG
 
-          # echo IMAGE_ID=$IMAGE_ID
           echo IMAGE_NAME=$IMAGE_NAME
-          echo BASE_BRANCH=$BASE_BRANCH
-          echo VERSION=$VERSION
+          echo DOCKER_FILE=$DOCKER_FILE
           echo "======================================="
           echo "$GITHUB_CONTEXT"
           # echo ${{ github.event.pull_request.title }}
@@ -79,9 +82,9 @@ jobs:
           echo docker build . \
           --file $DOCKER_FILE \
           --tag "$IMAGE_NAME:$VERSION" \
-          --label project.version=$VERSION \
-          --label project.branch="${{ github.base_ref }}" \
-          --label project.commit_sha="${{ github.sha }}"
+          --label tag.id=$IMAGE_TAG_ID" \
+          --label tag.branch=$IMAGE_TAG_BRANCH \
+          --label tag.version=$IMAGE_TAG_VERSION
 
       - name: Push image
         run: |
