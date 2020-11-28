@@ -2,8 +2,8 @@
 
 set -e
 
-printenv | sort
-exit 1
+#printenv | sort
+#exit 1
 
 function output
 {
@@ -33,18 +33,18 @@ function output
   builtin echo -e "${style_start}${1}${style_end}"
 }
 
-# Project directory
-PROJECT_DIR="$(dirname $(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd))"
-
-output "\nLoad environment variables" "heading"
-
-for file in ${PROJECT_DIR}/.{env,env.local}; do
-  # shellcheck source=../.env
-  [ -r "$file" ] && [ -f "$file" ] && source "$file"
-done
-unset file
-
-output "Load successfully!" "success"
+## Project directory
+#PROJECT_DIR="$(dirname $(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd))"
+#
+#output "\nLoad environment variables" "heading"
+#
+#for file in ${PROJECT_DIR}/.{env,env.local}; do
+#  # shellcheck source=../.env
+#  [ -r "$file" ] && [ -f "$file" ] && source "$file"
+#done
+#unset file
+#
+#output "Load successfully!" "success"
 
 #######################################################################
 # Check environment variables
@@ -52,8 +52,33 @@ output "Load successfully!" "success"
 
 #output "\nCheck environment variables" "heading"
 
-if [ -z $PROJECT_NAME ]; then
-  output "\nAn error occurred, the value of the variable PROJECT_NAME was not loaded!" "error"
+if [ -z $RELEASE_DATE ]; then
+  output "\nAn error occurred, the value of the variable RELEASE_DATE was not loaded!" "error"
+  exit 1
+fi
+
+if [ -z $RELEASE_ENV ]; then
+  output "\nAn error occurred, the value of the variable RELEASE_ENV was not loaded!" "error"
+  exit 1
+fi
+
+if [ -z $RELEASE_NAME ]; then
+  output "\nAn error occurred, the value of the variable RELEASE_NAME was not loaded!" "error"
+  exit 1
+fi
+
+if [ -z $RELEASE_TAG ]; then
+  output "\nAn error occurred, the value of the variable RELEASE_TAG was not loaded!" "error"
+  exit 1
+fi
+
+if [ -z $COMMIT_SHA ]; then
+  output "\nAn error occurred, the value of the variable COMMIT_SHA was not loaded!" "error"
+  exit 1
+fi
+
+if [ -z $BUILD_ID ]; then
+  output "\nAn error occurred, the value of the variable BUILD_ID was not loaded!" "error"
   exit 1
 fi
 
@@ -62,6 +87,8 @@ if ! command -v git >/dev/null 2>&1; then
   output "Git will be needed." "error"
   exit 1
 fi
+
+exit 0
 
 output "\nGit variables" "heading"
 

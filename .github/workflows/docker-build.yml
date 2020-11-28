@@ -73,8 +73,8 @@ jobs:
           RELEASE_NAME: ${{ steps.release.outputs.RELEASE_NAME }}
           RELEASE_DATE: ${{ steps.release.outputs.RELEASE_DATE }}
           RELEASE_TAG: ${{ steps.release.outputs.RELEASE_TAG }}
-          COMMIT_SHA: $(echo "${{ github.sha }}")
-          BUILD_ID: $(echo "${{ github.job }}")
+          COMMIT_SHA: ${{ github.sha }}
+          BUILD_ID: ${{ github.job }}
 
       - name: Build image (${{ matrix.env }})
         id: build
