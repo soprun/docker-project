@@ -2,7 +2,7 @@
 # Installation base container
 #######################################################################
 
-ARG PHP_VERSION
+ARG PHP_VERSION="8.0-rc"
 ARG APP_ENV="dev"
 ARG APP_DEBUG="1"
 ARG APP_DIR="/app"
