@@ -32,7 +32,7 @@ env:
 
 jobs:
   setup:
-    name: Setup
+    name: Setup stage
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -61,7 +61,7 @@ jobs:
           echo "RELEASE_VERSION: ${{ steps.release.outputs.RELEASE_VERSION }}"
 
       - name: Run build script
-        run: $GITHUB_ACTION_PATH/docker/build
+        run: ./docker/build.sh
         shell: bash
 
       #  build:
@@ -220,7 +220,7 @@ jobs:
 
   deploy_prod:
     needs: release
-    name: Deploy to production
+    name: Deploy stage
     if: contains(github.ref, 'master')
     runs-on: ubuntu-latest
     steps:
