@@ -6,6 +6,8 @@ on:
     branches:
       - master
       - develop
+    paths:
+      - 'docker/**'
     # Publish `v1.2.3` tags as releases.
     tags:
       - v*
@@ -17,7 +19,7 @@ env:
   GITHUB_CONTEXT: ${{ toJson(github) }}
 
   IMAGE_NAME: soprun/docker-project
-  DOCKER_FILE: ./docker/php/Dockerfile
+  IMAGE_FILE: ./docker/php/Dockerfile
 
 jobs:
   # Run tests.
@@ -33,7 +35,7 @@ jobs:
   #            docker-compose --file docker-compose.test.yml build
   #            docker-compose --file docker-compose.test.yml run sut
   #          else
-  #            docker build . --file $DOCKER_FILE
+  #            docker build . --file $IMAGE_FILE
   #          fi
 
   # Push image to GitHub Packages.
@@ -76,13 +78,14 @@ jobs:
           echo VERSION=$VERSION
           echo COMMIT_SHA=$COMMIT_SHA
           echo IMAGE_NAME=$IMAGE_NAME
-          echo DOCKER_FILE=$DOCKER_FILE
+          echo IMAGE_FILE=$IMAGE_FILE
+
           echo "======================================="
           echo "$GITHUB_CONTEXT"
           # echo ${{ github.event.pull_request.title }}
 
           docker build . \
-          --file $DOCKER_FILE \
+          --file "$IMAGE_FILE" \
           --tag "$IMAGE_NAME:$VERSION" \
           --label "project.version=$VERSION" \
           --label "project.commit_sha=$COMMIT_SHA"
