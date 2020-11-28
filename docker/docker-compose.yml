@@ -35,7 +35,7 @@ services:
 
   php:
     <<: *default_logging
-    image: php-docker/php-fpm
+    image: soprun/docker-project
     container_name: php
     restart: unless-stopped
     privileged: true

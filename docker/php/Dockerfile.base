@@ -1,0 +1,89 @@
+#######################################################################
+# Installation base container
+#######################################################################
+
+ARG PHP_VERSION=7.4
+
+FROM php:${PHP_VERSION}-fpm-alpine AS base
+
+#######################################################################
+# Default environment variables
+#######################################################################
+
+ARG APP_ENV="dev"
+ARG APP_DEBUG="1"
+
+ENV TZ=UTC
+ENV LANG=en_US.UTF8
+ENV LANGUAGE=en
+
+ENV APP_ENV=$APP_ENV
+ENV APP_DEBUG=$APP_DEBUG
+
+ENV PATH="/app/bin:$PATH"
+ENV PATH="/app/vendor/bin:$PATH"
+
+#######################################################################
+# Install extensions and utilities
+#######################################################################
+
+RUN set -eux \
+  # Permission fix
+  # && usermod -u 1000 www-data \
+  # Install extensions and utilities
+  && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+    postgresql-dev \
+  # Install required PHP extensions
+  && docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    opcache \
+    intl \
+  # PECL extensions
+  && pecl install \
+    apcu-5.1 \
+    redis-5.1 \
+    xdebug \
+  && docker-php-ext-enable \
+    apcu \
+    redis \
+    xdebug \
+    opcache \
+  # Remove unnecessary stuff
+  && docker-php-source delete \
+  && pecl clear-cache \
+  && apk del .build-deps
+
+#######################################################################
+# Install composer & composer plugins
+#######################################################################
+
+ENV COMPOSER_MEMORY_LIMIT="-1"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
+ENV PATH="/root/.composer/vendor/bin:$PATH"
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+RUN set -ex; \
+  composer global require hirak/prestissimo \
+    --no-progress \
+    --no-scripts \
+    --no-interaction \
+    --ignore-platform-reqs \
+    --optimize-autoloader \
+    --classmap-authoritative \
+    --profile
+
+#######################################################################
+# Default configuration
+#######################################################################
+
+COPY ./php/conf.d/* "${PHP_INI_DIR}/conf.d/"
+COPY ./php/www.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Set the working directory.
+WORKDIR /app
+
+CMD php-fpm
+
+EXPOSE 9000
