@@ -22,6 +22,23 @@ ENV PATH="${APP_DIR}/vendor/bin:$PATH"
 #ENV LANG=en_US.UTF8
 #ENV LANGUAGE=en
 
+# add users
+ARG APP_USER=www-data
+ARG APP_USER_ID=1000
+ARG APP_GROUP=$(APP_USER)
+ARG APP_GROUP_ID=$(APP_USER_ID)
+
+#######################################################################
+# Install PHP extensions
+#######################################################################
+
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/
+RUN install-php-extensions \
+  intl \
+  opcache \
+  apcu \
+  redis
+
 #######################################################################
 # Default configuration
 #######################################################################
@@ -105,7 +122,7 @@ EXPOSE 9000
 FROM build AS dev
 
 #######################################################################
-# Install extensions and utilities
+# Install software and utilities
 #######################################################################
 
 # persistent dependencies
@@ -115,7 +132,16 @@ RUN set -eux \
     bash \
     git \
     vim \
-    make
+    make \
+    unzip
+
+#######################################################################
+# Install development PHP extensions
+#######################################################################
+
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/
+RUN install-php-extensions \
+  xdebug
 
 #######################################################################
 # Install composer & composer plugins

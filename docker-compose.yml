@@ -38,7 +38,7 @@ services:
 
   php:
     <<: *default_logging
-    image: soprun/docker-project:latest
+    image: soprun/docker-project:dev-latest
     container_name: php
     restart: unless-stopped
     privileged: true

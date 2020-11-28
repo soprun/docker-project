@@ -5,7 +5,7 @@ DOCKER_COMPOSE_DIR=.
 DOCKER_COMPOSE_FILE=$(DOCKER_COMPOSE_DIR)/docker-compose.yml
 DOCKER_COMPOSE=docker-compose -f $(DOCKER_COMPOSE_FILE) --project-directory $(DOCKER_COMPOSE_DIR)
 
-DEFAULT_CONTAINER=workspace
+DEFAULT_CONTAINER=php
 
 # Self-Documented Makefile see https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 .DEFAULT_GOAL := help
@@ -33,25 +33,33 @@ docker-pull: ## Pull service images
 docker-down: ## Stop all docker containers. To only stop one container, use CONTAINER=<service>
 	@$(DOCKER_COMPOSE) down $(CONTAINER)
 
-.PHONY: docker-exec
-docker-exec: ## Execute a command in a running container
-	@$(DOCKER_COMPOSE) exec -T $(DEFAULT_CONTAINER) sh
-
 ##@ [Application]
 
 #RUN_IN_DOCKER := $(DOCKER_COMPOSE) exec -T --user $(RUN_IN_DOCKER_USER) $(RUN_IN_DOCKER_CONTAINER)
+RUN_IN_DOCKER := $(DOCKER_COMPOSE) exec -T php
+
+.PHONY: exec
+exec: ## Execute a command in a running container
+	@$(RUN_IN_DOCKER) bash
 
 .PHONY: composer
 composer: ## Run composer and provide the command via ARGS="command --options"
 	$(RUN_IN_DOCKER) composer $(ARGS)
 
-.PHONY: artisan
-artisan: ## Run artisan and provide the command via ARGS="command --options"
-	$(RUN_IN_DOCKER) php artisan $(ARGS)
+.PHONY: console
+console: ## Run artisan and provide the command via ARGS="command --options"
+	@$(RUN_IN_DOCKER) console $(ARGS)
 
 .PHONY: composer-install
 composer-install: ## Run composer install
-	$(RUN_IN_DOCKER) composer install
+	$(RUN_IN_DOCKER) composer install \
+		--no-progress \
+		--no-scripts \
+		--no-interaction \
+		--prefer-dist \
+		--optimize-autoloader \
+		--classmap-authoritative \
+		--profile
 
 # https://github.com/paslandau/docker-php-tutorial/blob/part_4_setup-laravel-on-docker/Makefile
 # https://www.pascallandau.com/blog/structuring-the-docker-setup-for-php-projects/#makefile-and-bashrc
@@ -102,4 +110,4 @@ composer-install: ## Run composer install
 # The run stage
 .PHONY: lint-container
 lint-container: ## dasd a
-	docker exec -it php bash /app/bin/console lint:container
+	$(RUN_IN_DOCKER) console lint:container
