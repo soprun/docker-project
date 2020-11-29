@@ -56,6 +56,7 @@ jobs:
           DOCKER_REGISTRY_URL: hub.docker.com
 
       - name: Setup build
+        if: success()
         id: release
         run: |
           # Strip git ref prefix from version
@@ -69,13 +70,11 @@ jobs:
 
           echo ::set-output name=version::${VERSION}
 
-      - name: Build debug tag name
-        run: |
           echo "IMAGE_PHP_NAME: ${{ env.IMAGE_PHP_NAME }}"
           echo "IMAGE_PHP_FILE: ${{ env.IMAGE_PHP_FILE }}"
           echo "${{ env.IMAGE_PHP_NAME }}:dev-${{ steps.prep.outputs.version }}"
 
-      - name: Build:dev-${{ steps.prep.outputs.version }}
+      - name: "Build image: dev"
         if: success()
         id: build_php_image
         uses: docker/build-push-action@v2
@@ -85,9 +84,25 @@ jobs:
           push: true
           target: dev
           tags: |
-            "${{ env.IMAGE_PHP_NAME }}:dev-${{ steps.prep.outputs.version }}"
+            ${{ env.IMAGE_PHP_NAME }}:dev-${{ steps.prep.outputs.version }}
           cache-from: |
             ${{ env.IMAGE_PHP_NAME }}:cache
+
+      - name: "Build image: prod"
+        if: success()
+        id: build_php_image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ${{ env.IMAGE_PHP_FILE }}
+          push: true
+          target: dev
+          tags: |
+            ${{ env.IMAGE_PHP_NAME }}:prod-${{ steps.prep.outputs.version }}
+            ${{ env.IMAGE_PHP_NAME }}:latest
+          cache-from: |
+            ${{ env.IMAGE_PHP_NAME }}:cache
+
 
       # - name: Image digest
       #   run: echo ${{ steps.build_php_image.outputs.digest }}
