@@ -1,4 +1,28 @@
 # syntax=docker/dockerfile:experimental
+FROM composer:1.8 as vendor
+
+ENV COMPOSER_HOME "/composer"
+ENV COMPOSER_CACHE_DIR "${COMPOSER_HOME}/cache"
+
+WORKDIR /app
+
+COPY ./app/composer.* /app
+COPY ./app/symfony.lock /app
+
+RUN --mount=type=cache,target=$COMPOSER_CACHE_DIR \
+  composer global require hirak/prestissimo \
+  --ignore-platform-reqs \
+  --optimize-autoloader \
+  --classmap-authoritative; \
+  # Install application dependencies
+  composer install \
+    --no-progress \
+    --no-scripts \
+    --no-interaction \
+    --prefer-dist \
+    --optimize-autoloader \
+    --classmap-authoritative \
+    --profile
 
 #######################################################################
 # Installation base container
@@ -20,6 +44,16 @@ ENV PATH "${APP_DIR}/vendor/bin:$PATH"
 ENV TZ UTC
 ENV LANG en_US.UTF8
 ENV LANGUAGE en
+
+#######################################################################
+# Install composer & composer plugins
+#######################################################################
+
+ENV COMPOSER_HOME "/composer"
+ENV COMPOSER_CACHE_DIR "${COMPOSER_HOME}/cache"
+ENV COMPOSER_MEMORY_LIMIT -1
+ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV PATH "${COMPOSER_HOME}/vendor/bin:$PATH"
 
 #######################################################################
 # Install software and utilities
@@ -57,28 +91,6 @@ COPY ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 # Use the default development configuration
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
-#######################################################################
-# Install composer & composer plugins
-#######################################################################
-
-ENV COMPOSER_HOME "/composer"
-ENV COMPOSER_CACHE_DIR "${COMPOSER_HOME}/cache"
-ENV PATH "${COMPOSER_HOME}/vendor/bin:$PATH"
-ENV COMPOSER_MEMORY_LIMIT -1
-ENV COMPOSER_ALLOW_SUPERUSER 1
-
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Install composer plugin
-RUN --mount=type=cache,target=/composer composer global require hirak/prestissimo \
-  --no-progress \
-  --no-scripts \
-  --no-interaction \
-  --ignore-platform-reqs \
-  --optimize-autoloader \
-  --classmap-authoritative \
-  --profile
-
 # Set the working directory.
 WORKDIR /app
 
@@ -92,25 +104,8 @@ EXPOSE 9000
 
 FROM base as src
 
-#######################################################################
-# Copying & install application dependencies
-#######################################################################
-
-COPY ./app/composer.* /app
-COPY ./app/symfony.lock /app
-
-### Install application dependencies
-RUN --mount=type=cache,target=/composer composer install \
-  --no-dev \
-  --no-progress \
-  --no-scripts \
-  --no-interaction \
-  --prefer-dist \
-  --optimize-autoloader \
-  --classmap-authoritative \
-  --profile
-
 # Copying source files to workdir
+COPY --from=vendor /app/vendor /app/vendor
 
 COPY ./app/bin /app/bin
 COPY ./app/config /app/config
@@ -119,12 +114,12 @@ COPY ./app/src /app/src
 COPY ./app/templates /app/templates
 COPY ./app/.env /app/.env
 
-RUN set -e; \
-  # Finish composer
-  composer dump-autoload --no-scripts --no-dev --optimize --classmap-authoritative; \
-  mkdir -p /app/var; \
-  chown -R www-data:www-data /app; \
-  chmod -R 777 /app/var
+#RUN set -e; \
+#  # Finish composer
+#  composer dump-autoload --no-scripts --no-dev --optimize --classmap-authoritative; \
+#  mkdir -p /app/var; \
+#  chown -R www-data:www-data /app; \
+#  chmod -R 777 /app/var
 
 #######################################################################
 # Development container
@@ -135,15 +130,8 @@ FROM src as dev
 ENV APP_ENV dev
 ENV APP_DEBUG 1
 
-### Install application dependencies
-RUN --mount=type=cache,target=/composer composer install \
-  --no-progress \
-  --no-scripts \
-  --no-interaction \
-  --prefer-dist \
-  --optimize-autoloader \
-  --classmap-authoritative \
-  --profile
+COPY --from=vendor "$COMPOSER_HOME" "$COMPOSER_HOME"
+COPY --from=vendor /usr/bin/composer /usr/bin/composer
 
 #######################################################################
 # Production container
