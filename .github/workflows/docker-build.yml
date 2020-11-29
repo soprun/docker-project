@@ -29,7 +29,7 @@ env:
 
 jobs:
   build:
-    name: Building ${{ matrix.name }} image
+    name: Building ${{ matrix.target }} image
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -92,7 +92,7 @@ jobs:
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
-          file: $PHP_IMAGE_FILE
+          file: ${{ env.IMAGE_PHP_FILE }}
           target: ${{ matrix.target }}
           tags: ${{ steps.prep.outputs.tags }}
 
@@ -102,7 +102,7 @@ jobs:
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
-          file: $IMAGE_NGINX_FILE
+          file: ${{ env.IMAGE_NGINX_FILE }}
           target: ${{ matrix.target }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
