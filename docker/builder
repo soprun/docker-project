@@ -51,7 +51,7 @@ if [ ! -f "${PROJECT_DIR}/.env.local" ]; then
   touch "${PROJECT_DIR}/.env.local"
 fi
 
-# TAGS
+# VERSIONS
 # :dev
 # :prod
 # :latest
@@ -68,8 +68,8 @@ if [ -z $PROJECT_NAME ]; then
   # exit 1
 fi
 
-if [ -z $RELEASE_TAG ]; then
-  output "\nAn error occurred, the value of the variable RELEASE_TAG was not loaded!" "error"
+if [ -z $RELEASE_VERSION ]; then
+  output "\nAn error occurred, the value of the variable RELEASE_VERSION was not loaded!" "error"
   # exit 1
 fi
 
@@ -129,20 +129,48 @@ output "\nGit variables" "heading"
 # For branches this in the format refs/heads/<branch_name>,
 # and for tags it is refs/tags/<tag_name>.
 
-git show-ref --quiet --verify -- "refs/heads/$headname" || echo "$headname is not a valid branch"
+#git show-ref --quiet --verify -- "refs/heads/$headname" || echo "$headname is not a valid branch"
 
 # GITHUB_SHA (commit SHA)
 # GITHUB_REF (Git ref)
 
-prefix=$(git rev-parse --show-prefix)
+GITHUB_REF="refs/heads/master"
+GITHUB_REF="refs/heads/develop"
+#GITHUB_REF="refs/tags/v1.1.1"
 
-echo $prefix
+VERSION="edge"
 
-#               cd "$(git rev-parse --show-toplevel)"
-#               eval "set -- $(git rev-parse --sq --prefix "$prefix" "$@")"
+## Strip git ref prefix from version
+# VERSION=$(echo $GITHUB_REF | sed -e 's,.*/\(.*\),\1,')
+
+if [[ $GITHUB_REF == refs/tags/* ]]; then
+  VERSION=${GITHUB_REF#refs/tags/v}
+fi
+
+TAG="${IMAGE_PHP_NAME}:${VERSION}"
+
+if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+  TAG="$TAG,${IMAGE_PHP_NAME}:latest"
+fi
+
+echo $TAG
+
+exit 0
+
+## Strip git ref prefix from version
+#VERSION=$(echo $GITHUB_REF | sed -e 's,.*/\(.*\),\1,')
 #
+## Strip "v" prefix from tag name
+#[[ "$GITHUB_REF" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+#
+## Use Docker `latest` tag convention
+#[[ "$VERSION" = "master" ]] && VERSION=latest
 
-#echo 123
+# Check that Git is installed.
+#if ! command -v git >/dev/null 2>&1; then
+#fi
+
+output "$IMAGE_PHP_NAME:$VERSION"
 
 exit 0
 

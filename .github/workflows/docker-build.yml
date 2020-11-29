@@ -22,16 +22,23 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   # GITHUB_CONTEXT: ${{ toJson(github) }}
 
-  PHP_IMAGE_NAME: soprun/docker-project-php
-  PHP_IMAGE_FILE: ./docker/php/Dockerfile
-
-  NGINX_IMAGE_NAME: soprun/docker-project-nginx
-  NGINX_IMAGE_FILE: ./docker/nginx/Dockerfile
+  IMAGE_PHP_NAME: soprun/docker-project-php
+  IMAGE_PHP_FILE: ./docker/php/Dockerfile
+  IMAGE_NGINX_NAME: soprun/docker-project-nginx
+  IMAGE_NGINX_FILE: ./docker/nginx/Dockerfile
 
 jobs:
   build:
-    name: Build images
+    name: Building ${{ matrix.name }} image
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: "development"
+            target: "dev"
+          - name: "production"
+            target: "prod"
+
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
@@ -42,20 +49,24 @@ jobs:
           RELEASE_NAME=$(printf "release-%s\n" "$(date +'%Y-%m-%d')")
           echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
 
-          RELEASE_DATE=$(date +'%Y-%m-%d')
-          echo "::set-output name=RELEASE_DATE::$RELEASE_DATE"
+          VERSION=edge
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          fi
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            VERSION=nightly
+          fi
 
-          # Strip git ref prefix from version
-          RELEASE_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          IMAGE_PHP_TAG="${IMAGE_PHP_NAME}:${{ matrix.target }}-${VERSION}"
+          IMAGE_NGINX_TAG="${IMAGE_NGINX_NAME}:${{ matrix.target }}-${VERSION}"
 
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && RELEASE_TAG=$(echo $RELEASE_TAG | sed -e 's/^v//')
+          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+            IMAGE_PHP_TAG="$IMAGE_PHP_TAG,${IMAGE_PHP_NAME}:latest"
+            IMAGE_NGINX_TAG="$IMAGE_NGINX_TAG,${IMAGE_NGINX_NAME}:latest"
+          fi
 
-          # Use Docker `latest` tag convention
-          [ "$RELEASE_TAG" == "master" ] && RELEASE_TAG=latest
-
-          echo "::set-output name=RELEASE_TAG::$RELEASE_TAG"
-          # latest, develop, v1.1.2
+          echo ::set-output name=IMAGE_PHP_TAG::${IMAGE_PHP_TAG}
+          echo ::set-output name=IMAGE_NGINX_TAG::${IMAGE_NGINX_TAG}
 
       - name: Docker Login
         uses: docker/login-action@v1.3.0
@@ -75,95 +86,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      #      - name: Build PHP image (dev)
-      #        id: build_php_dev
-      #        uses: docker/build-push-action@v2
-      #        with:
-      #          builder: ${{ steps.buildx.outputs.name }}
-      #          context: .
-      #          file: $PHP_IMAGE_FILE
-      #          target: dev
-      #          tags: "${PHP_IMAGE_NAME}:dev-${RELEASE_TAG}"
-      #
-      #      - name: Build PHP image (prod)
-      #        id: build_php_prod
-      #        uses: docker/build-push-action@v2
-      #        with:
-      #          builder: ${{ steps.buildx.outputs.name }}
-      #          context: .
-      #          file: ./docker/php/Dockerfile
-      #          target: prod
-      #          push: ${{ github.event_name != 'pull_request' }}
-      #          tags: ${{ steps.prep.outputs.tags }}
+      - name: Build PHP image (${{ matrix.target }})
+        id: build_php_image
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: $PHP_IMAGE_FILE
+          target: ${{ matrix.target }}
+          tags: ${{ steps.prep.outputs.tags }}
 
-      - name: Run builder shell-script (${{ matrix.name }})
-        id: builder-shell
-        run: ./docker/builder
-        shell: bash
-        env:
-          RELEASE_ENV: ${{ matrix.env }}
-          RELEASE_NAME: ${{ steps.release.outputs.RELEASE_NAME }}
-          RELEASE_DATE: ${{ steps.release.outputs.RELEASE_DATE }}
-          RELEASE_TAG: ${{ steps.release.outputs.RELEASE_TAG }}
-          COMMIT_SHA: ${{ github.sha }}
-          BUILD_ID: ${{ github.job }}
-
-      - name: Build PHP image
-        id: builder
-        env:
-          RELEASE_ENV: ${{ matrix.env }}
-          RELEASE_NAME: ${{ steps.release.outputs.RELEASE_NAME }}
-          RELEASE_DATE: ${{ steps.release.outputs.RELEASE_DATE }}
-          RELEASE_TAG: ${{ steps.release.outputs.RELEASE_TAG }}
-          COMMIT_SHA: $(echo "${{ github.sha }}")
-          BUILD_ID: $(echo "${{ github.job }}")
-        run: |
-          docker buildx build . \
-          --push \
-          --file "$PHP_IMAGE_FILE" \
-          --target "dev" \
-          --tag "$PHP_IMAGE_NAME:$RELEASE_TAG-dev"
-
-          docker buildx build . \
-          --push \
-          --file "$PHP_IMAGE_FILE" \
-          --target "prod" \
-          --tag "$PHP_IMAGE_NAME:$RELEASE_TAG" \
-          --tag "$PHP_IMAGE_NAME:$RELEASE_TAG-prod"
-
-#          docker push $PHP_IMAGE_NAME:$RELEASE_TAG
-#          docker push $PHP_IMAGE_NAME:$RELEASE_TAG-prod
-#          docker push $PHP_IMAGE_NAME:$RELEASE_TAG-dev
-
-#          docker buildx build . \
-#          --platform "linux/amd64" \
-#          --cache-from=type=local,src=/composer \
-#          --file "$PHP_IMAGE_FILE" \
-#          --tag "$PHP_IMAGE_NAME:dev-$RELEASE_TAG" \
-#          --target "dev" \
-#          --label "project.release=$RELEASE_NAME" \
-#          --label "project.release_date=$RELEASE_DATE" \
-#          --label "project.commit_sha=$COMMIT_SHA" \
-#          --label "project.build_id=$BUILD_ID" \
-#          --label "project.env=$RELEASE_ENV" \
-#          --label "project.tag=$RELEASE_TAG"
-
-#          docker buildx build \
-#          --platform "linux/amd64" \
-#          --file "$NGINX_IMAGE_FILE" \
-#          --tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
-#          --label "project.release=$RELEASE_NAME" \
-#          --label "project.release_date=$RELEASE_DATE" \
-#          --label "project.commit_sha=$COMMIT_SHA" \
-#          --label "project.build_id=$BUILD_ID" \
-#          --label "project.env=$RELEASE_ENV" \
-#          --label "project.tag=$RELEASE_TAG" \
-#          .
-#
-#          if [ "$RELEASE_ENV" == "prod" ] && [ "$RELEASE_TAG" == "latest"  ]; then
-#            docker tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" $PHP_IMAGE_NAME:latest
-#            docker tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" $NGINX_IMAGE_NAME:latest
-#          fi
-#
-#          docker push $PHP_IMAGE_NAME
-#          docker push $NGINX_IMAGE_NAME
+      - name: Build Nginx image (${{ matrix.target }})
+        id: build_nginx_image
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: $IMAGE_NGINX_FILE
+          target: ${{ matrix.target }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.prep.outputs.tags }}
