@@ -90,7 +90,7 @@ jobs:
           context: .
           file: $PHP_IMAGE_FILE
           target: dev
-          tags: "$PHP_IMAGE_NAME:dev-${{ steps.release.outputs.RELEASE_TAG }}"
+          tags: "${PHP_IMAGE_NAME}:dev-${RELEASE_TAG}"
 
       - name: Build PHP image (prod)
         id: build_php_prod
