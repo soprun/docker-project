@@ -70,93 +70,35 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Run builder shell-script (${{ matrix.name }})
-        id: builder-shell
-        run: ./docker/builder
-        shell: bash
-        env:
-          RELEASE_ENV: ${{ matrix.env }}
-          RELEASE_NAME: ${{ steps.release.outputs.RELEASE_NAME }}
-          RELEASE_DATE: ${{ steps.release.outputs.RELEASE_DATE }}
-          RELEASE_TAG: ${{ steps.release.outputs.RELEASE_TAG }}
-          COMMIT_SHA: ${{ github.sha }}
-          BUILD_ID: ${{ github.job }}
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: Build image (${{ matrix.name }})
-        id: builder
-        env:
-          RELEASE_ENV: ${{ matrix.env }}
-          RELEASE_NAME: ${{ steps.release.outputs.RELEASE_NAME }}
-          RELEASE_DATE: ${{ steps.release.outputs.RELEASE_DATE }}
-          RELEASE_TAG: ${{ steps.release.outputs.RELEASE_TAG }}
-          COMMIT_SHA: $(echo "${{ github.sha }}")
-          BUILD_ID: $(echo "${{ github.job }}")
-        run: |
-          # echo "::debug::RELEASE_ENV: $RELEASE_ENV"
-          # echo "::debug::RELEASE_NAME: $RELEASE_NAME"
-          # echo "::debug::RELEASE_DATE: $RELEASE_DATE"
-          # echo "::debug::RELEASE_TAG: $RELEASE_TAG"
-          # echo "::debug::COMMIT_SHA: $COMMIT_SHA"
-          # echo "::debug::BUILD_ID: $BUILD_ID"
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
-          docker buildx build \
-          --platform "linux/amd64" \
-          --cache-from=type=local,src=/composer \
-          --file "$PHP_IMAGE_FILE" \
-          --tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
-          --target "$RELEASE_ENV" \
-          --label "project.release=$RELEASE_NAME" \
-          --label "project.release_date=$RELEASE_DATE" \
-          --label "project.commit_sha=$COMMIT_SHA" \
-          --label "project.build_id=$BUILD_ID" \
-          --label "project.env=$RELEASE_ENV" \
-          --label "project.tag=$RELEASE_TAG" \
-          .
+      - name: Build PHP image (dev)
+        id: build_php_dev
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: $PHP_IMAGE_FILE
+          target: dev
+          tags: "$PHP_IMAGE_NAME:dev-${{ steps.release.outputs.RELEASE_TAG }}"
 
-          docker buildx build \
-          --platform "linux/amd64" \
-          --file "$NGINX_IMAGE_FILE" \
-          --tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
-          --label "project.release=$RELEASE_NAME" \
-          --label "project.release_date=$RELEASE_DATE" \
-          --label "project.commit_sha=$COMMIT_SHA" \
-          --label "project.build_id=$BUILD_ID" \
-          --label "project.env=$RELEASE_ENV" \
-          --label "project.tag=$RELEASE_TAG" \
-          .
-
-          if [ "$RELEASE_ENV" == "prod" ] && [ "$RELEASE_TAG" == "latest"  ]; then
-            docker tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" $PHP_IMAGE_NAME:latest
-            docker tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" $NGINX_IMAGE_NAME:latest
-          fi
-
-          docker push $PHP_IMAGE_NAME
-          docker push $NGINX_IMAGE_NAME
-
-  test:
-    needs: build
-    name: Test stage
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_PASSWORD: postgres
-    steps:
-      - run: echo "The test stage..."
-
-  release:
-    needs: test
-    name: Release stage
-    if: contains(github.ref, 'master')
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "The release stage..."
-
-  deploy:
-    needs: release
-    name: Deploy stage
-    if: contains(github.ref, 'master')
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Deploy to production server"
+      - name: Build PHP image (prod)
+        id: build_php_prod
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./docker/php/Dockerfile
+          target: prod
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.prep.outputs.tags }}
