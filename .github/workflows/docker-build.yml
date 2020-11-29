@@ -104,5 +104,4 @@ jobs:
           context: .
           file: ${{ env.IMAGE_NGINX_FILE }}
           target: ${{ matrix.target }}
-          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
