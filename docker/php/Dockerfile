@@ -104,10 +104,11 @@ COPY ./app/src /app/src
 COPY ./app/templates /app/templates
 COPY ./app/.env /app/.env
 
-RUN set -ex; \
+RUN set -e; \
   composer dump-autoload --classmap-authoritative; \
+  mkdir -p /app/var; \
   chown -R www-data:www-data /app; \
-  chmod -R 777 /app/var/*
+  chmod -R 777 /app/var
 
 CMD php-fpm
 
