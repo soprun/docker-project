@@ -2,7 +2,7 @@ ARG NGINX_VERSION="alpine"
 ARG APP_ENV="dev"
 ARG APP_DEBUG="1"
 
-FROM nginx:${NGINX_VERSION} AS build
+FROM nginx:alpine AS build
 
 ARG APP_ENV
 ARG APP_DEBUG

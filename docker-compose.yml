@@ -34,8 +34,8 @@ services:
       args:
         NGINX_VERSION: $NGINX_VERSION
     ports:
-      - "127.0.0.1:${NGINX_HOST_HTTP_PORT}:80"
-      - "127.0.0.1:${NGINX_HOST_HTTPS_PORT}:443"
+      - "${NGINX_HOST_HTTP_PORT}:80"
+      - "${NGINX_HOST_HTTPS_PORT}:443"
     networks:
       - frontend_tier
       - backend_tier
@@ -50,7 +50,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/php/Dockerfile
-      target: dev
       args:
         PHP_VERSION: $PHP_VERSION
         PHP_APCU_VERSION: $PHP_APCU_VERSION
@@ -58,9 +57,12 @@ services:
         PHP_XDEBUG_VERSION: $PHP_XDEBUG_VERSION
         PHP_OPCACHE_VERSION: $PHP_OPCACHE_VERSION
     volumes:
-      - ./app:/app:rw,cached
-      - cache:/app/var/cache:rw,cached
-      - logs:/app/var/log:rw,cached
+      - ./app:/app:rw,delegated
+      # If you develop on Linux, comment out the following volumes to just use bind-mounted project directory from host
+      - /app/var/
+      - /app/var/cache/
+      - /app/var/logs/
+      - /app/var/sessions/
     networks:
       - backend_tier
 
