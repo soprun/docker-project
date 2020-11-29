@@ -53,11 +53,37 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build and push
+      - name: Setup build
+        id: release
+        run: |
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          echo ::set-output name=version::${VERSION}
+
+      - name: "Build image: PHP dev"
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ${{ env.IMAGE_PHP_FILE }}
           push: true
+          target: dev
           tags: |
-            ${{ env.IMAGE_PHP_NAME }}:latest
+            "${{ env.IMAGE_PHP_NAME }}:dev-${{ steps.prep.outputs.version }}"
+
+      - name: "Build image: PHP prod"
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ${{ env.IMAGE_PHP_FILE }}
+          push: true
+          target: prod
+          tags: |
+            "${{ env.IMAGE_PHP_NAME }}:prod-${{ steps.prep.outputs.version }}"
+            "${{ env.IMAGE_PHP_NAME }}:latest
