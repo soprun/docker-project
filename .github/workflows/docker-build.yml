@@ -99,7 +99,7 @@ jobs:
           # echo "::debug::COMMIT_SHA: $COMMIT_SHA"
           # echo "::debug::BUILD_ID: $BUILD_ID"
 
-          docker build . \
+          docker buildx build . \
           --file "$PHP_IMAGE_FILE" \
           --tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
           --target "$RELEASE_ENV" \
@@ -110,7 +110,7 @@ jobs:
           --label "project.env=$RELEASE_ENV" \
           --label "project.tag=$RELEASE_TAG"
 
-          docker build . \
+          docker buildx build . \
           --file "$NGINX_IMAGE_FILE" \
           --tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
           --label "project.release=$RELEASE_NAME" \
