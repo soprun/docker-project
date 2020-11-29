@@ -108,7 +108,7 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
           BUILD_ID: ${{ github.job }}
 
-      - name: Build image (${{ matrix.name }})
+      - name: Build PHP image
         id: builder
         env:
           RELEASE_ENV: ${{ matrix.env }}
@@ -118,43 +118,60 @@ jobs:
           COMMIT_SHA: $(echo "${{ github.sha }}")
           BUILD_ID: $(echo "${{ github.job }}")
         run: |
-          # echo "::debug::RELEASE_ENV: $RELEASE_ENV"
-          # echo "::debug::RELEASE_NAME: $RELEASE_NAME"
-          # echo "::debug::RELEASE_DATE: $RELEASE_DATE"
-          # echo "::debug::RELEASE_TAG: $RELEASE_TAG"
-          # echo "::debug::COMMIT_SHA: $COMMIT_SHA"
-          # echo "::debug::BUILD_ID: $BUILD_ID"
-
-          docker buildx build \
-          --platform "linux/amd64" \
-          --cache-from=type=local,src=/composer \
+          docker buildx build . \
           --file "$PHP_IMAGE_FILE" \
-          --tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
-          --target "$RELEASE_ENV" \
-          --label "project.release=$RELEASE_NAME" \
-          --label "project.release_date=$RELEASE_DATE" \
-          --label "project.commit_sha=$COMMIT_SHA" \
-          --label "project.build_id=$BUILD_ID" \
-          --label "project.env=$RELEASE_ENV" \
-          --label "project.tag=$RELEASE_TAG" \
-          .
+          --target "base"
 
-          docker buildx build \
+          docker buildx build . \
+          --file "$PHP_IMAGE_FILE" \
+          --target "src"
+
+          docker buildx build . \
           --platform "linux/amd64" \
-          --file "$NGINX_IMAGE_FILE" \
-          --tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
-          --label "project.release=$RELEASE_NAME" \
-          --label "project.release_date=$RELEASE_DATE" \
-          --label "project.commit_sha=$COMMIT_SHA" \
-          --label "project.build_id=$BUILD_ID" \
-          --label "project.env=$RELEASE_ENV" \
-          --label "project.tag=$RELEASE_TAG" \
-          .
+          --file "$PHP_IMAGE_FILE" \
+          --target "dev" \
+          --tag "$PHP_IMAGE_NAME:$RELEASE_TAG-dev"
 
-          if [ "$RELEASE_ENV" == "prod" ] && [ "$RELEASE_TAG" == "latest"  ]; then
-            docker tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" $PHP_IMAGE_NAME:latest
-            docker tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" $NGINX_IMAGE_NAME:latest
-          fi
+          docker buildx build . \
+          --platform "linux/amd64" \
+          --file "$PHP_IMAGE_FILE" \
+          --target "prod" \
+          --tag "$PHP_IMAGE_NAME:$RELEASE_TAG-prod"
+          --tag "$PHP_IMAGE_NAME:$RELEASE_TAG"
 
-          docker push $PHP_IMAGE_NAME
-          docker push $NGINX_IMAGE_NAME
+          docker push $PHP_IMAGE_NAME:$RELEASE_TAG
+          docker push $PHP_IMAGE_NAME:$RELEASE_TAG-prod
+          docker push $PHP_IMAGE_NAME:$RELEASE_TAG-dev
+
+#          docker buildx build . \
+#          --platform "linux/amd64" \
+#          --cache-from=type=local,src=/composer \
+#          --file "$PHP_IMAGE_FILE" \
+#          --tag "$PHP_IMAGE_NAME:dev-$RELEASE_TAG" \
+#          --target "dev" \
+#          --label "project.release=$RELEASE_NAME" \
+#          --label "project.release_date=$RELEASE_DATE" \
+#          --label "project.commit_sha=$COMMIT_SHA" \
+#          --label "project.build_id=$BUILD_ID" \
+#          --label "project.env=$RELEASE_ENV" \
+#          --label "project.tag=$RELEASE_TAG"
+
+#          docker buildx build \
+#          --platform "linux/amd64" \
+#          --file "$NGINX_IMAGE_FILE" \
+#          --tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
+#          --label "project.release=$RELEASE_NAME" \
+#          --label "project.release_date=$RELEASE_DATE" \
+#          --label "project.commit_sha=$COMMIT_SHA" \
+#          --label "project.build_id=$BUILD_ID" \
+#          --label "project.env=$RELEASE_ENV" \
+#          --label "project.tag=$RELEASE_TAG" \
+#          .
+#
+#          if [ "$RELEASE_ENV" == "prod" ] && [ "$RELEASE_TAG" == "latest"  ]; then
+#            docker tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" $PHP_IMAGE_NAME:latest
+#            docker tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" $NGINX_IMAGE_NAME:latest
+#          fi
+#
+#          docker push $PHP_IMAGE_NAME
+#          docker push $NGINX_IMAGE_NAME
