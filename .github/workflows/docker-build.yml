@@ -76,7 +76,7 @@ jobs:
 
       - name: "Build image: dev"
         if: success()
-        id: build_php_image
+        id: build_php_dev
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -90,13 +90,13 @@ jobs:
 
       - name: "Build image: prod"
         if: success()
-        id: build_php_image
+        id: build_php_prod
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ${{ env.IMAGE_PHP_FILE }}
           push: true
-          target: dev
+          target: prod
           tags: |
             ${{ env.IMAGE_PHP_NAME }}:prod-${{ steps.prep.outputs.version }}
             ${{ env.IMAGE_PHP_NAME }}:latest
