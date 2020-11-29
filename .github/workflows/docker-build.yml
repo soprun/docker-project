@@ -29,7 +29,7 @@ env:
 
 jobs:
   build:
-    name: Building ${{ matrix.target }} image
+    name: "Build image: ${{ matrix.target }}"
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -86,20 +86,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Build PHP image (${{ matrix.target }})
+      - name: "Build image: PHP (${{ matrix.target }})"
         id: build_php_image
         uses: docker/build-push-action@v2
         with:
+          push: true
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ env.IMAGE_PHP_FILE }}
           target: ${{ matrix.target }}
           tags: ${{ steps.prep.outputs.tags }}
 
-      - name: Build Nginx image (${{ matrix.target }})
+      - name: "Build image: Nginx (${{ matrix.target }})"
         id: build_nginx_image
         uses: docker/build-push-action@v2
         with:
+          push: true
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ env.IMAGE_NGINX_FILE }}
