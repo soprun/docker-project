@@ -101,7 +101,7 @@ jobs:
 
           docker buildx build \
           --platform "linux/amd64" \
-          --cache-from=type=local,src=/composer .
+          --cache-from=type=local,src=/composer \
           --file "$PHP_IMAGE_FILE" \
           --tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
           --target "$RELEASE_ENV" \
