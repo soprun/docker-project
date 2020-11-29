@@ -65,14 +65,11 @@ jobs:
             IMAGE_NGINX_TAG="$IMAGE_NGINX_TAG,${IMAGE_NGINX_NAME}:latest"
           fi
 
+          echo "IMAGE_PHP_TAG: ${IMAGE_PHP_TAG}"
+          echo "IMAGE_NGINX_TAG: ${IMAGE_NGINX_TAG}"
+
           echo ::set-output name=IMAGE_PHP_TAG::${IMAGE_PHP_TAG}
           echo ::set-output name=IMAGE_NGINX_TAG::${IMAGE_NGINX_TAG}
-
-      - name: Docker Login
-        uses: docker/login-action@v1.3.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -80,6 +77,12 @@ jobs:
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
+
+      - name: Docker Login
+        uses: docker/login-action@v1.3.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -110,3 +113,9 @@ jobs:
           file: ${{ env.IMAGE_NGINX_FILE }}
           target: ${{ matrix.target }}
           tags: ${{ steps.prep.outputs.IMAGE_NGINX_TAG }}
+
+      - name: Image digest PHP
+        run: echo ${{ steps.build_php_image.outputs.digest }}
+
+      - name: Image digest Nginx
+        run: echo ${{ steps.build_nginx_image.outputs.digest }}
