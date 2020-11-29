@@ -48,10 +48,12 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Login to DockerHub
+        if: success()
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          DOCKER_REGISTRY_URL: hub.docker.com
 
       - name: Setup build
         id: release
@@ -67,7 +69,14 @@ jobs:
 
           echo ::set-output name=version::${VERSION}
 
-      - name: "Build image: PHP dev"
+      - name: Build info
+        run: |
+          echo "IMAGE_PHP_NAME: ${{ env.IMAGE_PHP_NAME }}"
+          echo "IMAGE_PHP_FILE: ${{ env.IMAGE_PHP_FILE }}"
+          echo "${{ env.IMAGE_PHP_NAME }}:dev-${{ steps.prep.outputs.version }}"
+
+      - name: "Build ${{ env.IMAGE_PHP_NAME }}:latest"
+        if: success()
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -76,14 +85,20 @@ jobs:
           target: dev
           tags: |
             "${{ env.IMAGE_PHP_NAME }}:dev-${{ steps.prep.outputs.version }}"
+          cache-from: |
+            ${{ env.IMAGE_PHP_NAME }}:cache
 
-      - name: "Build image: PHP prod"
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ${{ env.IMAGE_PHP_FILE }}
-          push: true
-          target: prod
-          tags: |
-            "${{ env.IMAGE_PHP_NAME }}:prod-${{ steps.prep.outputs.version }}"
-            "${{ env.IMAGE_PHP_NAME }}:latest
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
+#      - name: "Build image: PHP prod"
+#        if: success()
+#        uses: docker/build-push-action@v2
+#        with:
+#          context: .
+#          file: ${{ env.IMAGE_PHP_FILE }}
+#          push: true
+#          target: prod
+#          tags: |
+#            "${{ env.IMAGE_PHP_NAME }}:prod-${{ steps.prep.outputs.version }}"
+#            "${{ env.IMAGE_PHP_NAME }}:latest
