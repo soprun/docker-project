@@ -26,7 +26,9 @@ ENV LANGUAGE en
 #######################################################################
 
 # persistent dependencies
-RUN apk add --no-cache \
+RUN --mount=type=cache,target=/var/cache/apk \
+  ln -s /var/cache/apk /etc/apk/cache && apk update && apk add \
+  build-base \
   curl \
   bash \
   git \
@@ -37,12 +39,13 @@ RUN apk add --no-cache \
 # Install PHP extensions
 #######################################################################
 
-#COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/
-#RUN install-php-extensions \
-#  intl \
-#  opcache \
-#  apcu \
-#  redis
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/
+RUN --mount=type=cache,target=/var/cache/apk \
+  install-php-extensions \
+  intl \
+  opcache \
+  apcu \
+  redis
 
 #######################################################################
 # Default configuration
@@ -67,9 +70,7 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install composer plugin
-RUN \
-  --mount=type=cache,target=$COMPOSER_HOME \
-  composer global require hirak/prestissimo \
+RUN --mount=type=cache,target=/composer composer global require hirak/prestissimo \
   --no-progress \
   --no-scripts \
   --no-interaction \
@@ -99,9 +100,7 @@ COPY ./app/composer.* /app
 COPY ./app/symfony.lock /app
 
 ### Install application dependencies
-RUN \
-  --mount=type=cache,target=$COMPOSER_HOME \
-  composer install \
+RUN --mount=type=cache,target=/composer composer install \
   --no-dev \
   --no-progress \
   --no-scripts \
@@ -137,9 +136,7 @@ ENV APP_ENV dev
 ENV APP_DEBUG 1
 
 ### Install application dependencies
-RUN \
-  --mount=type=cache,target=$COMPOSER_HOME \
-  composer install \
+RUN --mount=type=cache,target=/composer composer install \
   --no-progress \
   --no-scripts \
   --no-interaction \
