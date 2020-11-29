@@ -100,6 +100,8 @@ jobs:
           # echo "::debug::BUILD_ID: $BUILD_ID"
 
           docker buildx build . \
+          --platform linux/amd64 \
+          --cache-from=type=local,src=/composer .
           --file "$PHP_IMAGE_FILE" \
           --tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
           --target "$RELEASE_ENV" \
@@ -111,6 +113,7 @@ jobs:
           --label "project.tag=$RELEASE_TAG"
 
           docker buildx build . \
+          --platform linux/amd64 \
           --file "$NGINX_IMAGE_FILE" \
           --tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
           --label "project.release=$RELEASE_NAME" \

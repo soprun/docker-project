@@ -5,8 +5,8 @@
 .backup
 
 # App
-#app/var/*
-#app/vendor/*
+app/var/*
+app/vendor/*
 
 # Fiels
 #.gitignore

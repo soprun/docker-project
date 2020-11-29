@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:experimental
+
 #######################################################################
 # Installation base container
 #######################################################################
@@ -56,17 +58,18 @@ RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 # Install composer & composer plugins
 #######################################################################
 
-#ENV COMPOSER_HOME "/composer"
-#ENV COMPOSER_CACHE_DIR "${COMPOSER_HOME}/cache"
-#ENV PATH "${COMPOSER_HOME}/vendor/bin:$PATH"
-
+ENV COMPOSER_HOME "/composer"
+ENV COMPOSER_CACHE_DIR "${COMPOSER_HOME}/cache"
+ENV PATH "${COMPOSER_HOME}/vendor/bin:$PATH"
 ENV COMPOSER_MEMORY_LIMIT -1
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install composer plugin
-RUN composer global require hirak/prestissimo \
+RUN \
+  --mount=type=cache,target=$COMPOSER_HOME \
+  composer global require hirak/prestissimo \
   --no-progress \
   --no-scripts \
   --no-interaction \
@@ -78,6 +81,16 @@ RUN composer global require hirak/prestissimo \
 # Set the working directory.
 WORKDIR /app
 
+CMD php-fpm
+
+EXPOSE 9000
+
+#######################################################################
+# Source container
+#######################################################################
+
+FROM base as src
+
 #######################################################################
 # Copying & install application dependencies
 #######################################################################
@@ -86,7 +99,10 @@ COPY ./app/composer.* /app
 COPY ./app/symfony.lock /app
 
 ### Install application dependencies
-RUN composer install \
+RUN \
+  --mount=type=cache,target=$COMPOSER_HOME \
+  composer install \
+  --no-dev \
   --no-progress \
   --no-scripts \
   --no-interaction \
@@ -105,20 +121,11 @@ COPY ./app/templates /app/templates
 COPY ./app/.env /app/.env
 
 RUN set -e; \
-  composer dump-autoload --classmap-authoritative; \
+  # Finish composer
+  composer dump-autoload --no-scripts --no-dev --optimize --classmap-authoritative; \
   mkdir -p /app/var; \
   chown -R www-data:www-data /app; \
   chmod -R 777 /app/var
-
-CMD php-fpm
-
-EXPOSE 9000
-
-#######################################################################
-# Source container
-#######################################################################
-
-FROM base as src
 
 #######################################################################
 # Development container
@@ -128,6 +135,18 @@ FROM src as dev
 
 ENV APP_ENV dev
 ENV APP_DEBUG 1
+
+### Install application dependencies
+RUN \
+  --mount=type=cache,target=$COMPOSER_HOME \
+  composer install \
+  --no-progress \
+  --no-scripts \
+  --no-interaction \
+  --prefer-dist \
+  --optimize-autoloader \
+  --classmap-authoritative \
+  --profile
 
 #######################################################################
 # Production container
