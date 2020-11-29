@@ -93,26 +93,31 @@ RUN \
   && set -xe \
   && apk add --virtual .build-deps $PHPIZE_DEPS \
     postgresql-dev \
-  && docker-php-source extract \
-  && docker-php-ext-install \
+  ; \
+  docker-php-source extract \
+  ; \
+  docker-php-ext-install \
     pdo \
     pdo_pgsql \
     intl \
     opcache \
+  ; \
   # PECL extensions
-  # && pecl install \
-  #   apcu-5.1.19 \
-  #   redis-6.0.9 \
-  #   xdebug-2.8.1 \
+  pecl install \
+    apcu-5.1.19 \
+    redis-6.0.9 \
+    xdebug-2.8.1 \
   # && docker-php-ext-enable \
   #   opcache \
   #   apcu \
   #   redis \
   #   xdebug \
   # cleanup
-  && docker-php-source delete \
-  && apk del .build-deps \
-  && rm -rf /tmp/* /var/cache/apk/*
+  ; \
+  docker-php-source delete \
+  ; \
+  apk del .build-deps
+  # && rm -rf /tmp/* /var/cache/apk/*
 
 #######################################################################
 # Default configuration
@@ -146,9 +151,10 @@ COPY ./app/.env /app/.env
 
 COPY --from=vendor /app/vendor /app/vendor
 
-RUN mkdir -p /app/var ; \
-  chmod -R 777 /app/var ; \
-  chown -R www-data:www-data /app/*
+RUN set -xe \
+  && mkdir -p /app/var \
+  && chmod -R 777 /app/var \
+  && chown -R www-data:www-data /app/*
 
 #######################################################################
 # Development container
