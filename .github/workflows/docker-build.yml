@@ -29,16 +29,8 @@ env:
 
 jobs:
   build:
-    name: "Build image: ${{ matrix.target }}"
+    name: "Build image: ..."
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - name: "development"
-            target: "dev"
-          - name: "production"
-            target: "prod"
-
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
@@ -49,30 +41,20 @@ jobs:
           RELEASE_NAME=$(printf "release-%s\n" "$(date +'%Y-%m-%d')")
           echo "::set-output name=RELEASE_NAME::$RELEASE_NAME"
 
-          VERSION=edge
 
+          DOCKER_IMAGE=${{ env.IMAGE_PHP_NAME }}
+          VERSION=edge
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
           fi
-
           if [ "${{ github.event_name }}" = "schedule" ]; then
             VERSION=nightly
           fi
-
-          IMAGE_PHP_TAG="${IMAGE_PHP_NAME}:${{ matrix.target }}-${VERSION}"
-          IMAGE_NGINX_TAG="${IMAGE_NGINX_NAME}:${{ matrix.target }}-${VERSION}"
-
+          TAGS="${DOCKER_IMAGE}:${VERSION}"
           if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            IMAGE_PHP_TAG="$IMAGE_PHP_TAG,${IMAGE_PHP_NAME}:latest"
-            IMAGE_NGINX_TAG="$IMAGE_NGINX_TAG,${IMAGE_NGINX_NAME}:latest"
+            TAGS="$TAGS,${DOCKER_IMAGE}:latest"
           fi
-
-          echo "RELEASE_NAME: ${RELEASE_NAME}"
-          echo "IMAGE_PHP_TAG: ${IMAGE_PHP_TAG}"
-          echo "IMAGE_NGINX_TAG: ${IMAGE_NGINX_TAG}"
-
-          echo ::set-output name=IMAGE_PHP_TAG::${IMAGE_PHP_TAG}
-          echo ::set-output name=IMAGE_NGINX_TAG::${IMAGE_NGINX_TAG}
+          echo ::set-output name=tags::${TAGS}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -96,7 +78,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       # https://github.com/docker/build-push-action
-      - name: "Build image: PHP (${{ matrix.target }})"
+      - name: "Build image: PHP"
         id: build_php_image
         uses: docker/build-push-action@v2
         with:
@@ -104,8 +86,8 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ env.IMAGE_PHP_FILE }}
-          target: ${{ matrix.target }}
-          tags: soprun/docker-project-php:latest
+          target: dev
+          tags: ${{ steps.prep.outputs.tags }}
           cache-from: type=registry,ref=soprun/docker-project-php:latest
           cache-to: type=inline
 
