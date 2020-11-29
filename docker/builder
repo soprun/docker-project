@@ -2,9 +2,6 @@
 
 set -e
 
-#printenv | sort
-exit 0
-
 function output
 {
   local style_start=""
@@ -33,6 +30,13 @@ function output
   builtin echo -e "${style_start}${1}${style_end}"
 }
 
+if [ "$CI" = "true" ]; then
+  output "Skipp.."
+  printenv | sort
+  exit 1
+fi
+
+# GITHUB_WORKSPACE
 # Project directory
 PROJECT_DIR="$(dirname $(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd))"
 
@@ -114,6 +118,33 @@ output "\nGit variables" "heading"
 #output "Branch: ${GIT_BRANCH}"
 #output "Commit ID: ${GIT_COMMIT_ID}"
 #output "Commit SHA: ${GIT_COMMIT_SHA}"
+
+# path: github.action_path
+# build_id: github.job
+# commit_sha: github.sha
+# ref: github.ref
+
+#
+# The branch or tag ref that triggered the workflow run.
+# For branches this in the format refs/heads/<branch_name>,
+# and for tags it is refs/tags/<tag_name>.
+
+git show-ref --quiet --verify -- "refs/heads/$headname" || echo "$headname is not a valid branch"
+
+# GITHUB_SHA (commit SHA)
+# GITHUB_REF (Git ref)
+
+prefix=$(git rev-parse --show-prefix)
+
+echo $prefix
+
+#               cd "$(git rev-parse --show-toplevel)"
+#               eval "set -- $(git rev-parse --sq --prefix "$prefix" "$@")"
+#
+
+#echo 123
+
+exit 0
 
 build()
 {
