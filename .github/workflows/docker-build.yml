@@ -93,6 +93,7 @@ jobs:
         id: build_php_image
         uses: docker/build-push-action@v2
         with:
+          push: true
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ env.IMAGE_PHP_FILE }}
@@ -103,6 +104,7 @@ jobs:
         id: build_nginx_image
         uses: docker/build-push-action@v2
         with:
+          push: true
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ env.IMAGE_NGINX_FILE }}
