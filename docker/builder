@@ -36,24 +36,43 @@ function output
 # Project directory
 PROJECT_DIR="$(dirname $(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd))"
 
-output "PROJECT_DIR: $PROJECT_DIR"
-exit 0
+for file in ${PROJECT_DIR}/.{env,env.local}; do
+  # shellcheck source=../.env
+  [ -r "$file" ] && [ -f "$file" ] && source "$file"
+done
+unset file
 
-#output "\nLoad environment variables" "heading"
-#
-#for file in ${PROJECT_DIR}/.{env,env.local}; do
-#  # shellcheck source=../.env
-#  [ -r "$file" ] && [ -f "$file" ] && source "$file"
-#done
-#unset file
-#
-#output "Load successfully!" "success"
+if [ ! -f "${PROJECT_DIR}/.env.local" ]; then
+  output "The file was not found and a new ${file} file was created!" "warning"
+  touch "${PROJECT_DIR}/.env.local"
+fi
+
+# TAGS
+# :dev
+# :prod
+# :latest
+# :edge
 
 #######################################################################
 # Check environment variables
 #######################################################################
 
-#output "\nCheck environment variables" "heading"
+output "\nCheck environment variables" "heading"
+
+if [ -z $PROJECT_NAME ]; then
+  output "\nAn error occurred, the value of the variable PROJECT_NAME was not loaded!" "error"
+  # exit 1
+fi
+
+if [ -z $RELEASE_TAG ]; then
+  output "\nAn error occurred, the value of the variable RELEASE_TAG was not loaded!" "error"
+  # exit 1
+fi
+
+if [ -z $COMMIT_SHA ]; then
+  output "\nAn error occurred, the value of the variable COMMIT_SHA was not loaded!" "error"
+  # exit 1
+fi
 
 #if [ -z $RELEASE_DATE ]; then
 #  output "\nAn error occurred, the value of the variable RELEASE_DATE was not loaded!" "error"
@@ -70,15 +89,7 @@ exit 0
 #  exit 1
 #fi
 #
-#if [ -z $RELEASE_TAG ]; then
-#  output "\nAn error occurred, the value of the variable RELEASE_TAG was not loaded!" "error"
-#  exit 1
-#fi
 #
-#if [ -z $COMMIT_SHA ]; then
-#  output "\nAn error occurred, the value of the variable COMMIT_SHA was not loaded!" "error"
-#  exit 1
-#fi
 #
 #if [ -z $BUILD_ID ]; then
 #  output "\nAn error occurred, the value of the variable BUILD_ID was not loaded!" "error"
@@ -93,24 +104,31 @@ fi
 
 output "\nGit variables" "heading"
 
-GIT_VERSION=$(git describe --tags --abbrev=0)
-GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-GIT_COMMIT_SHA=$(git rev-parse HEAD)
-GIT_COMMIT_ID=$(git rev-parse --short=7 HEAD)
+#GIT_VERSION=$(git describe --tags --abbrev=0)
+#GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+#GIT_COMMIT_SHA=$(git rev-parse HEAD)
+#GIT_COMMIT_ID=$(git rev-parse --short=7 HEAD)
+#
+#output "Project name: ${PROJECT_NAME}"
+#output "Version: ${GIT_VERSION}"
+#output "Branch: ${GIT_BRANCH}"
+#output "Commit ID: ${GIT_COMMIT_ID}"
+#output "Commit SHA: ${GIT_COMMIT_SHA}"
 
-output "Project name: ${PROJECT_NAME}"
-output "Version: ${GIT_VERSION}"
-output "Branch: ${GIT_BRANCH}"
-output "Commit ID: ${GIT_COMMIT_ID}"
-output "Commit SHA: ${GIT_COMMIT_SHA}"
+build()
+{
+  local file="${1}"
+  local target="${2}"
+  local tag="${3}"
 
-echo $PHP_IMAGE_NAME
-echo $PHP_IMAGE_FILE
+  if [ ! -f "$file" ]; then
+    output "An error occurred, file '${file}' exists!" "error"
+  fi
 
-# todo: перенести запятую
+  docker buildx build . \
+    --file "$file" \
+    --target "$target" \
+    --tag "$tag"
+}
 
-# --push \
-docker buildx build \
-  --file "./docker/php/Dockerfile" \
-  --target "dev" \
-  .
+build "${PROJECT_DIR}/${IMAGE_PHP_FILE}" "dev" "dev"

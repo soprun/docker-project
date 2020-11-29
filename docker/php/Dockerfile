@@ -106,12 +106,10 @@ RUN \
   pecl install \
     apcu-5.1.19 \
     redis-6.0.9 \
-    xdebug-2.8.1 \
-  # && docker-php-ext-enable \
-  #   opcache \
-  #   apcu \
-  #   redis \
-  #   xdebug \
+  ; \
+  docker-php-ext-enable \
+    opcache \
+    apcu \
   # cleanup
   ; \
   docker-php-source delete \
