@@ -93,22 +93,18 @@ jobs:
         id: build_php_image
         uses: docker/build-push-action@v2
         with:
-          push: true
-          load: true
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ env.IMAGE_PHP_FILE }}
           target: ${{ matrix.target }}
-          tags: ${{ steps.prep.outputs.tags }}
+          tags: ${{ steps.prep.outputs.IMAGE_PHP_TAG }}
 
       - name: "Build image: Nginx (${{ matrix.target }})"
         id: build_nginx_image
         uses: docker/build-push-action@v2
         with:
-          push: true
-          load: true
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ env.IMAGE_NGINX_FILE }}
           target: ${{ matrix.target }}
-          tags: ${{ steps.prep.outputs.tags }}
+          tags: ${{ steps.prep.outputs.IMAGE_NGINX_TAG }}
