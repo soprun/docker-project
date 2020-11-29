@@ -50,6 +50,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/php/Dockerfile
+      target: dev
       args:
         PHP_VERSION: $PHP_VERSION
         PHP_APCU_VERSION: $PHP_APCU_VERSION

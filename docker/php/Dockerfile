@@ -12,17 +12,20 @@ COPY ./app/symfony.lock /app
 RUN --mount=type=cache,target=$COMPOSER_CACHE_DIR \
   composer global require hirak/prestissimo \
   --ignore-platform-reqs \
+  --no-scripts \
+  --no-interaction \
   --optimize-autoloader \
-  --classmap-authoritative; \
+  --classmap-authoritative \
+  --profile
+
   # Install application dependencies
+RUN --mount=type=cache,target=$COMPOSER_CACHE_DIR \
   composer install \
-    --no-progress \
-    --no-scripts \
-    --no-interaction \
-    --prefer-dist \
-    --optimize-autoloader \
-    --classmap-authoritative \
-    --profile
+  --no-scripts \
+  --no-interaction \
+  --optimize-autoloader \
+  --classmap-authoritative \
+  --profile
 
 #######################################################################
 # Installation base container
@@ -34,9 +37,9 @@ FROM php:8.0-rc-fpm-alpine AS base
 # Default environment variables
 #######################################################################
 
-ENV APP_ENV prod
-ENV APP_DEBUG 0
-ENV APP_SECRET default-secret
+#ENV APP_ENV dev
+#ENV APP_DEBUG 0
+#ENV APP_SECRET default-secret
 
 ENV PATH "${APP_DIR}/bin:$PATH"
 ENV PATH "${APP_DIR}/vendor/bin:$PATH"
@@ -104,9 +107,6 @@ EXPOSE 9000
 
 FROM base as src
 
-# Copying source files to workdir
-COPY --from=vendor /app/vendor /app/vendor
-
 COPY ./app/bin /app/bin
 COPY ./app/config /app/config
 COPY ./app/public /app/public
@@ -114,12 +114,11 @@ COPY ./app/src /app/src
 COPY ./app/templates /app/templates
 COPY ./app/.env /app/.env
 
-#RUN set -e; \
-#  # Finish composer
-#  composer dump-autoload --no-scripts --no-dev --optimize --classmap-authoritative; \
-#  mkdir -p /app/var; \
-#  chown -R www-data:www-data /app; \
-#  chmod -R 777 /app/var
+COPY --from=vendor /app/vendor /app/vendor
+
+RUN mkdir -p /app/var ; \
+  chmod -R 777 /app/var ; \
+  chown -R www-data:www-data /app/*
 
 #######################################################################
 # Development container
@@ -127,8 +126,8 @@ COPY ./app/.env /app/.env
 
 FROM src as dev
 
-ENV APP_ENV dev
-ENV APP_DEBUG 1
+# ENV APP_ENV dev
+# ENV APP_DEBUG 1
 
 COPY --from=vendor "$COMPOSER_HOME" "$COMPOSER_HOME"
 COPY --from=vendor /usr/bin/composer /usr/bin/composer
@@ -139,5 +138,5 @@ COPY --from=vendor /usr/bin/composer /usr/bin/composer
 
 FROM src as prod
 
-ENV APP_ENV prod
-ENV APP_DEBUG 0
+# ENV APP_ENV prod
+# ENV APP_DEBUG 0
