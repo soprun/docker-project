@@ -105,6 +105,8 @@ jobs:
           file: ${{ env.IMAGE_PHP_FILE }}
           target: ${{ matrix.target }}
           tags: soprun/docker-project-php:latest
+          cache-from: type=registry,ref=soprun/docker-project-php:latest
+          cache-to: type=inline
 
       - name: Inspect
         run: |
