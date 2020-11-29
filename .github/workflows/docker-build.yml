@@ -30,15 +30,8 @@ env:
 
 jobs:
   build:
-    name: Build image (${{ matrix.name }})
+    name: Build images
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - env: "dev"
-            name: development
-          - env: "prod"
-            name: production
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
