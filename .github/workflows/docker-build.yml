@@ -99,8 +99,8 @@ jobs:
           # echo "::debug::COMMIT_SHA: $COMMIT_SHA"
           # echo "::debug::BUILD_ID: $BUILD_ID"
 
-          docker buildx build \
-          --platform linux/amd64 \
+          docker buildx build . \
+          --platform "linux/amd64" \
           --cache-from=type=local,src=/composer .
           --file "$PHP_IMAGE_FILE" \
           --tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
@@ -110,11 +110,11 @@ jobs:
           --label "project.commit_sha=$COMMIT_SHA" \
           --label "project.build_id=$BUILD_ID" \
           --label "project.env=$RELEASE_ENV" \
-          --label "project.tag=$RELEASE_TAG" \
-          .
+          --label "project.tag=$RELEASE_TAG"
 
-          docker buildx build \
-          --platform linux/amd64 \
+
+          docker buildx build . \
+          --platform "linux/amd64" \
           --file "$NGINX_IMAGE_FILE" \
           --tag "$NGINX_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" \
           --label "project.release=$RELEASE_NAME" \
@@ -122,8 +122,7 @@ jobs:
           --label "project.commit_sha=$COMMIT_SHA" \
           --label "project.build_id=$BUILD_ID" \
           --label "project.env=$RELEASE_ENV" \
-          --label "project.tag=$RELEASE_TAG" \
-          .
+          --label "project.tag=$RELEASE_TAG"
 
           if [ "$RELEASE_ENV" == "prod" ] && [ "$RELEASE_TAG" == "latest"  ]; then
             docker tag "$PHP_IMAGE_NAME:$RELEASE_ENV-$RELEASE_TAG" $PHP_IMAGE_NAME:latest
