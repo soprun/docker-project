@@ -75,7 +75,7 @@ jobs:
           echo "IMAGE_PHP_FILE: ${{ env.IMAGE_PHP_FILE }}"
           echo "${{ env.IMAGE_PHP_NAME }}:dev-${{ steps.prep.outputs.version }}"
 
-      - name: "Build:dev-$(echo ${{ steps.prep.outputs.version }})"
+      - name: Build:dev-${{ steps.prep.outputs.version }}
         if: success()
         id: build_php_image
         uses: docker/build-push-action@v2
