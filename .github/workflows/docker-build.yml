@@ -88,7 +88,7 @@ jobs:
           file: ${{ env.IMAGE_PHP_FILE }}
           target: dev
           tags: ${{ steps.prep.outputs.tags }}
-          cache-from: type=registry,ref=soprun/docker-project-php:latest
+          cache-from: type=registry,ref=${{ steps.prep.outputs.tags }}
           cache-to: type=inline
 
 #      - name: Inspect
