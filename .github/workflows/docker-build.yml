@@ -119,29 +119,21 @@ jobs:
           BUILD_ID: $(echo "${{ github.job }}")
         run: |
           docker buildx build . \
-          --file "$PHP_IMAGE_FILE" \
-          --target "base"
-
-          docker buildx build . \
-          --file "$PHP_IMAGE_FILE" \
-          --target "src"
-
-          docker buildx build . \
-          --platform "linux/amd64" \
+          --push \
           --file "$PHP_IMAGE_FILE" \
           --target "dev" \
           --tag "$PHP_IMAGE_NAME:$RELEASE_TAG-dev"
 
           docker buildx build . \
-          --platform "linux/amd64" \
+          --push \
           --file "$PHP_IMAGE_FILE" \
           --target "prod" \
+          --tag "$PHP_IMAGE_NAME:$RELEASE_TAG" \
           --tag "$PHP_IMAGE_NAME:$RELEASE_TAG-prod"
-          --tag "$PHP_IMAGE_NAME:$RELEASE_TAG"
 
-          docker push $PHP_IMAGE_NAME:$RELEASE_TAG
-          docker push $PHP_IMAGE_NAME:$RELEASE_TAG-prod
-          docker push $PHP_IMAGE_NAME:$RELEASE_TAG-dev
+#          docker push $PHP_IMAGE_NAME:$RELEASE_TAG
+#          docker push $PHP_IMAGE_NAME:$RELEASE_TAG-prod
+#          docker push $PHP_IMAGE_NAME:$RELEASE_TAG-dev
 
 #          docker buildx build . \
 #          --platform "linux/amd64" \
