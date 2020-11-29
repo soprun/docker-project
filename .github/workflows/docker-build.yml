@@ -1,3 +1,6 @@
+# https://www.docker.com/blog/docker-github-actions/
+# https://github.com/metcalfc/docker-action-examples/tree/main/.github/workflows
+
 name: Docker build image
 
 on:

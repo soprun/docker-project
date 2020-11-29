@@ -1,33 +1,36 @@
-ARG NGINX_VERSION="alpine"
-ARG APP_ENV="dev"
-ARG APP_DEBUG="1"
+#######################################################################
+# Installation base container
+#######################################################################
 
-FROM nginx:alpine AS build
+FROM nginx:alpine AS base
 
-ARG APP_ENV
-ARG APP_DEBUG
-ARG APP_DIR
-
-ENV APP_ENV=$APP_ENV
-ENV APP_DEBUG=$APP_DEBUG
-
-# nginx config
 COPY ./docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
-COPY ./app/public/* /app/public
 
-# workdir
 WORKDIR /app
-
+EXPOSE 80 443
 CMD ["nginx", "-g", "daemon off;"]
 
-EXPOSE 80 443
+#######################################################################
+# Installation source container
+#######################################################################
 
-FROM build AS dev
+FROM base as src
+COPY ./app/public/* /app/public
 
-FROM build AS prod
+#######################################################################
+# Installation dev container
+#######################################################################
 
-ARG APP_ENV
-ARG APP_DEBUG
+FROM src as dev
 
-ENV APP_ENV="${APP_ENV:-prod}"
-ENV APP_DEBUG="${APP_DEBUG:-0}"
+ENV APP_ENV dev
+ENV APP_DEBUG 1
+
+#######################################################################
+# Installation prod container
+#######################################################################
+
+FROM src as prod
+
+ENV APP_ENV prod
+ENV APP_DEBUG 0
