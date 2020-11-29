@@ -74,7 +74,7 @@ jobs:
           echo "IMAGE_PHP_FILE: ${{ env.IMAGE_PHP_FILE }}"
           echo "${{ env.IMAGE_PHP_NAME }}:dev-${{ steps.prep.outputs.version }}"
 
-      - name: "Build image: dev"
+      - name: "Build: dev"
         if: success()
         id: build_php_dev
         uses: docker/build-push-action@v2
@@ -88,7 +88,7 @@ jobs:
           cache-from: |
             ${{ env.IMAGE_PHP_NAME }}:cache
 
-      - name: "Build image: prod"
+      - name: "Build: prod"
         if: success()
         id: build_php_prod
         uses: docker/build-push-action@v2
