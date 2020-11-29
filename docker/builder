@@ -106,7 +106,11 @@ output "Commit SHA: ${GIT_COMMIT_SHA}"
 echo $PHP_IMAGE_NAME
 echo $PHP_IMAGE_FILE
 
-echo docker build . \
+# todo: перенести запятую
+
+echo docker buildx build \
+  --push \
   --file "${PHP_IMAGE_FILE}" \
-  --tag "${PHP_IMAGE_NAME}:${GIT_VERSION}" \
-  --target "dev"
+  --target "dev" \
+  --tag "${PHP_IMAGE_NAME}:dev-${GIT_VERSION}" \
+  .
