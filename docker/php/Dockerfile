@@ -16,10 +16,8 @@ RUN --mount=type=cache,target=$COMPOSER_CACHE_DIR \
   --no-interaction \
   --optimize-autoloader \
   --classmap-authoritative \
-  --profile
-
-  # Install application dependencies
-RUN --mount=type=cache,target=$COMPOSER_CACHE_DIR \
+  --profile \
+  ; \
   composer install \
   --no-scripts \
   --no-interaction \
@@ -33,51 +31,18 @@ RUN --mount=type=cache,target=$COMPOSER_CACHE_DIR \
 
 FROM php:8.0-rc-fpm-alpine AS base
 
-#######################################################################
 # Default environment variables
-#######################################################################
-
-#ENV APP_ENV dev
-#ENV APP_DEBUG 0
-#ENV APP_SECRET default-secret
-
-#######################################################################
-# Install composer & composer plugins
-#######################################################################
+ENV APP_ENV dev
+ENV APP_DEBUG 0
+ENV APP_SECRET default-secret
 
 ENV COMPOSER_HOME "/composer"
 ENV COMPOSER_CACHE_DIR "${COMPOSER_HOME}/cache"
 ENV COMPOSER_MEMORY_LIMIT -1
 ENV COMPOSER_ALLOW_SUPERUSER 1
-ENV PATH "${COMPOSER_HOME}/vendor/bin:$PATH"
 
-#######################################################################
-
-#######################################################################
-
-# # persistent dependencies
-# RUN \
-#   --mount=type=cache,target=/var/cache/apk \
-#   ln -sf /var/cache/apk /etc/apk/cache \
-#   && set -xe \
-#   && apk add --update \
-#     build-base \
-#     bash \
-#     unzip \
-#     curl \
-#     ca-certificates \
-#     openssl \
-#     tzdata \
-#     make
-
-#######################################################################
-# Setting the timezone
-# https://wiki.alpinelinux.org/wiki/Setting_the_timezone
-#######################################################################
-
-ARG TZ="Europe/Moscow"
-ENV TZ $TZ
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV TZ "Europe/Moscow"
+ENV PATH "/app/bin:/app/vendor/bin:${COMPOSER_HOME}/vendor/bin:$PATH"
 
 #######################################################################
 # Install PHP extensions
@@ -101,6 +66,9 @@ RUN \
     openssl \
     tzdata \
     make \
+  # Setting the timezone
+  && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+  && echo $TZ > /etc/timezone \
   # Install PHP extensions
   && apk add --virtual .build-deps $PHPIZE_DEPS \
     postgresql-dev \
@@ -165,10 +133,8 @@ RUN set -xe \
 
 FROM src as dev
 
-# ENV APP_ENV dev
-# ENV APP_DEBUG 1
-
-ENV PATH "/app/bin:/app/vendor/bin:$PATH"
+#ENV APP_ENV dev
+#ENV APP_DEBUG 1
 
 COPY --from=vendor "$COMPOSER_HOME" "$COMPOSER_HOME"
 COPY --from=vendor /usr/bin/composer /usr/bin/composer
@@ -179,5 +145,5 @@ COPY --from=vendor /usr/bin/composer /usr/bin/composer
 
 FROM src as prod
 
-# ENV APP_ENV prod
-# ENV APP_DEBUG 0
+ENV APP_ENV prod
+ENV APP_DEBUG 0
