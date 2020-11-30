@@ -52,23 +52,23 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV PATH "${COMPOSER_HOME}/vendor/bin:$PATH"
 
 #######################################################################
-# Install software and utilities
+
 #######################################################################
 
-# persistent dependencies
-RUN \
-  --mount=type=cache,target=/var/cache/apk \
-  ln -sf /var/cache/apk /etc/apk/cache \
-  && set -xe \
-  && apk add --update \
-    build-base \
-    bash \
-    unzip \
-    curl \
-    ca-certificates \
-    openssl \
-    tzdata \
-    make
+# # persistent dependencies
+# RUN \
+#   --mount=type=cache,target=/var/cache/apk \
+#   ln -sf /var/cache/apk /etc/apk/cache \
+#   && set -xe \
+#   && apk add --update \
+#     build-base \
+#     bash \
+#     unzip \
+#     curl \
+#     ca-certificates \
+#     openssl \
+#     tzdata \
+#     make
 
 #######################################################################
 # Setting the timezone
@@ -91,31 +91,36 @@ RUN \
   --mount=type=cache,target=/tmp/ \
   ln -sf /var/cache/apk /etc/apk/cache \
   && set -xe \
+  # Install software and utilities
+  && apk add --update \
+    build-base \
+    bash \
+    unzip \
+    curl \
+    ca-certificates \
+    openssl \
+    tzdata \
+    make \
+  # Install PHP extensions
   && apk add --virtual .build-deps $PHPIZE_DEPS \
     postgresql-dev \
-  ; \
-  docker-php-source extract \
-  ; \
-  docker-php-ext-install \
+  && docker-php-source extract \
+  && docker-php-ext-install \
     pdo \
     pdo_pgsql \
     intl \
     opcache \
-  ; \
   # PECL extensions
-  pecl install \
+  && pecl install \
     apcu-5.1.19 \
     redis-6.0.9 \
-  ; \
-  docker-php-ext-enable \
+  && docker-php-ext-enable \
     opcache \
     apcu \
   # cleanup
-  ; \
-  docker-php-source delete \
-  ; \
-  apk del .build-deps
-  # && rm -rf /tmp/* /var/cache/apk/*
+  && docker-php-source delete \
+  && apk del .build-deps \
+  && rm -rf /tmp/* /var/cache/apk/*
 
 #######################################################################
 # Default configuration
