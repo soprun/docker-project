@@ -102,7 +102,7 @@ jobs:
           cache-from: |
             ${{ env.IMAGE_PHP_NAME }}:cache
 
-      - name: "Build: Nginx"
+      - name: "Build: Nginx prod"
         if: success()
         id: build_nginx_prod
         uses: docker/build-push-action@v2
