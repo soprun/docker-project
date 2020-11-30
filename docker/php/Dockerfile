@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:experimental
-FROM composer:1.8 as vendor
+FROM composer:latest as vendor
 
 ENV COMPOSER_HOME "/composer"
 ENV COMPOSER_CACHE_DIR "${COMPOSER_HOME}/cache"
@@ -12,14 +12,6 @@ COPY ./app/symfony.lock /app
 # --mount=type=cache,target=$COMPOSER_CACHE_DIR \
 RUN \
   set -xe; \
-  composer global require hirak/prestissimo \
-  --ignore-platform-reqs \
-  --no-scripts \
-  --no-interaction \
-  --optimize-autoloader \
-  --classmap-authoritative \
-  --profile \
-  ; \
   composer install \
   --no-scripts \
   --no-interaction \
