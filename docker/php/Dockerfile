@@ -57,41 +57,27 @@ ENV PATH "/app/bin:/app/vendor/bin:${COMPOSER_HOME}/vendor/bin:$PATH"
 #  --mount=type=cache,target=/tmp/ \
 #  ln -sf /var/cache/apk /etc/apk/cache \
 
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/
+
 RUN \
   set -xe; \
   # Install software and utilities
-  apk add --update \
-    build-base \
+  apk add --no-cache --update \
     bash \
-    unzip \
-    curl \
     ca-certificates \
-    openssl \
     tzdata \
-    make \
   # Setting the timezone
   && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
   && echo $TZ > /etc/timezone \
   # Install PHP extensions
-  && apk add --virtual .build-deps $PHPIZE_DEPS \
-    postgresql-dev \
-  && docker-php-source extract \
-  && docker-php-ext-install \
+  && install-php-extensions \
     pdo \
     pdo_pgsql \
     intl \
     opcache \
-  # PECL extensions
-  && pecl install \
-    apcu-5.1.19 \
-    redis-6.0.9 \
-  && docker-php-ext-enable \
-    opcache \
     apcu \
-  # cleanup
-  && docker-php-source delete \
-  && apk del .build-deps \
-  && rm -rf /tmp/* /var/cache/apk/*
+    redis \
+    xdebug
 
 #######################################################################
 # Default configuration
