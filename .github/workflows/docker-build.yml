@@ -97,8 +97,7 @@ jobs:
           push: true
           target: prod
           tags: |
-            ${{ env.IMAGE_PHP_NAME }}:${{ steps.setup.outputs.version }}-prod
-            ${{ env.IMAGE_PHP_NAME }}:latest
+            ${{ env.IMAGE_PHP_NAME }}:${{ steps.setup.outputs.version }}
           cache-from: |
             ${{ env.IMAGE_PHP_NAME }}:cache
 
@@ -113,7 +112,6 @@ jobs:
           target: dev
           tags: |
             ${{ env.IMAGE_NGINX_NAME }}:${{ steps.setup.outputs.version }}-dev
-            ${{ env.IMAGE_NGINX_NAME }}:latest
           cache-from: |
             ${{ env.IMAGE_NGINX_NAME }}:cache
 
@@ -127,7 +125,6 @@ jobs:
           push: true
           target: prod
           tags: |
-            ${{ env.IMAGE_NGINX_NAME }}:${{ steps.setup.outputs.version }}-prod
-            ${{ env.IMAGE_NGINX_NAME }}:latest
+            ${{ env.IMAGE_NGINX_NAME }}:${{ steps.setup.outputs.version }}
           cache-from: |
             ${{ env.IMAGE_NGINX_NAME }}:cache
