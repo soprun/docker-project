@@ -102,6 +102,21 @@ jobs:
           cache-from: |
             ${{ env.IMAGE_PHP_NAME }}:cache
 
+      - name: "Build: Nginx dev"
+        if: success()
+        id: build_nginx_dev
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ${{ env.IMAGE_NGINX_FILE }}
+          push: true
+          target: dev
+          tags: |
+            ${{ env.IMAGE_NGINX_NAME }}:${{ steps.setup.outputs.version }}-dev
+            ${{ env.IMAGE_NGINX_NAME }}:latest
+          cache-from: |
+            ${{ env.IMAGE_NGINX_NAME }}:cache
+
       - name: "Build: Nginx prod"
         if: success()
         id: build_nginx_prod
