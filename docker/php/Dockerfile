@@ -9,7 +9,9 @@ WORKDIR /app
 COPY ./app/composer.* /app
 COPY ./app/symfony.lock /app
 
-RUN --mount=type=cache,target=$COMPOSER_CACHE_DIR \
+# --mount=type=cache,target=$COMPOSER_CACHE_DIR \
+RUN \
+  set -xe; \
   composer global require hirak/prestissimo \
   --ignore-platform-reqs \
   --no-scripts \
@@ -51,13 +53,14 @@ ENV PATH "/app/bin:/app/vendor/bin:${COMPOSER_HOME}/vendor/bin:$PATH"
 # https://git.alpinelinux.org/aports/tree/community/php7/APKBUILD
 # https://pecl.php.net/package/apcu
 
+#  --mount=type=cache,target=/var/cache/apk \
+#  --mount=type=cache,target=/tmp/ \
+#  ln -sf /var/cache/apk /etc/apk/cache \
+
 RUN \
-  --mount=type=cache,target=/var/cache/apk \
-  --mount=type=cache,target=/tmp/ \
-  ln -sf /var/cache/apk /etc/apk/cache \
-  && set -xe \
+  set -xe; \
   # Install software and utilities
-  && apk add --update \
+  apk add --update \
     build-base \
     bash \
     unzip \
