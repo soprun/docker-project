@@ -60,27 +60,31 @@ fi
 # repo:${{ github.sha }}
 # repo:latest
 
+# latest
+# /^[0-9.]+$/
+# release-{sourceref}
+
 #######################################################################
 # Check environment variables
 #######################################################################
 
-output "\nCheck environment variables" "heading"
-
-if [ -z $PROJECT_NAME ]; then
-  output "\nAn error occurred, the value of the variable PROJECT_NAME was not loaded!" "error"
-  # exit 1
-fi
-
-if [ -z $RELEASE_VERSION ]; then
-  output "\nAn error occurred, the value of the variable RELEASE_VERSION was not loaded!" "error"
-  # exit 1
-fi
-
-if [ -z $COMMIT_SHA ]; then
-  output "\nAn error occurred, the value of the variable COMMIT_SHA was not loaded!" "error"
-  # exit 1
-fi
-
+#output "\nCheck environment variables" "heading"
+#
+#if [ -z $PROJECT_NAME ]; then
+#  output "\nAn error occurred, the value of the variable PROJECT_NAME was not loaded!" "error"
+#  exit 1
+#fi
+#
+#if [ -z $RELEASE_VERSION ]; then
+#  output "\nAn error occurred, the value of the variable RELEASE_VERSION was not loaded!" "error"
+#  exit 1
+#fi
+#
+#if [ -z $COMMIT_SHA ]; then
+#  output "\nAn error occurred, the value of the variable COMMIT_SHA was not loaded!" "error"
+#  exit 1
+#fi
+#
 #if [ -z $RELEASE_DATE ]; then
 #  output "\nAn error occurred, the value of the variable RELEASE_DATE was not loaded!" "error"
 #  exit 1
@@ -138,44 +142,27 @@ output "\nGit variables" "heading"
 # GITHUB_REF (Git ref)
 
 GITHUB_REF="refs/heads/master"
-GITHUB_REF="refs/heads/develop"
+#GITHUB_REF="refs/heads/develop"
 #GITHUB_REF="refs/tags/v1.1.1"
 
-VERSION="edge"
+#output "$GITHUB_REF" "error"
 
 ## Strip git ref prefix from version
-# VERSION=$(echo $GITHUB_REF | sed -e 's,.*/\(.*\),\1,')
+VERSION=$(echo $GITHUB_REF | sed -e 's,.*/\(.*\),\1,')
 
 if [[ $GITHUB_REF == refs/tags/* ]]; then
   VERSION=${GITHUB_REF#refs/tags/v}
 fi
 
-TAG="${IMAGE_PHP_NAME}:${VERSION}"
+# Use Docker `latest` tag convention
+[[ "$VERSION" == "master" ]] && VERSION="latest"
 
-if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-  TAG="$TAG,${IMAGE_PHP_NAME}:latest"
-fi
-
-echo $TAG
-
-exit 0
-
-## Strip git ref prefix from version
-#VERSION=$(echo $GITHUB_REF | sed -e 's,.*/\(.*\),\1,')
-#
-## Strip "v" prefix from tag name
-#[[ "$GITHUB_REF" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-#
-## Use Docker `latest` tag convention
-#[[ "$VERSION" = "master" ]] && VERSION=latest
-
-# Check that Git is installed.
-#if ! command -v git >/dev/null 2>&1; then
+#TAG="${IMAGE_PHP_NAME}:${VERSION}"
+#if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+#  TAG="$TAG,${IMAGE_PHP_NAME}:latest"
 #fi
 
-output "$IMAGE_PHP_NAME:$VERSION"
-
-exit 0
+#output "$IMAGE_PHP_NAME:$VERSION"
 
 build()
 {
@@ -193,4 +180,5 @@ build()
     --tag "$tag"
 }
 
-build "${PROJECT_DIR}/${IMAGE_PHP_FILE}" "dev" "dev"
+build "${PROJECT_DIR}/${IMAGE_PHP_FILE}" "dev" "${IMAGE_PHP_NAME}:$VERSION-dev"
+build "${PROJECT_DIR}/${IMAGE_PHP_FILE}" "prod" "${IMAGE_PHP_NAME}:$VERSION"
