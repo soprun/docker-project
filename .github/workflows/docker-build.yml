@@ -83,7 +83,6 @@ jobs:
           push: true
           target: dev
           tags: |
-            ${{ env.IMAGE_PHP_NAME }}:dev-${{ github.sha }}
             ${{ env.IMAGE_PHP_NAME }}:dev-${{ steps.setup.outputs.version }}
           cache-from: |
             ${{ env.IMAGE_PHP_NAME }}:cache
@@ -98,7 +97,6 @@ jobs:
           push: true
           target: prod
           tags: |
-            ${{ env.IMAGE_PHP_NAME }}:prod-${{ github.sha }}
             ${{ env.IMAGE_PHP_NAME }}:prod-${{ steps.setup.outputs.version }}
             ${{ env.IMAGE_PHP_NAME }}:latest
           cache-from: |
