@@ -2,7 +2,7 @@
 # Installation base container
 #######################################################################
 
-FROM nginx:alpine AS base
+FROM nginx:1.21-alpine AS base
 
 COPY ./docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
